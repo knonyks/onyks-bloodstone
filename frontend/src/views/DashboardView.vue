@@ -17,25 +17,28 @@
         tables: {},
         suppliers: {},
         manufacturers: {},
+        repository: {}
     })
 
     onMounted(async () =>
     {
         try
         {
-            loading.value.state += 100/7
+            loading.value.state += 100/8
             data.value.elements = (await services.elements.count()).data
-            loading.value.state += 100/7
+            loading.value.state += 100/8
             data.value.elements.lastAdded = (await services.elements.lastAdded()).data
             data.value.elements.lastAdded.createdAt = MyTime.getLocalTime(data.value.elements.lastAdded.createdAt, 'en')
-            loading.value.state += 100/7
+            loading.value.state += 100/8
             data.value.tables = (await services.tables.count()).data
-            loading.value.state += 100/7
+            loading.value.state += 100/8
             data.value.tables.counts = (await services.tables.counts()).data
-            loading.value.state += 100/7
+            loading.value.state += 100/8
             data.value.suppliers = (await services.suppliers.count()).data
-            loading.value.state += 100/7
+            loading.value.state += 100/8
             data.value.manufacturers = (await services.manufacturers.count()).data
+            loading.value.state += 100/8
+            data.value.repository = (await services.repository.statistics()).data
             loading.value.state = 100
             data.value.manufacturers.counts = (await services.manufacturers.counts()).data
             loading.value.isLoading = false
@@ -84,25 +87,51 @@
                     </onyks-container>
                 </onyks-card>
 
-                <onyks-grid cols="4" gap="m">
-                    <onyks-card title="Elements" span="2" size="l">
-                        <onyks-header level="3">{{ data?.elements?.count || 'Undefined' }}</onyks-header>
-                    </onyks-card>
+                <onyks-card title="Repository" size="l">
 
-                    <onyks-card title="Tables" span="2" size="l">
-                        <onyks-header level="3">{{ data?.tables?.count || 'Undefined' }}</onyks-header>
-                    </onyks-card>
+                    <onyks-container gap="m">
 
-                    <onyks-card title="Manufacturers" span="2" size="l">
-                        <onyks-header level="3">{{ data?.manufacturers?.count || 'Undefined' }}</onyks-header>
-                    </onyks-card>
+                        <onyks-container type="stack" align="left" gap="s">
+                            <onyks-header level="6">Symbols files (*.SchLib)</onyks-header>
+                            <onyks-text size="l">{{ data.repository?.schlib_count || 'Undefined' }}</onyks-text>
+                        </onyks-container>
 
-                    <onyks-card title="Suppliers" span="2" size="l">
-                        <onyks-header level="3">{{ data?.suppliers?.count || 'Undefined' }}</onyks-header>
-                    </onyks-card>
-                </onyks-grid>
+                        <onyks-container type="stack" align="left" gap="s">
+                            <onyks-header level="6">Footprints files (*.PcbLib)</onyks-header>
+                            <onyks-text size="l">{{data.repository?.pcblib_count || 'Undefined'}}</onyks-text>
+                        </onyks-container>
 
+                        <onyks-container type="stack" align="left" gap="s">
+                            <onyks-header level="6">Symbols</onyks-header>
+                            <onyks-text size="l">{{data.repository?.symbols_count || 'Undefined'}}</onyks-text>
+                        </onyks-container>
+
+                        <onyks-container type="stack" align="left" gap="s">
+                            <onyks-header level="6">Footprints</onyks-header>
+                            <onyks-text size="l">{{data.repository?.footprints_count || 'Undefined'}}</onyks-text>
+                        </onyks-container>
+
+                    </onyks-container>
+                </onyks-card>
             </onyks-container>
+
+            <onyks-grid cols="4" gap="m">
+                <onyks-card title="Elements" span="2" size="l">
+                    <onyks-header level="3">{{ data?.elements?.count || 'Undefined' }}</onyks-header>
+                </onyks-card>
+
+                <onyks-card title="Tables" span="2" size="l">
+                    <onyks-header level="3">{{ data?.tables?.count || 'Undefined' }}</onyks-header>
+                </onyks-card>
+
+                <onyks-card title="Manufacturers" span="2" size="l">
+                    <onyks-header level="3">{{ data?.manufacturers?.count || 'Undefined' }}</onyks-header>
+                </onyks-card>
+
+                <onyks-card title="Suppliers" span="2" size="l">
+                    <onyks-header level="3">{{ data?.suppliers?.count || 'Undefined' }}</onyks-header>
+                </onyks-card>
+            </onyks-grid>
 
             <onyks-header level="3">Tables</onyks-header>
 

@@ -56,3 +56,7 @@ services:
       - ${SVN_DATA_PATH}:/var/svn
     depends_on:
       - database
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped

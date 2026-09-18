@@ -42,6 +42,18 @@ export const repository =
         {
             throw error
         }
+    },
+    statistics: async () =>
+    {
+        try
+        {
+            const response = await api.get(`/repository/statistics`);
+            return response;
+        }
+        catch (error)
+        {
+            throw error
+        }
     }
 }
 

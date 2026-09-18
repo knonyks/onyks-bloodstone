@@ -81,7 +81,26 @@ sync_authz_file &
 
 # =================================================================
 
-echo "Konfiguracja gotowa. Uruchamiam Apache."
+echo "Konfiguracja gotowa. Instaluję SVN hook i uruchamiam Apache."
 
-# 5. Start Apache in foreground
+# 1. Definiujemy poprawną ścieżkę do katalogu hooks wewnątrz Twojego repozytorium
+HOOKS_DIR="/var/svn/$SVN_REPO_NAME/hooks"
+
+# 2. Upewniamy się, że folder istnieje (svnadmin create powinien go założyć, ale dla pewności)
+mkdir -p "$HOOKS_DIR"
+
+# 3. Kopiujemy hooka i nadajemy uprawnienia do wykonywania (+x jest krytyczne)
+cp /opt/post-commit "$HOOKS_DIR/post-commit"
+chmod +x "$HOOKS_DIR/post-commit"
+
+# 4. Nadajemy uprawnienia własnościowe (używamy www-data, tak jak zrobiłeś to w kroku 2)
+chown www-data:www-data "$HOOKS_DIR/post-commit"
+
+echo "Pobieram najnowszą rewizję z repozytorium..."
+YOUNGEST_REV=$(svnlook youngest "/var/svn/$SVN_REPO_NAME")
+
+echo "Uruchamiam skrypt post-commit dla rewizji początkowej ($YOUNGEST_REV)..."
+# Uruchamiamy skrypt ręcznie, podając mu ścieżkę i najnowszą rewizję
+/usr/bin/env python3 "$HOOKS_DIR/post-commit" "/var/svn/$SVN_REPO_NAME" "$YOUNGEST_REV"
+
 exec "$@"

@@ -21,8 +21,10 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import Json
 from sqlalchemy import text
 from utils import MyRepository, MyDatabase
+import redis
 
 app = FastAPI()
+r = redis.Redis(host='redis', port=6379, db=0)
 
 UPLOAD_DIR = "/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -64,6 +66,19 @@ async def get_repository_content(path: str):
             return MyRepository.getFolderList(*enterData)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/repository/statistics")
+async def get_repository_statistics():
+    try:
+        schlib_count = int(r.get('schlib_count') or 0)
+        pcblib_count = int(r.get('pcblib_count') or 0)
+        footprints_count = int(r.get('footprints_count') or 0)
+        symbols_count = int(r.get('symbols_count') or 0)
+
+        return {"schlib_count": schlib_count, "pcblib_count": pcblib_count, 'footprints_count': footprints_count, 'symbols_count':symbols_count}
+    except redis.exceptions.ConnectionError as e:
+        return {"error": "Failed to connect to Redis: " + str(e)}
 
 # ELEMENTS
 @app.get('/elements/count')
