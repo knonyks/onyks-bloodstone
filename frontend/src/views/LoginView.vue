@@ -1,11 +1,12 @@
 <script setup>
     import Logos from '@/components/Logos.vue';
+
 </script>
 
 <template>
-    <onyks-container align="center" justify="center" class="container" padding="m">
-        <onyks-container class="form" gap="l" padding="l">
-            <Logos class="logos"></Logos>
+    <onyks-container class="content" align="center" justify="center" padding="s" type="stack" gap="m" cols="10" rows="1">
+        <logos class="logos"></logos>    
+        <onyks-container gap="m" class="login">
             <onyks-text>Login</onyks-text>
             <onyks-textfield type="text"></onyks-textfield>
             <onyks-text>Password</onyks-text>
@@ -15,52 +16,44 @@
                 <onyks-text>Remember me</onyks-text>
             </onyks-container>
             
-            <router-link to="/manager/dashboard" class="loginBtn"><onyks-button>Login!</onyks-button></router-link>
-            
+            <router-link to="/manager/dashboard" class="loginBtn"><onyks-button background="green">Login!</onyks-button></router-link>
+        
+            <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Forgot password?</onyks-text></router-link>
+            <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Request for create an account</onyks-text></router-link>
         </onyks-container>
     </onyks-container>
 </template>
 
 <style lang="css" scoped>
-    .container
+    .logos
+    {
+        top: 0;
+        left: 0;
+        position: fixed;
+    }
+
+    .content
     {
         width: 100%;
         height: 100%;
         box-sizing: border-box;
     }
 
-    .logos
+    .login
+    {
+        max-width: 325px;
+        width: 100%;
+        height: fit-content;
+    }
+
+    .loginBtn > *
     {
         width: 100%;
     }
 
-    .form
+    .link
     {
-        max-width: 400px;
-        width: 100%;
-        background-color: var(--onyks-surface-1);
-        border-radius: var(--onyks-radius-lg);
-        border: 1px solid var(--onyks-surface-1-border);
-        box-sizing: border-box;
-    }
-
-    .form > *
-    {
-        width: 100%;
-    }
-
-    .rememberMe
-    {
-        width: 100%;
-    }
-
-    .rememberMe > *
-    {
-        width: fit-content;
-    }
-
-    .loginBtn, .loginBtn *
-    {
-        width: 100%;
+        text-decoration: none;
+        color: inherit;
     }
 </style>

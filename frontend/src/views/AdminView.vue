@@ -45,15 +45,14 @@
 <template>
     <DataLoader v-model="loading">
         <ManagerPage title="Admin">
-
             <!-- #region Users -->
             <onyks-header level=3>Users</onyks-header>
             <BasicButtonsPanel>
                 <onyks-button background="green">Add</onyks-button>
                 <onyks-button background="blue">Edit</onyks-button>
+                <onyks-button background="yellow">Reset</onyks-button>
                 <onyks-button>Delete</onyks-button>
             </BasicButtonsPanel>
-            <BasicSearch v-model="users"></BasicSearch>
             <BasicTable v-model="users"></BasicTable>
             <!-- #endregion -->
         </ManagerPage>
