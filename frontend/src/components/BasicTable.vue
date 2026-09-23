@@ -22,7 +22,7 @@
 <template>
     <onyks-container gap="l" align="center">
         <BasicSearch v-model="model"></BasicSearch>
-        <onyks-container :class="{ extend: model.extend }" :padding="`${model.extend ? 'l' : ''}`">
+        <onyks-container :class="{ extend: model.extend }" :padding="`${model.extend ? 'm' : ''}`">
             <onyks-table :columns="model?.columns ?? []" :data="model?.data ?? []" @checkbox-click="handleCheckboxClick"></onyks-table>
         </onyks-container>
         <onyks-container type="group" align="center" justify="center" gap="m">

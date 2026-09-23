@@ -36,6 +36,7 @@
         height: 100%;
         flex-shrink: 0;
         overflow-y: scroll;
+        overflow-x: hidden;
     }
 
     onyks-loader

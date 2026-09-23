@@ -27,6 +27,10 @@
         height: 100vh;
         margin: 0;
         padding: 0;
+    }
+
+    #app
+    {
         overflow-y: hidden;
     }
 
@@ -40,8 +44,6 @@
         box-sizing: border-box;
         z-index: 101;
     }
-
-
 
     onyks-nav
     {
