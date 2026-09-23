@@ -1,5 +1,8 @@
 <script setup>
     import { RouterView, useRoute } from 'vue-router'
+    import { useLoaderStore } from '@/stores/loader';
+
+    const loaderStore = useLoaderStore()
     const route = useRoute()
 </script>
 
@@ -13,14 +16,16 @@
             <router-link slot="nav" to="settings" .selected="route.path.endsWith('/settings')">Settings</router-link>
             <router-link slot="nav" to="admin" .selected="route.path.endsWith('/admin')">Admin</router-link>
         </onyks-nav>
-        <onyks-container gap="" class="content">
+        <onyks-container class="content" gap="m">
+            
             <router-view v-slot="{ Component }">
                 <transition name="fade" mode="out-in">
                     <component :is="Component"/>
                 </transition>
             </router-view>
+            <onyks-container class="footer"></onyks-container>
+            <onyks-loader scroll-container=".manager-view" :isLoading.prop="loaderStore.isLoading" reset-scroll></onyks-loader>
         </onyks-container>
-        <!-- <onyks-container class="footer"></onyks-container> -->
     </onyks-container>
 </template>
 
@@ -28,8 +33,15 @@
     .manager-view
     {
         width: 100%;
-        min-height: 90vh;
+        height: 100%;
         flex-shrink: 0;
+        overflow-y: scroll;
+    }
+
+    onyks-loader
+    {
+        z-index: 20000;
+        position: relative;
     }
 
     .logo
@@ -42,8 +54,6 @@
 
     .content
     {
-        max-width: 1024px;
-        height: 100%;
         width: 100%;
         flex: 1;
         box-sizing: border-box;
@@ -57,5 +67,6 @@
         border: 1px solid var(--onyks-surface-1-border);
         border-width: 1px 0 0 0;
         flex-shrink: 0;
+        z-index: 0;
     }
 </style>

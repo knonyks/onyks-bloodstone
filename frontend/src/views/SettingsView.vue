@@ -4,21 +4,20 @@
     import DataLoader from '@/components/DataLoader.vue';
     import { ref } from 'vue';
     import { onMounted } from 'vue';
+    import { useLoaderStore } from '@/stores/loader';
 
-    const loading = ref(new MyLoaderState())
+    const loaderStore = useLoaderStore()
 
     onMounted(async () =>
     {
-        loading.value.state += 100/4
-
-        loading.value.state = 100
-        loading.value.isLoading = false
+        loaderStore.hide()
+        loaderStore.globalHide()
     })
 
 </script>
 
 <template>
-    <DataLoader v-model="loading">
+
         <ManagerPage title="Settings">
             <onyks-header level="4">Account Details</onyks-header>
             <onyks-container type="grid" cols="2" gap="m">
@@ -31,7 +30,7 @@
             </onyks-container>
 
         </ManagerPage>
-    </DataLoader>
+
 </template>
 
 <style lang="css">

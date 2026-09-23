@@ -1,20 +1,14 @@
 <script setup>
     import { ref } from 'vue';
     import { onMounted } from 'vue';
-    import DataLoader from '@/components/DataLoader.vue';
     import ManagerPage from '@/components/ManagerPage.vue';
     import BasicButtonsPanel from '@/components/BasicButtonsPanel.vue';
     import { services } from '@/utils/api';
-    import { MyLoaderState, MyTime, MyTable } from '@/utils/tools';
+    import { MyTime, MyTable } from '@/utils/tools';
     import BasicTable from '@/components/BasicTable.vue';
-    import BasicSearch from '@/components/BasicSearch.vue';
-    import { watch } from 'vue';
+    import { useLoaderStore } from '@/stores/loader';
 
-    // OTHER
-    const loading = ref(new MyLoaderState())
-    
-
-
+    const loaderStore = useLoaderStore()
 
     // TABLES
     const elements = ref(new MyTable(services.suppliers.list, 
@@ -123,22 +117,15 @@
 
     onMounted(async () =>
     {
-        loading.value.state += 100/4
         await tables.value.init()
-        
-        loading.value.state += 100/4
         await manufacturers.value.init()
-        
-        loading.value.state += 100/4
         await suppliers.value.init()
-        
-        loading.value.state = 100
-        loading.value.isLoading = false
+        loaderStore.hide()
+        loaderStore.globalHide()
     })
 </script>
 
 <template>
-    <DataLoader v-model="loading">
         <ManagerPage title="Management">
 
             <!-- #region Elements -->
@@ -186,7 +173,7 @@
             <BasicTable v-model="suppliers"></BasicTable>
             <!-- #endregion -->
         </ManagerPage>
-    </DataLoader>
+
 </template>
 
 <style lang="css">

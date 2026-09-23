@@ -8,6 +8,7 @@ import LoginView from '@/views/LoginView.vue';
 import ManagerView from '@/views/ManagerView.vue';
 import AdminView from '@/views/AdminView.vue';
 import SettingsView from '@/views/SettingsView.vue';
+import { useLoaderStore } from '@/stores/loader';
 
 const routes = [
   {
@@ -93,6 +94,14 @@ const router = createRouter(
 router.beforeEach((to, from, next) => 
 {
   document.title = to.meta.title || 'ONYKS Bloodstone';
+  const loaderStore = useLoaderStore()
+
+  if(from.path == '/')
+  {
+    loaderStore.globalIsLoading = true
+  }
+
+  loaderStore.isLoading = true 
   next();
 });
 

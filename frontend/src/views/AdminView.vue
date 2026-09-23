@@ -9,8 +9,10 @@
     import BasicTable from '@/components/BasicTable.vue';
     import { MyTable } from '@/utils/tools';
     import BasicSearch from '@/components/BasicSearch.vue';
+    import { useLoaderStore } from '@/stores/loader';
 
-    const loading = ref(new MyLoaderState())
+    const loaderStore = useLoaderStore()
+
     const users = ref(new MyTable(services.users.list, 
     [
         {
@@ -34,29 +36,27 @@
 
     onMounted(async () =>
     {
-        loading.value.state += 100/4
         await users.value.init()
-        
-        loading.value.state = 100
-        loading.value.isLoading = false
+        loaderStore.hide()
+        loaderStore.globalHide()
     })
 </script>
 
 <template>
-    <DataLoader v-model="loading">
-        <ManagerPage title="Admin">
-            <!-- #region Users -->
-            <onyks-header level=3>Users</onyks-header>
-            <BasicButtonsPanel>
-                <onyks-button background="green">Add</onyks-button>
-                <onyks-button background="blue">Edit</onyks-button>
-                <onyks-button background="yellow">Reset</onyks-button>
-                <onyks-button>Delete</onyks-button>
-            </BasicButtonsPanel>
-            <BasicTable v-model="users"></BasicTable>
-            <!-- #endregion -->
-        </ManagerPage>
-    </DataLoader>
+
+    <ManagerPage title="Admin">
+        <!-- #region Users -->
+        <onyks-header level=3>Users</onyks-header>
+        <BasicButtonsPanel>
+            <onyks-button background="green">Add</onyks-button>
+            <onyks-button background="blue">Edit</onyks-button>
+            <onyks-button background="yellow">Reset</onyks-button>
+            <onyks-button>Delete</onyks-button>
+        </BasicButtonsPanel>
+        <BasicTable v-model="users"></BasicTable>
+        <!-- #endregion -->
+    </ManagerPage>
+
 </template>
 
 <style lang="css">

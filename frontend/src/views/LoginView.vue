@@ -1,6 +1,9 @@
 <script setup>
     import Logos from '@/components/Logos.vue';
+    import { useLoaderStore } from '@/stores/loader';
 
+    const loaderStore = useLoaderStore()
+    loaderStore.globalHide()
 </script>
 
 <template>

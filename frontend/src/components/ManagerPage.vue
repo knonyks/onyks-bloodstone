@@ -4,7 +4,7 @@
 </script>
 
 <template>
-    <onyks-container gap="m">
+    <onyks-container gap="m" class="manager-page" padding="m">
         <onyks-container class="header" padding="l">
             <onyks-header>{{ props.title }}</onyks-header>
         </onyks-container>
@@ -19,5 +19,15 @@
     .header
     {
         padding-left: 0 !important;
+    }
+
+    .manager-page
+    {
+        max-width: 1024px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        box-sizing: border-box;
+        min-height: 100vh;
     }
 </style>
