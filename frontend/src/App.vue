@@ -56,7 +56,7 @@
 
     onyks-dialog
     {
-        z-index: 12;
+        z-index: 200;
     }
 
     onyks-button

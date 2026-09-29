@@ -143,23 +143,26 @@ export const elements =
     //         return error
     //     }
     // },
-    // list: async (limit, skip) =>
-    // {
-    //     try 
-    //     {
-    //         const response = await api.get(`/element/list`, {
-    //             params: {
-    //                 limit: limit,
-    //                 skip: skip
-    //             }
-    //         });
-    //         return response
-    //     } 
-    //     catch (error) 
-    //     {
-    //         return error
-    //     }
-    // },
+    list: async (page = 1, limit = 10, search = null, sortBy = "createdAt", sortDesc = false) =>
+    {
+        try 
+        {
+            const response = await api.get(`/elements`, {
+                params: {
+                    page: page,
+                    limit: limit,
+                    search: search,
+                    sortBy: sortBy,
+                    sortDesc: sortDesc
+                }
+            });
+            return response
+        } 
+        catch (error) 
+        {
+            return error
+        }
+    },
     // edit: async (id, element, datasheet = null) =>
     // {
     //     try 
@@ -239,7 +242,7 @@ export const tables =
             throw error
         }
     },
-    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = true) =>
+    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = false) =>
     {
         try 
         {
@@ -335,7 +338,7 @@ export const manufacturers =
             throw error
         }
     },
-    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = true) =>
+    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = false) =>
     {
         try 
         {
@@ -367,11 +370,11 @@ export const manufacturers =
             throw error
         }
     },
-    edit: async (id, supplier) =>
+    edit: async (id, manufacturer) =>
     {
         try 
         {
-            const response = await api.patch(`/manufacturers/${id}`, supplier);
+            const response = await api.patch(`/manufacturers/${id}`, manufacturer);
             return response
         } 
         catch (error) 
@@ -419,7 +422,7 @@ export const suppliers =
             throw error
         }
     },
-    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = true) =>
+    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = false) =>
     {
         try 
         {

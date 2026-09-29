@@ -51,27 +51,30 @@ const routes = [
         component: SettingsView,
         meta: { title: 'Settings - ONYKS Bloodstone' }
       },
-
       {
-        path: 'element/add',
+        path: 'element/create',
+        name: 'ElementCreate',
         component: ElementView,
-        meta: { title: 'Add an element - ONYKS Bloodstone' },
+        meta: { title: 'Create an element - ONYKS Bloodstone' },
         props: { type: 'add' }
       },
       {
         path: 'element/details/:uuid',
+        name: 'ElementDetails',
         component: ElementView,
         meta: { title: 'Element details - ONYKS Bloodstone' },
         props: { type: 'details' }
       },
       {
         path: 'element/edit/:uuid',
+        name: 'ElementEdit',
         component: ElementView,
         meta: { title: 'Edit an element - ONYKS Bloodstone' },
         props: { type: 'edit' }
       },
       {
         path: 'element/duplicate/:uuid',
+        name: 'ElementDuplicate',
         component: ElementView,
         meta: { title: 'Duplicate an element - ONYKS Bloodstone' },
         props: { type: 'duplicate' }

@@ -57,6 +57,28 @@ class TableFull(TableBase):
     id: int
     createdAt: datetime
 
+# ELEMENTS
+class ElementBase(BaseModel):
+    partName: NotEmptyString = Field(min_length=3, max_length=256)
+    manufacturer: NotEmptyString = Field(max_length=256)
+    table: NotEmptyString = Field(max_length=256)
+    description: NotEmptyString = Field(max_length=256)
+    availability: NotEmptyString = Field(max_length=256)
+    value: NotEmptyString = Field(max_length=256)
+    suppliers: dict = Field(default_factory=dict)
+    libraryReference: NotEmptyString = Field(max_length=1024)
+    libraryPath: NotEmptyString = Field(max_length=1024)
+    footprintReferenceNo1: NotEmptyString = Field(max_length=1024)
+    footprintPathNo1: NotEmptyString = Field(max_length=1024)
+    footprintReferenceNo2: NotEmptyString = Field(max_length=1024)
+    footprintPathNo2: NotEmptyString = Field(max_length=1024)
+    footprintReferenceNo3: NotEmptyString = Field(max_length=1024)
+    footprintPathNo3: NotEmptyString = Field(max_length=1024)
+
+class ElementFull(ElementBase):
+    uuid: UUID
+    createdAt: datetime
+
 # USERS
 class UserRank(str, Enum):
     EDITOR = 'editor'
@@ -71,33 +93,3 @@ class UserBase(BaseModel):
 class UserFull(UserBase):
     id: int
     expirationTime: datetime
-
-# ELEMENTS
-class ElementBase(BaseModel):
-    partName: NotEmptyString = Field(min_length=3, max_length=256)
-    description: NotEmptyString = Field(max_length=256)
-    availability: NotEmptyString = Field(max_length=256)
-    value: NotEmptyString = Field(max_length=256)
-    manufacturer: NotEmptyString = Field(max_length=256)
-    suppliers: dict = Field(default_factory=dict)
-    datasheet: bool = False
-    isDatasheetSupposedToChange: int = Field(0)
-    libraryReference: NotEmptyString = Field(max_length=1024)
-    libraryPath: NotEmptyString = Field(max_length=1024)
-    footprintReferenceNo1: NotEmptyString = Field(max_length=1024)
-    footprintPathNo1: NotEmptyString = Field(max_length=1024)
-    footprintReferenceNo2: NotEmptyString = Field(max_length=1024)
-    footprintPathNo2: NotEmptyString = Field(max_length=1024)
-    footprintReferenceNo3: NotEmptyString = Field(max_length=1024)
-    footprintPathNo3: NotEmptyString = Field(max_length=1024)
-    manufacturer: NotEmptyString = Field(max_length=256)
-    table: NotEmptyString = Field(max_length=256)
-
-
-class ElementFull(ElementBase):
-    uuid: UUID
-    createdAt: datetime
-
-class ElementList(BaseModel):
-    total: int
-    items: List[ElementFull]

@@ -111,15 +111,20 @@ export class MyLoaderState
 
 export class MyTable
 {
-    constructor(cmd, columns, formater = (e) => e)
+    constructor(cmd, sortBy, columns, formater = (e) => e)
     {
-        this.data = []
+        this.data = 
+        {
+            items: [],
+            total: 0,
+            page: 1,
+            limit: 100,
+            search: '',
+            sortBy: sortBy,
+            sortDesc: false
+        }
         this.columns = columns
         this.formater = formater
-        this.total = 0
-        this.limit = 100
-        this.search = ''
-        this.page = 1
         this.cmd = cmd
         this.extend = false
         this.selectedCount = 0
@@ -127,40 +132,39 @@ export class MyTable
 
     async init()
     {
-        const data = (await this.cmd(this.page, this.limit, '', 'id', false))
-        this.total = data.data.total
-        this.data = data.data?.items.filter((item) => this.formater(item))
+        const data = (await this.cmd(this.data.page, this.data.limit, this.data.search, this.data.sortBy, this.data.sortDesc))
+        this.data.total = data.data.total
+        this.data.items = data.data?.items.filter((item) => this.formater(item))
     }
 
-    async nextPage(index)
+        async nextPage(index)
     {
-        const totalItems = this.total || this.data.length || 0
-        const totalPages = Math.max(1, Math.ceil(totalItems / this.limit))
+        const totalItems = this.data.total || this.data.items.length || 0
+        const totalPages = Math.max(1, Math.ceil(totalItems / this.data.limit))
 
         if (Number.isInteger(index) && index > 0)
         {
-            this.page = Math.min(index, totalPages)
-            await this.searchPhrase()
+            this.data.page = Math.min(index, totalPages)
+            await this.search()
             return
         }
 
-        if (this.page >= totalPages)
+        if (this.data.page >= totalPages)
         {
             return
         }
 
-        this.page += 1
+        this.data.page += 1
 
-        await this.searchPhrase()
+        await this.search()
     }
 
-    async searchPhrase()
+    async search()
     {
-        const response = await this.cmd(this.page, this.limit, this.search, 'id', false)
+        const response = await this.cmd(this.data.page, this.data.limit, this.data.search, this.data.sortBy, this.data.sortDesc)
         const items = response?.data?.items ?? []
-        console.log(items)
-        this.total = Number(response?.data?.total ?? items.length ?? 0)
-        this.data = items.filter((item) => this.formater(item))
+        this.data.total = Number(response?.data?.total ?? items.length ?? 0)
+        this.data.items = items.filter((item) => this.formater(item))
     }
 }
 
@@ -212,11 +216,11 @@ export class LabelsDoc
         this.pages = await this.pdf.getPages()
     }
 
-    drawBorders()
+    async drawBorders()
     {
         for(let i=0; i<this.labelsAmount; i++)
         {
-            this.__drawBorder(i)
+            await this.__drawBorder(i)
         }
     }
 

@@ -1,103 +1,58 @@
 <script setup lang="js">
-    import { ref } from 'vue'
-    import { defineModel } from 'vue'
-    import { defineExpose } from 'vue'
-
-
-
-    const props = defineProps(['action', 'subject', 'disabled'])
-    const emit = defineEmits(['add-click', 'edit-click', 'delete-click'])
-
-    const name = defineModel('name')
-    const id = defineModel('id')
-    const codes = defineModel('codes')
-
-    const btns = ref({add: null, edit: null, delete: null})
-    const values = ref([])
+    import { ref } from 'vue';
+    import BasicSearch from './BasicSearch.vue';
+    
+    const props = defineProps({action: Function})
+    const items = ref([])
+    const page = ref(1)
     const total = ref(0)
     const counter = ref(0)
+    const query = ref('')
+    const model = defineModel({ default: () => ({}) })
     
-    const reset = async () =>
+    const init = async () => 
     {
-        props.action(100, 0).then((e) => 
-        {
-            values.value = e.data.items
-            total.value = e.data.total
-            counter.value = values.value.length
-        })
-        name.value = ''
-        try
-        {
-            changeValue({detail:{selected: false}})
-        }
-        catch(error)
-        {}
+        let data = await props.action(1, 50)
+        items.value = data.data.items
+        total.value = data.data.total
+        counter.value = items.value.length
+        page.value = 1
     }
 
-    const refresh = async () =>
+    const nextPage = async () => 
     {
-        props.action(100, counter.value).then((e) => 
-        {
-            values.value = [...values.value, ...e.data.items]
-            counter.value = values.value.length
-            total.value = e.data.total
-        })
+        let data = await props.action(page.value + 1, 50, query.value)
+        items.value = items.value.concat(data.data.items)
+        total.value = data.data.total
+        counter.value = items.value.length
+        page.value++
     }
 
-    const changeValue = (e) =>
+    const search = async () =>
     {
-
-        if(e.detail.selected)
-        {
-            name.value = e.detail.value[1]
-            id.value = e.detail.value[0]
-            btns.value.delete.disabled = false
-            btns.value.edit.disabled = false
-        }
-        else
-        {
-            name.value = ''
-            id.value = 0
-            btns.value.edit.disabled = true
-            btns.value.delete.disabled = true
-        }
+        let data = await props.action(1, 50, query.value)
+        items.value = data.data.items
+        total.value = data.data.total
+        counter.value = items.value.length
+        page.value = 1
     }
 
-    defineExpose(
-    {
-        reset,
-        name,
-        id,
-        codes
-    })
-
-    reset()
-
-
+    defineExpose({init})
 </script>
 
 <template>
-    <onyks-container type="stack" padding="" gap="l">
-        
-        <onyks-select ref="select" @scroll-end="refresh" @change="changeValue">
-            <onyks-select-option v-for="value in values" :key="value" :value="[value.id, value.name]" >
-                <onyks-container padding="" gap="l">
-                    <onyks-text>{{ value.name }}</onyks-text>
-                        <onyks-textfield :disabled="props.disabled" v-model="codes[value.id]" size="m" type="text"  style="position: relative; z-index: 10; pointer-events: auto;">
-                        </onyks-textfield>
+    <onyks-container type="stack" gap="m" style="width: 100%;">
+        <BasicSearch v-model="query" :search="search"></BasicSearch>
+        <onyks-select ref="select" @scroll-end="nextPage">
+            <onyks-select-option :selected="value.name == model" v-for="value in items" :key="value" :value="value.id">
+                <onyks-container gap="m">
+                    <onyks-header level="6">{{ value.name }}</onyks-header>
+                    <onyks-textfield v-model="model[String(value.id)]" style="position: relative; z-index: 10; pointer-events: auto;"></onyks-textfield>
                 </onyks-container>
-
             </onyks-select-option>
         </onyks-select>
 
         <onyks-text>Total:&emsp;{{counter}}&emsp;/&emsp;{{ total }}</onyks-text>
-
-
-        <onyks-container type="grid" cols="3" padding="" gap="m" v-if="props.disabled === false">
-            <onyks-button background="green" @click="emit('add-click')">Add</onyks-button>
-            <onyks-button background="blue" @click="emit('edit-click')" :ref="(el) => { if (el) btns.edit = el }" disabled>Edit</onyks-button>
-            <onyks-button @click="emit('delete-click')" :ref="(el) => { if (el) btns.delete = el }" disabled>Delete</onyks-button>
-        </onyks-container>
     </onyks-container>
 </template>
 
@@ -110,11 +65,6 @@
     onyks-select
     {
         width: 100%;
-        height: 300px;
-    }
-
-    onyks-textfield
-    {
-        width: 100%;
+        height: 400px;
     }
 </style>

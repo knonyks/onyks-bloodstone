@@ -67,7 +67,6 @@ async def get_repository_content(path: str):
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/repository/statistics")
 async def get_repository_statistics():
     try:
@@ -648,9 +647,6 @@ async def patch_users(id: int, user: schemas.UserBase, db = Depends(get_db)):
 async def get_server_info():
     return {'name': 'ONYKS Bloodstone', 'version': 'v0.2.0-alpha'}
 
-##############################################################
-
-
 
 # ELEMENT
 # do poprawy
@@ -782,31 +778,61 @@ async def get_server_info():
 
 
 
-# # do poprawy
-# @app.get("/element/list")
-# async def elementList(limit: int = Query(default=10, ge=1, le=100),
-#     skip: int = Query(default=0, ge=0),
-#     db = Depends(get_db)):
+# do poprawy
+@app.get("/elements", response_model = schemas.PageResponse[schemas.ElementFull])
+async def elementList(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    search: str | None = Query(None),
+    sortBy: str = Query("createdAt"),
+    sortDesc: bool = Query(False),
+    db=Depends(get_db),
+):
+    limit = max(1, min(limit, 100))
+    skip = (page - 1) * limit
 
-#     query = select(func.count()).select_from(models.Element)
-#     result = await db.execute(query)
-#     totalCount = result.scalar()
-    
-#     queryEntries = select(models.Element).offset(skip).limit(limit)
-#     entriesResult = await db.execute(queryEntries)
-#     entries = []
-#     for item in entriesResult.scalars().all():
-#         entry = {
-#             key: value
-#             for key, value in vars(item).items()
-#             if key not in {"_sa_instance_state", "suppliers"}
-#         }
-#         suppliers = getattr(item, "suppliers", None)
-#         if isinstance(suppliers, dict):
-#             entry.update({f"supplier_{key}": value for key, value in suppliers.items()})
-#         entries.append(entry)
-    
-#     return {"total": totalCount, "items": entries}
+    sort_column = getattr(models.Element, sortBy, None)
+    if sort_column is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported sortBy value: {sortBy}",
+        )
+
+    count_query = select(func.count()).select_from(models.Element)
+    query_entries = select(models.Element)
+    if search:
+        from sqlalchemy import JSON, String, cast, or_
+
+        search_term = f"%{search.strip()}%"
+        search_filters = []
+        for column in models.Element.__table__.columns:
+            try:
+                python_type = column.type.python_type
+            except (NotImplementedError, AttributeError):
+                python_type = None
+            if python_type is str:
+                search_filters.append(column.ilike(search_term))
+            elif python_type is uuid.UUID:
+                search_filters.append(cast(column, String).ilike(search_term))
+            elif isinstance(column.type, JSON):
+                search_filters.append(cast(column, String).ilike(search_term))
+        if search_filters:
+            search_filter = or_(*search_filters)
+            count_query = count_query.where(search_filter)
+            query_entries = query_entries.where(search_filter)
+
+    count_result = await db.execute(count_query)
+    total_count = count_result.scalar() or 0
+    query_entries = (
+        query_entries
+        .order_by(sort_column.desc() if sortDesc else sort_column.asc())
+        .offset(skip)
+        .limit(limit)
+    )
+    entries_result = await db.execute(query_entries)
+    entries = entries_result.scalars().all()
+
+    return schemas.PageResponse(items=entries, total=total_count, page=page, limit=limit)
 
 # # do poprawy
 # @app.delete('/element/delete/{id}')

@@ -10,7 +10,7 @@
 </template>
 
 <style>
-    .btns > onyks-button
+    .btns onyks-button
     {
         width: 100%;
     }

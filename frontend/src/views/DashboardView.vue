@@ -113,7 +113,7 @@
             </onyks-card>
         </onyks-container>
 
-        <onyks-text v-else>There is no tables to show.</onyks-text>
+        <onyks-text v-else>There are no tables to show.</onyks-text>
 
         <onyks-header level="3">Manufacturers</onyks-header>
         
@@ -123,7 +123,7 @@
             </onyks-card>
         </onyks-container>
 
-        <onyks-text v-else>There is no manufacturers to show.</onyks-text>
+        <onyks-text v-else>There are no manufacturers to show.</onyks-text>
 
     </ManagerPage>
 

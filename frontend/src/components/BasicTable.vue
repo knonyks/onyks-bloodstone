@@ -1,33 +1,53 @@
 <script setup>
-    import { defineEmits } from 'vue';
-    import BasicSearch from './BasicSearch.vue';
+    import { ref } from 'vue';
 
     const emit = defineEmits(['page-change', 'checkbox-click'])
-    const model = defineModel();
+    const model = defineModel({ required: true });
+    const table = ref(null);
 
     const handleCheckboxClick = (e) =>
     {
-        if(e.detail.type == 'row')
+        const detail = e.detail;
+        const data = model.value?.data?.items;
+        if (!detail || !Array.isArray(data)) return;
+
+        if(detail.type === 'row')
         {
-            model.value.data[e.detail.rowIndex].selected = e.detail.checked
+            const row = data[detail.rowIndex];
+            if (row) row.selected = detail.checked;
         }
         else
         {
-            model.value.data.forEach((item) => item.selected = e.detail.checked)
+            data.forEach((item) => item.selected = detail.checked)
         }
-        model.value.selectedCount = model.value.data.filter((item) => item.selected).length
+        model.value.selectedCount = data.filter((item) => item.selected).length
+        emit('checkbox-click', detail)
     }
+
+    const handlePageChange = (event) =>
+    {
+        const index = event.detail?.index;
+        if (index == null) return;
+        model.value.nextPage?.(index);
+        emit('page-change', index);
+    }
+
+    const refresh = () =>
+    {
+        table?.value?.refresh?.()
+    }
+
+    defineExpose({ refresh });
 </script>
 
 <template>
     <onyks-container gap="l" align="center">
-        <BasicSearch v-model="model"></BasicSearch>
         <onyks-container :class="{ extend: model.extend }" :padding="`${model.extend ? 'm' : ''}`">
-            <onyks-table :columns="model?.columns ?? []" :data="model?.data ?? []" @checkbox-click="handleCheckboxClick"></onyks-table>
+            <onyks-table ref="table" :columns="model?.columns ?? []" :data="model?.data?.items ?? []" @checkbox-click="handleCheckboxClick"></onyks-table>
         </onyks-container>
         <onyks-container type="group" align="center" justify="center" gap="m">
-            <onyks-pagination-nav :max-index="Math.ceil(model.total / model.limit)" :index="model.page" max-view="3" size="m" @page-change="model.nextPage($event.detail.index)"></onyks-pagination-nav>
-            <onyks-text>Selected:&emsp;{{model.selectedCount}}&emsp;|&emsp;Total:&emsp;{{ model.total }}</onyks-text>
+            <onyks-pagination-nav :max-index="Math.ceil((model.data?.total ?? 0) / (model.data?.limit || 1))" :index="model.data?.page ?? 1" max-view="3" size="m" @page-change="handlePageChange"></onyks-pagination-nav>
+            <onyks-text>Selected:&emsp;{{model.selectedCount}}&emsp;|&emsp;Total:&emsp;{{ model.data?.total ?? 0 }}</onyks-text>
         </onyks-container>
     </onyks-container>
 </template>
