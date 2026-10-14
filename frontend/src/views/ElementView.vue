@@ -33,14 +33,14 @@
         libraryReference: '',
         libraryPath: '',
 
-        footprintReferenceNo1: '3',
-        footprintPathNo1: '4',
+        footprintReferenceNo1: '',
+        footprintPathNo1: '',
 
-        footprintReferenceNo2: '5',
-        footprintPathNo2: '6',
+        footprintReferenceNo2: '',
+        footprintPathNo2: '',
 
-        footprintReferenceNo3: '7',
-        footprintPathNo3: '8',
+        footprintReferenceNo3: '',
+        footprintPathNo3: '',
 
         createdAt: '12:12:2023, 12:12:12',
 

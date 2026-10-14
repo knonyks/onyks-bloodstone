@@ -31,6 +31,7 @@ export const useRepository = (_filter = (e) => e.type === 'dir' || e.type === 's
         let temp = Array.from((await services.repository.content(e.detail.path.slice(1).join('/'))).data)
         temp = temp.filter(e => filter.value(e))
         content.value = temp
+        currentSelected.value = { type: '', name: '' }
     }
 
     const enterFolder = async (e) =>
@@ -39,6 +40,7 @@ export const useRepository = (_filter = (e) => e.type === 'dir' || e.type === 's
         let temp = Array.from((await services.repository.content(path.value.slice(1).join('/'))).data)
         temp = temp.filter(e => filter.value(e))
         content.value = temp
+        currentSelected.value = { type: '', name: '' }
     }
 
     const refresh = async () =>
@@ -249,15 +251,20 @@ export const useDeleteItemsDialog = (_service = null, _title = '', _handleEnd = 
     return { firstOpen, secondOpen, items, isLoading, handleDelete, title, counter, errorCodes, succesCounter, errorCounter, handleEnd }
 }
 
-export const useRepositoryModelDialog = (_title = '') =>
+export const useRepositoryModelDialog = (_title = '', _filter = (() => true), _handleOk = () => {}, _handleReset = () => {}) =>
 {
     const open = ref(false)
     const title = ref(_title)
-    const repository = useRepository()
-
+    const repository = reactive(useRepository(_filter))
+    const error = ref('')
     const init = () => { repository.init() }
 
-    return { open, title, repository, init }
+    const handleOk = _handleOk
+    const handleReset = _handleReset
+
+    watch(repository, () => { error.value = '' })
+
+    return { open, title, repository, init, handleOk, error }
 }
 
 export const addToast = (message, duration = 3000, closable = true, size = 'm', type = 'info') =>

@@ -4,10 +4,14 @@
 
     const convertedContent = computed(() => 
     {
-        let pathArray = props.path.split('/');
-        if(props.obj == '')
-            return pathArray;
-        return pathArray.concat(props.obj);
+        let result = []
+        if(props.path != '')
+            result = result.concat(props.path.split('/'));
+        if(props.obj != '')
+            result = result.concat(props.obj);
+
+        result = result.filter(item => item !== '');    
+        return result;
     });
 </script>
 
