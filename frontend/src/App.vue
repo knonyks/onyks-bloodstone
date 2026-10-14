@@ -1,14 +1,14 @@
 <script setup>
     import { useLoaderStore } from '@/stores/loader';
+
     const loaderStore = useLoaderStore()
 </script>
 
 <template>
 
     <onyks-container padding="m" class="toast-container">
-        <onyks-toast-container class="toast-container-content">
-        </onyks-toast-container>
-    </onyks-container>
+        <onyks-toast-container class="toast-container-content"></onyks-toast-container>
+    </onyks-container> 
 
     <onyks-container class="container" align="center">
         <router-view v-slot="{ Component }">

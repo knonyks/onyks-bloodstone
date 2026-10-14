@@ -1,16 +1,10 @@
 <script setup>
-    import { defineModel } from 'vue';
-    const text = defineModel('text');
-    const emit = defineEmits(['search']);
-
-    function handleInput(event) 
-    {
-        emit('search', event.target?.value ?? text.value);
-    }
+    const model = defineModel()
+    const props = defineProps({search: Function})
 </script>
 
 <template>
-    <onyks-textfield placeholder="Search..." v-model="text" @input="handleInput"></onyks-textfield>
+    <onyks-textfield placeholder="Search..." @input="props.search" v-model="model"></onyks-textfield>
 </template>
 
 <style>

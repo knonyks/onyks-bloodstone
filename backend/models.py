@@ -65,7 +65,11 @@ class Table(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name = Column('name', String, unique=True, nullable=False)
     createdAt = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    elements = relationship("Element", back_populates="tableCategory")
+    elements = relationship(
+        "Element",
+        back_populates="tableCategory",
+        foreign_keys="Element.table",
+    )
 
 
 class Element(Base):
@@ -81,11 +85,15 @@ class Element(Base):
         nullable=True
     )
 
+    manufacturer_id = Column('manufacturer_id', Integer, ForeignKey("private.manufacturers.id", ondelete="SET NULL", onupdate="CASCADE"), nullable=True)
+
     table = Column('table',
         String(1024), 
         ForeignKey("private.tables.name", ondelete="CASCADE", onupdate="CASCADE"), 
         nullable=False
     )
+
+    table_id = Column('table_id', Integer, ForeignKey("private.tables.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
 
     description = Column('description', String(1024), nullable=True, default='')
     value = Column('value', String(1024), nullable=True, default='')
@@ -108,5 +116,9 @@ class Element(Base):
 
     createdAt = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
-    tableCategory = relationship("Table", back_populates="elements")
-    manufacturerRel = relationship("Manufacturer")
+    tableCategory = relationship(
+        "Table",
+        back_populates="elements",
+        foreign_keys=[table],
+    )
+    manufacturerRel = relationship("Manufacturer", foreign_keys=[manufacturer])

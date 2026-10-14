@@ -1,14 +1,13 @@
 <script setup lang="js">
-    import { ref } from 'vue';
+    import { reactive } from 'vue';
     import ManagerPage from '@/components/ManagerPage.vue';
     import { onMounted } from 'vue';
     import { services } from '@/utils/api';
-    import { MyTime } from '@/utils/tools';
     import { useLoaderStore } from '@/stores/loader';
 
     const loaderStore = useLoaderStore()
 
-    const data = ref(
+    const data = reactive(
     {
         elements: {},
         tables: {},
@@ -21,21 +20,29 @@
     {
         try
         {
-            data.value.elements = (await services.elements.count()).data
-            data.value.elements.lastAdded = (await services.elements.lastAdded()).data
-            data.value.elements.lastAdded.createdAt = MyTime.getLocalTime(data.value.elements.lastAdded.createdAt, 'en')
-            data.value.tables = (await services.tables.count()).data
-            data.value.tables.counts = (await services.tables.counts()).data
-            data.value.suppliers = (await services.suppliers.count()).data
-            data.value.manufacturers = (await services.manufacturers.count()).data
-            data.value.repository = (await services.repository.statistics()).data
-            data.value.manufacturers.counts = (await services.manufacturers.counts()).data
+            data.elements = (await services.elements.count()).data
+
+            try
+            {
+                data.elements.lastAdded = (await services.elements.lastAdded()).data
+            }
+            catch(e)
+            {
+                console.dir(e)
+            }
+
+            data.tables = (await services.tables.count()).data
+            data.tables.counts = (await services.tables.counts()).data
+            data.suppliers = (await services.suppliers.count()).data
+            data.manufacturers = (await services.manufacturers.count()).data
+            data.repository = (await services.repository.statistics()).data
+            data.manufacturers.counts = (await services.manufacturers.counts()).data
             loaderStore.hide()
             loaderStore.globalHide()
         }
         catch (err)
         {
-
+            console.dir(err)
         }
     })
 </script>
@@ -52,16 +59,16 @@
                 <onyks-container gap="m" cols="10" rows="4" type="grid" mobile-breakpoint="900">
 
                     <onyks-header level="6" cols="3">Part name</onyks-header>
-                    <onyks-text size="l" cols="7">{{ data.elements?.lastAdded?.partName || 'Undefined' }}</onyks-text>
+                    <onyks-text size="l" cols="7">{{ data.elements?.lastAdded?.partName || 'None' }}</onyks-text>
 
                     <onyks-header level="6" cols="3">Manufacturer</onyks-header>
-                    <onyks-text size="l" cols="7">{{data.elements?.lastAdded?.manufacturer || 'Undefined'}}</onyks-text>
+                    <onyks-text size="l" cols="7">{{data.elements?.lastAdded?.manufacturer || 'None'}}</onyks-text>
 
                     <onyks-header level="6" cols="3">Table</onyks-header>
-                    <onyks-text size="l" cols="7">{{data.elements?.lastAdded?.table || 'Undefined'}}</onyks-text>
+                    <onyks-text size="l" cols="7">{{data.elements?.lastAdded?.table || 'None'}}</onyks-text>
 
                     <onyks-header level="6" cols="3">Created At</onyks-header>
-                    <onyks-text size="l" cols="7">{{data.elements?.lastAdded?.createdAt || 'Undefined'}}</onyks-text>
+                    <onyks-text size="l" cols="7">{{data.elements?.lastAdded?.createdAt || 'None'}}</onyks-text>
 
                 </onyks-container>
             </onyks-card>
@@ -70,16 +77,16 @@
                 <onyks-container gap="m" cols="10" rows="4" type="grid" mobile-breakpoint="900">
 
                     <onyks-header level="6" cols="6">Symbols files (*.SchLib)</onyks-header>
-                    <onyks-text size="l" cols="4">{{ data.repository?.schlib_count || 'Undefined' }}</onyks-text>
+                    <onyks-text size="l" cols="4">{{ data.repository?.schlib_count || 0 }}</onyks-text>
 
                     <onyks-header level="6" cols="6">Footprints files (*.PcbLib)</onyks-header>
-                    <onyks-text size="l" cols="4">{{data.repository?.pcblib_count || 'Undefined'}}</onyks-text>
+                    <onyks-text size="l" cols="4">{{data.repository?.pcblib_count || 0}}</onyks-text>
 
                     <onyks-header level="6" cols="6">Symbols</onyks-header>
-                    <onyks-text size="l" cols="4">{{data.repository?.symbols_count || 'Undefined'}}</onyks-text>
+                    <onyks-text size="l" cols="4">{{data.repository?.symbols_count || 0}}</onyks-text>
 
                     <onyks-header level="6" cols="6">Footprints</onyks-header>
-                    <onyks-text size="l" cols="4">{{data.repository?.footprints_count || 'Undefined'}}</onyks-text>
+                    <onyks-text size="l" cols="4">{{data.repository?.footprints_count || 0}}</onyks-text>
 
                 </onyks-container>
             </onyks-card>
@@ -89,19 +96,19 @@
         <onyks-container cols="4" rows="1" type="grid" gap="m" mobile-breakpoint="950">
 
             <onyks-card title="Elements" cols="1" size="l">
-                <onyks-header level="3">{{ data?.elements?.count || 'Undefined' }}</onyks-header>
+                <onyks-header level="3">{{ data?.elements?.count || 0 }}</onyks-header>
             </onyks-card>
 
             <onyks-card title="Tables" cols="1" size="l">
-                <onyks-header level="3">{{ data?.tables?.count || 'Undefined' }}</onyks-header>
+                <onyks-header level="3">{{ data?.tables?.count || 0 }}</onyks-header>
             </onyks-card>
 
             <onyks-card title="Manufacturers" cols="1" size="l">
-                <onyks-header level="3">{{ data?.manufacturers?.count || 'Undefined' }}</onyks-header>
+                <onyks-header level="3">{{ data?.manufacturers?.count || 0 }}</onyks-header>
             </onyks-card>
 
             <onyks-card title="Suppliers" cols="1" size="l">
-                <onyks-header level="3">{{ data?.suppliers?.count || 'Undefined' }}</onyks-header>
+                <onyks-header level="3">{{ data?.suppliers?.count || 0 }}</onyks-header>
             </onyks-card>
         </onyks-container>
 
@@ -128,7 +135,3 @@
     </ManagerPage>
 
 </template>
-
-<style scoped>
-
-</style>

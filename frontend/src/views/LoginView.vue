@@ -10,9 +10,9 @@
     <onyks-container class="content" align="center" justify="center" padding="s" type="stack" gap="m" cols="10" rows="1">
         <logos class="logos"></logos>    
         <onyks-container gap="m" class="login">
-            <onyks-text>Login</onyks-text>
+            <onyks-header level="6">Login</onyks-header>
             <onyks-textfield type="text"></onyks-textfield>
-            <onyks-text>Password</onyks-text>
+            <onyks-header level="6">Password</onyks-header>
             <onyks-textfield type="password"></onyks-textfield>
             <onyks-container class="rememberMe" align="center" type="group" gap="s">
                 <onyks-checkbox></onyks-checkbox>
@@ -22,7 +22,7 @@
             <router-link to="/manager/dashboard" class="loginBtn"><onyks-button background="green">Login!</onyks-button></router-link>
         
             <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Forgot password?</onyks-text></router-link>
-            <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Request for create an account</onyks-text></router-link>
+            <!-- <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Request for create an account</onyks-text></router-link> -->
         </onyks-container>
     </onyks-container>
 </template>
@@ -44,7 +44,7 @@
 
     .login
     {
-        max-width: 325px;
+        max-width: 400px;
         width: 100%;
         height: fit-content;
     }
@@ -58,5 +58,10 @@
     {
         text-decoration: none;
         color: inherit;
+    }
+
+    onyks-textfield
+    {
+        width: 100%;
     }
 </style>

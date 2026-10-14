@@ -1,14 +1,14 @@
 <script setup>
     import WarningAlert from './WarningAlert.vue';
-    const props = defineProps(['title'])
+    const props = defineProps({ title: String, expand: { type: Boolean, default: false } })
 </script>
 
 <template>
-    <onyks-container gap="m" class="manager-page" padding="m">
+    <onyks-container gap="m" :class="['manager-page', { expand: props.expand }]" padding="m" type="stack">
         <onyks-container class="header" padding="l">
             <onyks-header>{{ props.title }}</onyks-header>
         </onyks-container>
-        <onyks-container gap="l">
+        <onyks-container gap="l" type="stack">
             <WarningAlert></WarningAlert>
             <slot></slot>
         </onyks-container>
@@ -29,5 +29,10 @@
         margin-right: auto;
         box-sizing: border-box;
         min-height: 100vh;
+    }
+
+    .expand
+    {
+        max-width: 100%;
     }
 </style>

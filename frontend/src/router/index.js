@@ -2,7 +2,6 @@ import DashboardView from '@/views/DashboardView.vue';
 import ManagementView from '@/views/ManagementView.vue';
 import RepositoryView from '@/views/RepositoryView.vue';
 import { createRouter, createWebHistory } from 'vue-router'
-import ErrorView from '@/views/ErrorView.vue';
 import ElementView from '@/views/ElementView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ManagerView from '@/views/ManagerView.vue';
@@ -52,39 +51,31 @@ const routes = [
         meta: { title: 'Settings - ONYKS Bloodstone' }
       },
       {
-        path: 'element/create',
-        name: 'ElementCreate',
+        path: 'elements/create',
+        name: 'element-create',
         component: ElementView,
-        meta: { title: 'Create an element - ONYKS Bloodstone' },
-        props: { type: 'add' }
+        meta: { title: 'Create an element - ONYKS Bloodstone' }
       },
       {
-        path: 'element/details/:uuid',
-        name: 'ElementDetails',
+        path: 'elements/details/:uuid',
+        name: 'element-details',
         component: ElementView,
-        meta: { title: 'Element details - ONYKS Bloodstone' },
-        props: { type: 'details' }
+        meta: { title: 'Element details - ONYKS Bloodstone' }
       },
       {
-        path: 'element/edit/:uuid',
-        name: 'ElementEdit',
+        path: 'elements/edit/:uuid',
+        name: 'element-edit',
         component: ElementView,
-        meta: { title: 'Edit an element - ONYKS Bloodstone' },
-        props: { type: 'edit' }
+        meta: { title: 'Edit an element - ONYKS Bloodstone' }
       },
       {
-        path: 'element/duplicate/:uuid',
-        name: 'ElementDuplicate',
+        path: 'elements/duplicate/:uuid',
+        name: 'element-duplicate',
         component: ElementView,
         meta: { title: 'Duplicate an element - ONYKS Bloodstone' },
-        props: { type: 'duplicate' }
+        props: { schema: 'duplicate' }
       },
     ]
-  },
-  {
-    path: '/error',
-    component: ErrorView,
-    meta: { title: 'Error! - ONYKS Bloodstone' },
   }
 ]
 

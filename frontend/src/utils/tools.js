@@ -2,184 +2,272 @@ import { degrees, PDFDocument, rgb, StandardFonts, PageSizes } from 'pdf-lib';
 import QRCode from 'qrcode'
 import { DateTime } from "luxon";
 import { services } from './api';
+import { reactive } from 'vue'
+import { ref } from 'vue';
+import { watch } from 'vue';
+import { OnyksToastContainer } from 'onyks-web-ui-system'
+import { computed } from 'vue';
+import { unref } from 'vue';
+import { html } from 'lit';
 
-export class MyTime
+export const useRepository = (_filter = (e) => e.type === 'dir' || e.type === 'schlib' || e.type === 'pcblib' || e.type === 'footprint' || e.type === 'symbol') =>
 {
-    static getLocalTime = (dateStr, country = 'pl', format = '24h', zone = null) =>
+    const path = ref([])
+    const filter = ref(_filter)
+    const content = ref([])
+    const currentSelected = ref('')
+
+    const init = async () =>
     {
-        const countryCode = (country || 'pl').toLowerCase()
-        const timeFormat = (format || '24h').toLowerCase()
-
-        const localeMap = {
-            pl: 'pl',
-            en: 'en',
-            us: 'en-US',
-            gb: 'en-GB',
-            de: 'de',
-            fr: 'fr',
-            es: 'es',
-            it: 'it',
-        }
-
-        const zoneMap = {
-            pl: 'Europe/Warsaw',
-            en: 'Europe/Warsaw',
-            us: 'America/New_York',
-            gb: 'Europe/London',
-            de: 'Europe/Berlin',
-            fr: 'Europe/Paris',
-            es: 'Europe/Madrid',
-            it: 'Europe/Rome',
-        }
-
-        const resolvedZone = zone || zoneMap[countryCode] || 'Europe/Warsaw'
-        const locale = localeMap[countryCode] || 'en'
-        const hour12 = timeFormat === '12h'
-
-        return DateTime.fromISO(dateStr)
-            .setZone(resolvedZone)
-            .setLocale(locale)
-            .toLocaleString({ ...DateTime.DATETIME_MED_WITH_SECONDS, hour12 })
-    }
-}
-
-export class MyRepository
-{
-    constructor(filter = () => true)
-    {
-        this.path = []
-        this.filter = filter
-        this.content = []
-    }
-
-    async init()
-    {
-        this.path = [(await services.repository.info()).data.name]
+        path.value = [(await services.repository.info()).data.name]
         let temp = Array.from((await services.repository.content('/')).data)
-        temp = temp.filter(e => this.filter(e))
-        this.content = temp
+        temp = temp.filter(e => filter.value(e))
+        content.value = temp
     }
-    
-    async pathChange(e)
+
+    const pathChange = async (e) =>
     {
-        this.path = e.detail.path
+        path.value = e.detail.path
         let temp = Array.from((await services.repository.content(e.detail.path.slice(1).join('/'))).data)
-        temp = temp.filter(e => this.filter(e))
-        this.content = temp
+        temp = temp.filter(e => filter.value(e))
+        content.value = temp
     }
 
-    async enterFolder(e)
+    const enterFolder = async (e) =>
     {
-        this.path = [...this.path, e.detail.folder.name]
-        let temp = Array.from((await services.repository.content(this.path.slice(1).join('/'))).data)
-        temp = temp.filter(e => this.filter(e))
-        this.content = temp
+        path.value = [...path.value, e.detail.folder.name]
+        let temp = Array.from((await services.repository.content(path.value.slice(1).join('/'))).data)
+        temp = temp.filter(e => filter.value(e))
+        content.value = temp
     }
 
-    async refresh()
+    const refresh = async () =>
     {
-        let temp = Array.from((await services.repository.content(this.path.slice(1).join('/'))).data)
-        temp = temp.filter(e => this.filter(e))
-        this.content = temp
+        let temp = Array.from((await services.repository.content(path.value.slice(1).join('/'))).data)
+        temp = temp.filter(e => filter.value(e))
+        content.value = temp
     }
+
+    const handleSelect = (e) =>
+    {
+        currentSelected.value = e.detail.items[0]
+    }
+
+    return { path, filter, content, currentSelected, init, pathChange, enterFolder, refresh, handleSelect }
 }
 
-export class MyError
+export const useBasicTable = (_service, _columns, _expandable = false, _expandedTemplate = (row) => html`
+    ${row ? JSON.stringify(row) : ''}
+`) =>
 {
-    static process(error)
+    const columns = ref(_columns)
+    const data = ref([{name: 'xx'}])
+    const service = _service
+    const page = ref(1)
+    const total = ref(0)
+    const limit = ref(100)
+    const searchPhrase = ref('')
+    const sortBy = ref('id')
+    const sortDesc = ref(false)
+    const selected = ref(0)
+    const expandable = ref(_expandable)
+    const expandedTemplate = ref(_expandedTemplate)
+
+    const init = async () =>
     {
-        if (error.response && error.response.data && error.response.data.message) 
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        data.value = result?.data?.items ?? []
+        data.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    const checkboxClick = (details) =>
+    {
+        if(details.type === 'row')
         {
-            return `Error: ${error.response.data.message}`
-        } 
-        else 
+            const row = data.value[details.rowIndex];
+            if (row) row.selected = details.checked;
+        }
+        else
         {
-            return `Error: ${error.message || 'Unknown error'}`
+            data.value.forEach((item) => item.selected = details.checked)
+        }
+        selected.value = data.value.filter((item) => item.selected).length
+    }
+
+    watch(() => data.value, (newItems) => 
+    {
+        selected.value = (newItems || []).filter((item) => item.selected).length
+
+    });
+
+    const pageChange = async (index) =>
+    {
+        data.value = (await service.list(index, limit.value, searchPhrase.value, sortBy.value, sortDesc.value))?.data?.items ?? []
+        data.value.map((item) => item.selected = false)
+        if (index == null) return;
+        page.value = index;
+    }
+
+    const search = async () =>
+    {
+        page.value = 1
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        data.value = result?.data?.items ?? []
+        data.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    return { columns, data, page, limit, total, searchPhrase, sortBy, sortDesc, selected, expandable, expandedTemplate, init, checkboxClick, pageChange, search }
+}
+
+export const useAddItemDialog = (_service = null, _title = '', _handleEnd = () => {}) =>
+{
+    const open = ref(false)
+    const name = ref('')
+    const error = ref('')
+    const title = ref(_title) 
+    const isLoading = ref(false)
+
+    const handleOK = async () =>
+    {
+        if(isLoading.value) return
+        isLoading.value = true
+        try
+        {
+            await _service.create(name.value)
+            name.value = ''
+            error.value = ''
+            open.value = false
+            _handleEnd()
+        }
+        catch (e)
+        {
+            error.value = e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'
+        }
+        finally
+        {
+            isLoading.value = false
         }
     }
+
+    return { open, name, error, title, isLoading, handleOK }
 }
 
-export class MyLoaderState
+export const useEditItemDialog = (_service = null, _title = '', _handleEnd = () => {}, _item = (() => null)) =>
 {
-    constructor()
+    const open = ref(false)
+    
+    const error = ref('')
+    const title = ref(_title) 
+    const isLoading = ref(false)
+    const item = computed(() => unref(typeof _item === 'function' ? _item() : _item))
+    const name = ref(item.value?.name || '')
+    // watch(item, value => { name.value = value?.name || '' }, { immediate: true })
+    
+    const handleOK = async () =>
     {
-        this.state = 0
-        this.error = ''
-        this.isLoading = true
+        if(isLoading.value) return
+        isLoading.value = true
+        try
+        {
+            await _service.edit(item.value.id, name.value)
+            name.value = ''
+            error.value = ''
+            open.value = false
+            _handleEnd()
+        }
+        catch (e)
+        {
+            console.dir(e)
+            error.value = e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'
+        }
+        finally
+        {
+            isLoading.value = false
+        }
     }
+
+    return { open, name, error, title, isLoading, handleOK, item }
 }
 
-export class MyTable
+export const useDeleteItemsDialog = (_service = null, _title = '', _handleEnd = () => {}, _items = (() => [])) =>
 {
-    constructor(cmd, sortBy, columns, formater = (e) => e)
+    const firstOpen = ref(false)
+    const secondOpen = ref(false)
+
+    const items = computed(() => unref(typeof _items === 'function' ? _items() : _items))
+    const isLoading = ref(false)
+
+    const title = ref(_title)
+    const counter = ref(0)
+    const errorCodes = ref([])
+    const succesCounter = ref(0)
+    const errorCounter = ref(0)
+    const handleEnd = _handleEnd
+
+    const handleDelete = async () =>
     {
-        this.data = 
+        succesCounter.value = 0
+        errorCounter.value = 0
+        errorCodes.value = []
+        if(isLoading.value) return
+        isLoading.value = true
+
+        try
         {
-            items: [],
-            total: 0,
-            page: 1,
-            limit: 100,
-            search: '',
-            sortBy: sortBy,
-            sortDesc: false
+            for(const item of items.value)
+            {
+                try
+                {
+                    await _service.delete(item.id)
+                    counter.value++ 
+                    succesCounter.value++
+                    errorCodes.value.push([item.name, 'ITEM_DELETE_SUCCESS'])
+                }
+                catch (e)
+                {
+
+                    errorCodes.value.push([item.name, e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'])
+                    errorCounter.value++
+                }
+            }
         }
-        this.columns = columns
-        this.formater = formater
-        this.cmd = cmd
-        this.extend = false
-        this.selectedCount = 0
-    }
-
-    async init()
-    {
-        const data = (await this.cmd(this.data.page, this.data.limit, this.data.search, this.data.sortBy, this.data.sortDesc))
-        this.data.total = data.data.total
-        this.data.items = data.data?.items.filter((item) => this.formater(item))
-    }
-
-        async nextPage(index)
-    {
-        const totalItems = this.data.total || this.data.items.length || 0
-        const totalPages = Math.max(1, Math.ceil(totalItems / this.data.limit))
-
-        if (Number.isInteger(index) && index > 0)
+        catch (e)
         {
-            this.data.page = Math.min(index, totalPages)
-            await this.search()
-            return
+            errorCodes.value.push(['Unknown item', e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'])
         }
-
-        if (this.data.page >= totalPages)
+        finally
         {
-            return
+            isLoading.value = false
+
+            firstOpen.value = false
+            secondOpen.value = true
         }
-
-        this.data.page += 1
-
-        await this.search()
     }
 
-    async search()
-    {
-        const response = await this.cmd(this.data.page, this.data.limit, this.data.search, this.data.sortBy, this.data.sortDesc)
-        const items = response?.data?.items ?? []
-        this.data.total = Number(response?.data?.total ?? items.length ?? 0)
-        this.data.items = items.filter((item) => this.formater(item))
-    }
+    return { firstOpen, secondOpen, items, isLoading, handleDelete, title, counter, errorCodes, succesCounter, errorCounter, handleEnd }
 }
 
-export const dateUTCtoDestination = (dateStr, zone = 'Europe/Warsaw', locale = 'en') =>
+export const useRepositoryModelDialog = (_title = '') =>
 {
-    return DateTime.fromISO(dateStr).setZone(zone).setLocale(locale).toLocaleString({...DateTime.DATETIME_MED_WITH_SECONDS, hour12: false})
+    const open = ref(false)
+    const title = ref(_title)
+    const repository = useRepository()
+
+    const init = () => { repository.init() }
+
+    return { open, title, repository, init }
 }
 
-
-
-
-
-
-
-
+export const addToast = (message, duration = 3000, closable = true, size = 'm', type = 'info') =>
+{
+    const toastContainer = document.querySelector('.toast-container-content')
+    if (toastContainer)
+    {
+        toastContainer.appendChild(OnyksToastContainer.addToast(message, duration, closable, size, type))
+    }
+}
 
 
 

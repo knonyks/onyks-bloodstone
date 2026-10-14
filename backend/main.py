@@ -45,6 +45,8 @@ async def startup_db():
         print(f"❌❌❌ DB Startup Failed: {e}")
         raise e
 
+##################################################################################################################################
+
 # REPOSITORY
 @app.get('/repository/info')
 async def get_repository_info():
@@ -74,10 +76,11 @@ async def get_repository_statistics():
         pcblib_count = int(r.get('pcblib_count') or 0)
         footprints_count = int(r.get('footprints_count') or 0)
         symbols_count = int(r.get('symbols_count') or 0)
-
         return {"schlib_count": schlib_count, "pcblib_count": pcblib_count, 'footprints_count': footprints_count, 'symbols_count':symbols_count}
     except redis.exceptions.ConnectionError as e:
         return {"error": "Failed to connect to Redis: " + str(e)}
+
+##################################################################################################################################
 
 # ELEMENTS
 @app.get('/elements/count')
@@ -97,10 +100,15 @@ async def get_elements_last_added(db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="The database is empty!"
+            detail={
+                "error_code": "ELEMENT_NOT_FOUND",
+                "message": "No elements found in the database."
+            }
         )
         
     return item
+
+##################################################################################################################################
 
 # TABLES
 @app.get('/tables/count')
@@ -146,7 +154,10 @@ async def get_tables_list(
     if sort_column is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported sortBy value: {sortBy}"
+            detail={
+                "error_code": "UNSUPPORTED_SORT_BY",
+                "message": f"Unsupported sortBy value: {sortBy}"
+            }
         )
 
     queryEntries = select(models.Table)
@@ -174,12 +185,28 @@ async def delete_tables(id: int, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "TABLE_NOT_FOUND",
+                "message": "ID doesn't exist!"
+            }
+        )
+
+    elements_query = select(func.count()).select_from(models.Element).where(
+        models.Element.table == item.name
+    )
+    elements_result = await db.execute(elements_query)
+    if elements_result.scalar() > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "TABLE_NOT_EMPTY",
+                "message": "Table cannot be deleted because it is not empty."
+            }
         )
     
     await db.delete(item)
     await db.commit()
-    await MyDatabase.updateElementsViews(db)
+    # await MyDatabase.updateElementsViews(db)
     
     return id
 
@@ -190,13 +217,16 @@ async def post_tables(table: schemas.TableBase, db = Depends(get_db)):
     try:
         await db.commit()
         await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
+        # await MyDatabase.updateElementsViews(db)
         return item
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid data or a supplier with this name already exists."
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or a supplier with this name already exists."
+            }
         )
 
 @app.get('/tables/{id}')
@@ -208,7 +238,10 @@ async def get_tables(id: int, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "TABLE_NOT_FOUND",
+                "message": "ID doesn't exist!"
+            }
         )
     
     return item
@@ -222,7 +255,10 @@ async def patch_tables(id: int, table: schemas.TableBase, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "TABLE_NOT_FOUND",
+                "message": "ID doesn't exist!"
+            }
         )
     
     update_data = table.model_dump(exclude_unset=True)
@@ -234,11 +270,19 @@ async def patch_tables(id: int, table: schemas.TableBase, db = Depends(get_db)):
         db.add(item)
         await db.commit()
         await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
+        # await MyDatabase.updateElementsViews(db)
         return item
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data or a supplier with this name already exists.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or a supplier with this name already exists."
+            }
+        )
+
+##################################################################################################################################
 
 # MANUFACTURERS
 @app.get('/manufacturers/count')
@@ -284,7 +328,10 @@ async def get_manufacturers_list(
     if sort_column is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported sortBy value: {sortBy}"
+            detail={
+                "error_code": "UNSUPPORTED_SORT_BY",
+                "message": f"Unsupported sortBy value: {sortBy}"
+            }
         )
 
     queryEntries = select(models.Manufacturer)
@@ -312,12 +359,15 @@ async def delete_manufacturers(id: int, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "MANUFACTURER_NOT_FOUND",
+                "message": "ID doesn't exist!"
+            }
         )
     
     await db.delete(item)
     await db.commit()
-    await MyDatabase.updateElementsViews(db)
+    # await MyDatabase.updateElementsViews(db)
     
     return id
 
@@ -328,13 +378,16 @@ async def post_manufacturers(manufacturer: schemas.ManufacturerBase, db = Depend
     try:
         await db.commit()
         await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
+        # await MyDatabase.updateElementsViews(db)
         return item
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid data or a supplier with this name already exists."
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or a supplier with this name already exists."
+            }
         )
 
 @app.get('/manufacturers/{id}')
@@ -346,7 +399,10 @@ async def get_manufacturers(id: int, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "MANUFACTURER_NOT_FOUND",
+                "message": "ID doesn't exist!"
+            }
         )
     
     return item
@@ -360,7 +416,10 @@ async def patch_manufacturers(id: int, manufacturer: schemas.ManufacturerBase, d
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "MANUFACTURER_NOT_FOUND",
+                "message": "ID doesn't exist!"
+            }
         )
     
     update_data = manufacturer.model_dump(exclude_unset=True)
@@ -372,11 +431,16 @@ async def patch_manufacturers(id: int, manufacturer: schemas.ManufacturerBase, d
         db.add(item)
         await db.commit()
         await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
+        # await MyDatabase.updateElementsViews(db)
         return item
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data or a supplier with this name already exists.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
+            "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+            "message": "Invalid data or an object with this name already exists."
+        })
+
+##################################################################################################################################
 
 # SUPPLIERS
 @app.get('/suppliers/count')
@@ -438,12 +502,15 @@ async def delete_suppliers(id: int, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "SUPPLIER_NOT_FOUND",
+                "message": "Supplier not found."
+            }
         )
     
     await db.delete(item)
     await db.commit()
-    await MyDatabase.updateElementsViews(db)
+    # await MyDatabase.updateElementsViews(db)
     
     return id
 
@@ -454,13 +521,16 @@ async def post_suppliers(supplier: schemas.SupplierBase, db = Depends(get_db)):
     try:
         await db.commit()
         await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
+        # await MyDatabase.updateElementsViews(db)
         return item
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid data or a supplier with this name already exists."
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or a supplier with this name already exists."
+            }
         )
 
 @app.get('/suppliers/{id}')
@@ -472,7 +542,10 @@ async def get_suppliers(id: int, db = Depends(get_db)):
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "SUPPLIER_NOT_FOUND",
+                "message": "Supplier not found."
+            }
         )
     
     return item
@@ -486,7 +559,10 @@ async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(
     if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
+            detail={
+                "error_code": "SUPPLIER_NOT_FOUND",
+                "message": "Supplier not found."
+            }
         )
     
     update_data = supplier.model_dump(exclude_unset=True)
@@ -498,11 +574,148 @@ async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(
         db.add(item)
         await db.commit()
         await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
+        # await MyDatabase.updateElementsViews(db)
         return item
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data or a supplier with this name already exists.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or a supplier with this name already exists."
+            }
+        )
+
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # USERS
 @app.get("/users", response_model = schemas.PageResponse[schemas.UserFull])
@@ -576,12 +789,6 @@ async def delete_users(id: int, db = Depends(get_db)):
     await MyDatabase.updateElementsViews(db)
 
     return id
-
-
-
-
-
-
 
 @app.post('/users')
 async def post_users(user: schemas.UserBase, db = Depends(get_db)):

@@ -1,18 +1,19 @@
 <script setup lang="js">
     import RepositoryExplorer from '@/components/RepositoryExplorer.vue';
-    import { onMounted, ref } from 'vue';
+    import { onMounted, ref, reactive } from 'vue';
     import ManagerPage from '@/components/ManagerPage.vue';
-    import { MyRepository } from '@/utils/tools';
     import { useLoaderStore } from '@/stores/loader';
+    import { useRepository } from '@/utils/tools';
 
     const loaderStore = useLoaderStore()
-    const repository = ref(new MyRepository((e) => e.type === 'dir' || e.type === 'schlib' || e.type === 'pcblib' || e.type === 'footprint' || e.type === 'symbol'))
+    const repository = reactive(useRepository())
+    
 
     onMounted(async () =>
     {
         try 
         {
-            await repository.value.init()
+            await repository.init()
             loaderStore.hide()
             loaderStore.globalHide()
         } 
