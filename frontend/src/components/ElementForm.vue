@@ -13,6 +13,33 @@
     const props = defineProps(['schema'])
     const element = defineModel('element');
 
+    const selectors = reactive(
+    {
+        manufacturer: useValueSelector(services.manufacturers, (value) => 
+        { 
+            if(value.selected)
+            {
+                element.value.manufacturer = value.value.name
+            }
+            else
+            {
+                element.value.manufacturer = ''
+            }
+        }),
+        tables: useValueSelector(services.tables, (value) => 
+        { 
+            if(value.selected)
+            {
+                element.value.table = value.value.name
+            }
+            else
+            {
+                element.value.table = ''
+            }
+        }),
+        suppliers: useSupplierSelector(services.suppliers)
+    })
+
     const dialogs = reactive(
     {
         symbol: useRepositoryModelDialog('Select Symbol', (item) => item.type == 'schlib' || item.type == 'dir' || item.type == 'symbol', () => 
@@ -69,32 +96,6 @@
         }, () => { dialogs.footprintNo3.open = false; element.value.footprintPathNo3 = ''; element.value.footprintReferenceNo3 = ''; })
     })
 
-    const selectors = reactive(
-    {
-        manufacturer: useValueSelector(services.manufacturers, (value) => 
-        { 
-            if(value.selected)
-            {
-                element.value.manufacturer = value.value.name
-            }
-            else
-            {
-                element.value.manufacturer = ''
-            }
-        }),
-        tables: useValueSelector(services.tables, (value) => 
-        { 
-            if(value.selected)
-            {
-                element.value.table = value.value.name
-            }
-            else
-            {
-                element.value.table = ''
-            }
-        }),
-        suppliers: useSupplierSelector(services.suppliers)
-    })
 
     onMounted(async () => 
     {
@@ -111,15 +112,13 @@
 <template>
     <onyks-container gap="m">
         <onyks-header level="4">Basic information</onyks-header>
+
         <onyks-container type="grid" cols="2" mobile-breakpoint="900" gap="m">
             
             <onyks-container gap="m">
 
-                <onyks-header level="6" v-if="props.schema == 'details' || props.schema == 'edit'">UUID</onyks-header>
-                <onyks-textfield v-model="element.uuid" v-if="props.schema == 'details' || props.schema == 'edit'" disabled></onyks-textfield>
-
                 <onyks-header level="6">Part Name</onyks-header>
-                <onyks-textfield v-model="element.partName" :disabled="props.schema == 'details'"></onyks-textfield>
+                <onyks-textfield v-model="element.partName"></onyks-textfield>
 
                 <onyks-header level="6">Manufacturer</onyks-header>
                 <ValueSelector v-model="selectors.manufacturer" v-model:value="element.manufacturer"></ValueSelector>
@@ -140,9 +139,10 @@
                 <ValueSelector v-model="selectors.tables" v-model:value="element.table"></ValueSelector>
 
             </onyks-container>
+
         </onyks-container>
         <onyks-header level="6">Description</onyks-header>
-        <onyks-textarea v-model="element.description" :disabled="props.schema == 'details'" size="m" placeholder="" resize="none"></onyks-textarea>
+        <onyks-textarea v-model="element.description" size="m" placeholder="" resize="none"></onyks-textarea>
 
         <onyks-header level="4">Symbol & Footprints</onyks-header>
 
@@ -182,28 +182,19 @@
                     <onyks-button background="red" @click="element.footprintPathNo3 = ''; element.footprintReferenceNo3 = ''">Reset</onyks-button>
                 </onyks-container>  
             </onyks-container>
-
-                <RepositoryModelDialog v-model="dialogs.symbol"></RepositoryModelDialog>
-                <RepositoryModelDialog v-model="dialogs.footprintNo1"></RepositoryModelDialog>
-                <RepositoryModelDialog v-model="dialogs.footprintNo2"></RepositoryModelDialog>
-                <RepositoryModelDialog v-model="dialogs.footprintNo3"></RepositoryModelDialog>
+            
+            <RepositoryModelDialog v-model="dialogs.symbol"></RepositoryModelDialog>
+            <RepositoryModelDialog v-model="dialogs.footprintNo1"></RepositoryModelDialog>
+            <RepositoryModelDialog v-model="dialogs.footprintNo2"></RepositoryModelDialog>
+            <RepositoryModelDialog v-model="dialogs.footprintNo3"></RepositoryModelDialog>
         </onyks-container>
+        <onyks-header level="6">Suppliers</onyks-header>
+
+        <SupplierSelector v-model="selectors.suppliers" v-model:value="element.suppliers"></SupplierSelector>
+
     </onyks-container>
-    <onyks-header level="4">Suppliers</onyks-header>
-
-    <SupplierSelector v-model="selectors.suppliers" v-model:value="element.suppliers"></SupplierSelector>
-
-    <onyks-header level="4">Datasheets</onyks-header>
-
-    <CreateElementFiles></CreateElementFiles>
-
-    <onyks-header level="4">Tags</onyks-header>
 </template>
 
 <style>
-    onyks-textarea 
-    {
-        width: 100%;
-        height: 300px;
-    }
+
 </style>

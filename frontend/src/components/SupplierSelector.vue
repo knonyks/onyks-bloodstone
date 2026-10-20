@@ -2,7 +2,18 @@
     import BasicSearch from './BasicSearch.vue';
 
     const model = defineModel()
-    const value = defineModel('value')
+    const value = defineModel('value', {
+        type: Object,
+        default: () => ({})
+    })
+
+    function updateValue(id, event) {
+        const nextValue = event.detail?.value ?? event.target?.value ?? event.detail ?? ''
+        value.value = {
+            ...value.value,
+            [String(id)]: nextValue
+        }
+    }
 </script>
 
 <template>
@@ -12,7 +23,7 @@
             
             <onyks-container gap="m">
                 <onyks-text>{{ item.name }}</onyks-text>
-                <onyks-textfield v-model="value[String(item.id)]" style="position: relative; z-index: 10; pointer-events: auto;"></onyks-textfield>
+                <onyks-textfield :value="value[String(item.id)] ?? ''" @input="updateValue(item.id, $event)" style="position: relative; z-index: 10; pointer-events: auto;"></onyks-textfield>
             </onyks-container>
 
         </onyks-select-option>
@@ -25,11 +36,5 @@
     {
         height: 300px;
         width: 100%;
-    }
-
-    onyks-select
-    {
-        width: 100%;
-        height: 400px;
     }
 </style>

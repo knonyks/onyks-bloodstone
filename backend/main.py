@@ -40,12 +40,12 @@ async def startup_db():
         async with engine.begin() as conn:
             await conn.execute(text("CREATE SCHEMA IF NOT EXISTS private;"))
             await conn.run_sync(models.Base.metadata.create_all)
-            await MyDatabase.updateElementsViews(conn)
+            # await MyDatabase.updateElementsViews(conn)
     except Exception as e:
         print(f"❌❌❌ DB Startup Failed: {e}")
         raise e
 
-##################################################################################################################################
+########################################
 
 # REPOSITORY
 @app.get('/repository/info')
@@ -80,7 +80,7 @@ async def get_repository_statistics():
     except redis.exceptions.ConnectionError as e:
         return {"error": "Failed to connect to Redis: " + str(e)}
 
-##################################################################################################################################
+########################################
 
 # ELEMENTS
 @app.get('/elements/count')
@@ -108,7 +108,7 @@ async def get_elements_last_added(db = Depends(get_db)):
         
     return item
 
-##################################################################################################################################
+########################################
 
 # TABLES
 @app.get('/tables/count')
@@ -282,7 +282,7 @@ async def patch_tables(id: int, table: schemas.TableBase, db = Depends(get_db)):
             }
         )
 
-##################################################################################################################################
+########################################
 
 # MANUFACTURERS
 @app.get('/manufacturers/count')
@@ -440,7 +440,7 @@ async def patch_manufacturers(id: int, manufacturer: schemas.ManufacturerBase, d
             "message": "Invalid data or an object with this name already exists."
         })
 
-##################################################################################################################################
+########################################
 
 # SUPPLIERS
 @app.get('/suppliers/count')
@@ -586,6 +586,70 @@ async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(
             }
         )
 
+########################################
+
+# SERVER
+@app.get('/server/info')
+async def get_server_info():
+    return {'name': 'ONYKS Bloodstone', 'version': 'v0.2.0-alpha'}
+
+########################################
+
+# ELEMENTS
+@app.post("/element/create")
+async def create_element(element: schemas.ElementBase, db = Depends(get_db)):
+    new_element = models.Element(**element.model_dump())
+    db.add(new_element)
+    await db.commit()
+    await db.refresh(new_element)
+    return new_element
+
+@app.get("/elements", response_model = schemas.PageResponse[schemas.ElementFull])
+async def get_elements_list(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    search: str | None = Query(None),
+    sortBy: str = Query("id"),
+    sortDesc: bool = Query(False),
+    db = Depends(get_db)
+):
+    element_model = models.Element
+    limit = max(1, min(limit, 100))
+    skip = (page - 1) * limit
+
+    sort_column = getattr(element_model, sortBy, None)
+    if sort_column is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported sortBy value: {sortBy}"
+        )
+
+    if sortDesc:
+        sort_column = sort_column.desc()
+
+    query = select(element_model)
+    if search:
+        query = query.where(element_model.partName.ilike(f"%{search}%"))
+    query = query.order_by(sort_column).offset(skip).limit(limit)
+
+    result = await db.execute(query)
+    items = result.scalars().all()
+
+    total_query = select(func.count()).select_from(element_model)
+    if search:
+        total_query = total_query.where(element_model.partName.ilike(f"%{search}%"))
+    total_result = await db.execute(total_query)
+    total = total_result.scalar_one()
+
+    return schemas.PageResponse(
+        items=items,
+        total=total,
+        page=page,
+        limit=limit
+    )
+
+
+
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
@@ -718,141 +782,138 @@ async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(
 
 
 # USERS
-@app.get("/users", response_model = schemas.PageResponse[schemas.UserFull])
-async def get_users_list(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    search: str | None = Query(None),
-    sortBy: str = Query("id"),
-    sortDesc: bool = Query(False),
-    db = Depends(get_db)
-):
-    user_model = models.User
-    limit = max(1, min(limit, 100))
-    skip = (page - 1) * limit
+# @app.get("/users", response_model = schemas.PageResponse[schemas.UserFull])
+# async def get_users_list(
+#     page: int = Query(1, ge=1),
+#     limit: int = Query(10, ge=1, le=100),
+#     search: str | None = Query(None),
+#     sortBy: str = Query("id"),
+#     sortDesc: bool = Query(False),
+#     db = Depends(get_db)
+# ):
+#     user_model = models.User
+#     limit = max(1, min(limit, 100))
+#     skip = (page - 1) * limit
 
-    sort_column = getattr(user_model, sortBy, None)
-    if sort_column is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported sortBy value: {sortBy}"
-        )
+#     sort_column = getattr(user_model, sortBy, None)
+#     if sort_column is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=f"Unsupported sortBy value: {sortBy}"
+#         )
 
-    count_query = select(func.count()).select_from(user_model)
-    query_entries = select(user_model)
-    if search:
-        search_term = f"%{search.strip()}%"
-        search_filters = [
-            column.ilike(search_term)
-            for column in user_model.__table__.columns
-            if getattr(column.type, "python_type", None) is str
-        ]
-        if search_filters:
-            from sqlalchemy import or_
-            search_filter = or_(*search_filters)
-            count_query = count_query.where(search_filter)
-            query_entries = query_entries.where(search_filter)
+#     count_query = select(func.count()).select_from(user_model)
+#     query_entries = select(user_model)
+#     if search:
+#         search_term = f"%{search.strip()}%"
+#         search_filters = [
+#             column.ilike(search_term)
+#             for column in user_model.__table__.columns
+#             if getattr(column.type, "python_type", None) is str
+#         ]
+#         if search_filters:
+#             from sqlalchemy import or_
+#             search_filter = or_(*search_filters)
+#             count_query = count_query.where(search_filter)
+#             query_entries = query_entries.where(search_filter)
 
-    count_result = await db.execute(count_query)
-    total_count = count_result.scalar() or 0
+#     count_result = await db.execute(count_query)
+#     total_count = count_result.scalar() or 0
 
-    query_entries = (
-        query_entries
-        .order_by(sort_column.desc() if sortDesc else sort_column.asc())
-        .offset(skip)
-        .limit(limit)
-    )
-    entries_result = await db.execute(query_entries)
-    entries = entries_result.scalars().all()
+#     query_entries = (
+#         query_entries
+#         .order_by(sort_column.desc() if sortDesc else sort_column.asc())
+#         .offset(skip)
+#         .limit(limit)
+#     )
+#     entries_result = await db.execute(query_entries)
+#     entries = entries_result.scalars().all()
 
-    return schemas.PageResponse(
-        items=entries,
-        total=total_count,
-        page=page,
-        limit=limit
-    )
+#     return schemas.PageResponse(
+#         items=entries,
+#         total=total_count,
+#         page=page,
+#         limit=limit
+#     )
 
-@app.delete('/users/{id}')
-async def delete_users(id: int, db = Depends(get_db)):
-    query = select(models.User).where(models.User.id == id)
-    result = await db.execute(query)
-    item = result.scalar_one_or_none()
+# @app.delete('/users/{id}')
+# async def delete_users(id: int, db = Depends(get_db)):
+#     query = select(models.User).where(models.User.id == id)
+#     result = await db.execute(query)
+#     item = result.scalar_one_or_none()
 
-    if item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
-        )
+#     if item is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="ID doesn't exist!"
+#         )
 
-    await db.delete(item)
-    await db.commit()
-    await MyDatabase.updateElementsViews(db)
+#     await db.delete(item)
+#     await db.commit()
+#     await MyDatabase.updateElementsViews(db)
 
-    return id
+#     return id
 
-@app.post('/users')
-async def post_users(user: schemas.UserBase, db = Depends(get_db)):
-    item = models.User(**user.model_dump())
-    db.add(item)
-    try:
-        await db.commit()
-        await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
-        return item
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid data or a user with these details already exists."
-        )
+# @app.post('/users')
+# async def post_users(user: schemas.UserBase, db = Depends(get_db)):
+#     item = models.User(**user.model_dump())
+#     db.add(item)
+#     try:
+#         await db.commit()
+#         await db.refresh(item)
+#         await MyDatabase.updateElementsViews(db)
+#         return item
+#     except IntegrityError:
+#         await db.rollback()
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Invalid data or a user with these details already exists."
+#         )
 
-@app.get('/users/{id}')
-async def get_users(id: int, db = Depends(get_db)):
-    query = select(models.User).where(models.User.id == id)
-    result = await db.execute(query)
-    item = result.scalar_one_or_none()
+# @app.get('/users/{id}')
+# async def get_users(id: int, db = Depends(get_db)):
+#     query = select(models.User).where(models.User.id == id)
+#     result = await db.execute(query)
+#     item = result.scalar_one_or_none()
 
-    if item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
-        )
+#     if item is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="ID doesn't exist!"
+#         )
 
-    return item
+#     return item
 
-@app.patch('/users/{id}')
-async def patch_users(id: int, user: schemas.UserBase, db = Depends(get_db)):
-    query = select(models.User).where(models.User.id == id)
-    result = await db.execute(query)
-    item = result.scalar_one_or_none()
+# @app.patch('/users/{id}')
+# async def patch_users(id: int, user: schemas.UserBase, db = Depends(get_db)):
+#     query = select(models.User).where(models.User.id == id)
+#     result = await db.execute(query)
+#     item = result.scalar_one_or_none()
 
-    if item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ID doesn't exist!"
-        )
+#     if item is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="ID doesn't exist!"
+#         )
 
-    update_data = user.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(item, field, value)
+#     update_data = user.model_dump(exclude_unset=True)
+#     for field, value in update_data.items():
+#         setattr(item, field, value)
 
-    try:
-        db.add(item)
-        await db.commit()
-        await db.refresh(item)
-        await MyDatabase.updateElementsViews(db)
-        return item
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid data or a user with these details already exists."
-        )
+#     try:
+#         db.add(item)
+#         await db.commit()
+#         await db.refresh(item)
+#         await MyDatabase.updateElementsViews(db)
+#         return item
+#     except IntegrityError:
+#         await db.rollback()
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Invalid data or a user with these details already exists."
+#         )
 
-# SERVER
-@app.get('/server/info')
-async def get_server_info():
-    return {'name': 'ONYKS Bloodstone', 'version': 'v0.2.0-alpha'}
+
 
 
 # ELEMENT
@@ -986,60 +1047,60 @@ async def get_server_info():
 
 
 # do poprawy
-@app.get("/elements", response_model = schemas.PageResponse[schemas.ElementFull])
-async def elementList(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    search: str | None = Query(None),
-    sortBy: str = Query("createdAt"),
-    sortDesc: bool = Query(False),
-    db=Depends(get_db),
-):
-    limit = max(1, min(limit, 100))
-    skip = (page - 1) * limit
+# @app.get("/elements", response_model = schemas.PageResponse[schemas.ElementFull])
+# async def elementList(
+#     page: int = Query(1, ge=1),
+#     limit: int = Query(10, ge=1, le=100),
+#     search: str | None = Query(None),
+#     sortBy: str = Query("createdAt"),
+#     sortDesc: bool = Query(False),
+#     db=Depends(get_db),
+# ):
+#     limit = max(1, min(limit, 100))
+#     skip = (page - 1) * limit
 
-    sort_column = getattr(models.Element, sortBy, None)
-    if sort_column is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported sortBy value: {sortBy}",
-        )
+#     sort_column = getattr(models.Element, sortBy, None)
+#     if sort_column is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=f"Unsupported sortBy value: {sortBy}",
+#         )
 
-    count_query = select(func.count()).select_from(models.Element)
-    query_entries = select(models.Element)
-    if search:
-        from sqlalchemy import JSON, String, cast, or_
+#     count_query = select(func.count()).select_from(models.Element)
+#     query_entries = select(models.Element)
+#     if search:
+#         from sqlalchemy import JSON, String, cast, or_
 
-        search_term = f"%{search.strip()}%"
-        search_filters = []
-        for column in models.Element.__table__.columns:
-            try:
-                python_type = column.type.python_type
-            except (NotImplementedError, AttributeError):
-                python_type = None
-            if python_type is str:
-                search_filters.append(column.ilike(search_term))
-            elif python_type is uuid.UUID:
-                search_filters.append(cast(column, String).ilike(search_term))
-            elif isinstance(column.type, JSON):
-                search_filters.append(cast(column, String).ilike(search_term))
-        if search_filters:
-            search_filter = or_(*search_filters)
-            count_query = count_query.where(search_filter)
-            query_entries = query_entries.where(search_filter)
+#         search_term = f"%{search.strip()}%"
+#         search_filters = []
+#         for column in models.Element.__table__.columns:
+#             try:
+#                 python_type = column.type.python_type
+#             except (NotImplementedError, AttributeError):
+#                 python_type = None
+#             if python_type is str:
+#                 search_filters.append(column.ilike(search_term))
+#             elif python_type is uuid.UUID:
+#                 search_filters.append(cast(column, String).ilike(search_term))
+#             elif isinstance(column.type, JSON):
+#                 search_filters.append(cast(column, String).ilike(search_term))
+#         if search_filters:
+#             search_filter = or_(*search_filters)
+#             count_query = count_query.where(search_filter)
+#             query_entries = query_entries.where(search_filter)
 
-    count_result = await db.execute(count_query)
-    total_count = count_result.scalar() or 0
-    query_entries = (
-        query_entries
-        .order_by(sort_column.desc() if sortDesc else sort_column.asc())
-        .offset(skip)
-        .limit(limit)
-    )
-    entries_result = await db.execute(query_entries)
-    entries = entries_result.scalars().all()
+#     count_result = await db.execute(count_query)
+#     total_count = count_result.scalar() or 0
+#     query_entries = (
+#         query_entries
+#         .order_by(sort_column.desc() if sortDesc else sort_column.asc())
+#         .offset(skip)
+#         .limit(limit)
+#     )
+#     entries_result = await db.execute(query_entries)
+#     entries = entries_result.scalars().all()
 
-    return schemas.PageResponse(items=entries, total=total_count, page=page, limit=limit)
+#     return schemas.PageResponse(items=entries, total=total_count, page=page, limit=limit)
 
 # # do poprawy
 # @app.delete('/element/delete/{id}')

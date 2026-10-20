@@ -47,7 +47,7 @@ class Manufacturer(Base):
     __table_args__ = {'schema': 'private'}
 
     id:  Mapped[int] = mapped_column(primary_key=True)
-    name = Column('name', String, unique=True, index=True, nullable=False)
+    name = Column('name', String(256), unique=True, index=True, nullable=False)
     createdAt = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 class Supplier(Base):
@@ -55,7 +55,7 @@ class Supplier(Base):
     __table_args__ = {'schema': 'private'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name = Column('name', String, unique=True, index=True, nullable=False)
+    name = Column('name', String(256), unique=True, index=True, nullable=False)
     createdAt = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 class Table(Base):
@@ -63,7 +63,7 @@ class Table(Base):
     __table_args__ = {'schema': 'private'}
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name = Column('name', String, unique=True, nullable=False)
+    name = Column('name', String(256), unique=True, nullable=False)
     createdAt = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     elements = relationship(
         "Element",
@@ -77,10 +77,10 @@ class Element(Base):
     __table_args__ = {'schema': 'private'}
 
     uuid = Column('uuid', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    partName = Column("part_name", String(1024), nullable=False)
+    partName = Column("part_name", String(256), nullable=False)
 
     manufacturer = Column(
-        String(1024), 
+        String(256), 
         ForeignKey("private.manufacturers.name", ondelete="SET NULL", onupdate="CASCADE"), 
         nullable=True
     )
@@ -92,9 +92,14 @@ class Element(Base):
     )
 
     description = Column('description', String(1024), nullable=True, default='')
-    value = Column('value', String(1024), nullable=True, default='')
-    availability = Column('availability', String(1024), nullable=True, default='')
-    datasheet = Column(Boolean, nullable=False, default=False)
+
+
+
+
+
+    value = Column('value', String(256), nullable=True, default='')
+    availability = Column('availability', String(256), nullable=True, default='')
+
     
     libraryReference = Column('library_ref', String(1024), nullable=True, default='')
     libraryPath = Column('library_path', String(1024), nullable=True, default='')
@@ -109,9 +114,10 @@ class Element(Base):
     footprintPathNo3 = Column('footprint_path_3', String(1024), nullable=True, default='')
     
     suppliers = Column('suppliers', JSONB, default={})
+    datasheets = Column('datasheets', JSONB, default={})
 
     createdAt = Column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-
+    
     tableCategory = relationship(
         "Table",
         back_populates="elements"

@@ -12,7 +12,6 @@
     import DeleteItemsDialog from '@/components/DeleteItemsDialog.vue';
     import { addToast } from '@/utils/tools';
     import { html } from 'lit';
-    import ElementPath from '@/components/ElementPath.vue';
 
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
@@ -44,25 +43,27 @@
         { label: 'Part Name', key: 'partName' },
         { label: 'Manufacturer', key: 'manufacturer'},
         { label: 'Table', key: 'table'},
+        { label: 'Value', key: 'value' },
+        { label: 'Availability', key: 'availability' },
         { label: 'Created At', key: 'createdAt' }
     ], true, (row) => html`
 
-            <onyks-container type="grid" gap="m" justify="left" align="center" cols="2" style="grid-template-columns: 150px 500px;">
-                <onyks-header level="6" style="width: 100%; text-align: left;">UUID</onyks-header>
-                <onyks-text style="width: 100%; text-align: left;">${row?.uuid || ''}</onyks-text>
-
-                <onyks-header level="6" style="width: 100%; text-align: left;">Symbol</onyks-header>
-                <onyks-path style="width: 100%; text-align: left;" .content=${row.libraryPath.split('/').concat(row.libraryReference)} size="s" disabled></onyks-path>
-
-                <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 1</onyks-header>
-                <onyks-path style="width: 100%; text-align: left;" .content=${row.footprintPathNo1.split('/').concat(row.footprintReference1)} size="s" disabled></onyks-path>
-
-                <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 2</onyks-header>
-                <onyks-path style="width: 100%; text-align: left;" .content=${row.footprintPathNo2.split('/').concat(row.footprintReference2)} size="s" disabled></onyks-path>
-
-                <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 3</onyks-header>
-                <onyks-path style="width: 100%; text-align: left;" .content=${row.footprintPathNo3.split('/').concat(row.footprintReference3)} size="s" disabled></onyks-path>
-
+        <onyks-container type="grid" gap="m" justify="left" align="center" cols="2" style="grid-template-columns: 150px 500px;">
+            <onyks-header level="6" style="width: 100%; text-align: left;">UUID</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${row?.uuid || ''}</onyks-text>
+            <onyks-header level="6" style="width: 100%; text-align: left;">Description</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${row?.description || ''}</onyks-text>
+            <onyks-header level="6" style="width: 100%; text-align: left;">Symbol</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${(row?.libraryPath || '') + ' / ' + (row?.libraryReference || '')}</onyks-text>
+            <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 1</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo1 || '') + ' / ' + (row?.footprintReferenceNo1 || '')}</onyks-text>
+            <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 2</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo2 || '') + ' / ' + (row?.footprintReferenceNo2 || '')}</onyks-text>
+            <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 3</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo3 || '') + ' / ' + (row?.footprintReferenceNo3 || '')}</onyks-text>
+            <onyks-header level="6" style="width: 100%; text-align: left;">Suppliers</onyks-header>
+            <onyks-text style="width: 100%; text-align: left;">${Object.values(row?.suppliers || {}).join(', ')}</onyks-text>
+            
         </onyks-container>
         
     `))
@@ -128,27 +129,9 @@
         await suppliersTable.init()
         await manufacturersTable.init()
         await tablesTable.init()
+
+        elementsTable.sortBy = "createdAt"
         await elementsTable.init()
-
-        elementsTable.data = [
-            {
-                selected: false,
-                partName: 'Example Part', 
-                uuid: '123e4567-e89b-12d3-a456-426614174000',
-                manufacturer: 'Example Manufacturer',
-                table: 'Example Table',
-                createdAt: new Date(),
-
-                libraryReference: 'Example Library Reference',
-                libraryPath: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
-                footprintPathNo1: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
-                footprintReference1: 'Example Footprint Reference 1',
-                footprintPathNo2: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
-                footprintReference2: 'Example Footprint Reference 2',
-                footprintPathNo3: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
-                footprintReference3: 'Example Footprint Reference 3',
-                
-            }]
 
         loaderStore.hide()
         loaderStore.globalHide()

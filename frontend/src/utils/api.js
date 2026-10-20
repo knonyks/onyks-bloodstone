@@ -103,7 +103,7 @@ export const tables =
                 params: {
                     page: page,
                     limit: limit,
-                    search: search,
+                    search: search || undefined,
                     sortBy: sortBy,
                     sortDesc: sortDesc
                 }
@@ -369,67 +369,19 @@ export const elements =
             throw error
         }
     },
-    // create: async (element, datasheet = null) =>
-    // {
-    //     try 
-    //     {
-    //         const formData = new FormData();
-
-    //         formData.append('element', JSON.stringify(element));
-
-    //         if (datasheet)
-    //         {
-    //             formData.append('datasheet', datasheet);
-    //         }
-
-    //         const response = await api.post(`/element/create`, formData,
-    //         {
-    //             headers: {'Content-Type': 'multipart/form-data'} 
-    //         });
-    //         return response
-    //     } 
-    //     catch (error) 
-    //     {
-    //         return error
-    //     }
-    // },
-    // duplicate: async (id, element, datasheet = null) =>
-    // {
-    //     try 
-    //     {
-    //         const formData = new FormData();
-
-    //         formData.append('element', JSON.stringify(element));
-
-    //         if (datasheet)
-    //         {
-    //             formData.append('datasheet', datasheet);
-    //         }
-
-    //         const response = await api.post(`/element/duplicate/${id}`, formData,
-    //         {
-    //             headers: {'Content-Type': 'multipart/form-data'} 
-    //         });
-    //         return response
-    //     } 
-    //     catch (error) 
-    //     {
-    //         return error
-    //     }
-    // },
-    // get: async (id) =>
-    // {
-    //     try 
-    //     {
-    //         const response = await api.get(`/element/${id}`);
-    //         return response
-    //     } 
-    //     catch (error) 
-    //     {
-    //         return error
-    //     }
-    // },
-    list: async (page = 1, limit = 10, search = null, sortBy = "createdAt", sortDesc = false) =>
+    create: async (element) =>
+    {
+        try
+        {
+            const response = await api.post(`/element/create`, element);
+            return response;
+        }
+        catch (error)
+        {
+            throw error;
+        }
+    },
+    list: async (page = 1, limit = 100, search = null, sortBy = "uuid", sortDesc = false) =>
     {
         try 
         {

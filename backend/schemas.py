@@ -60,20 +60,27 @@ class TableFull(TableBase):
 # ELEMENTS
 class ElementBase(BaseModel):
     partName: NotEmptyString = Field(min_length=3, max_length=256)
-    manufacturer: NotEmptyString = Field(max_length=256)
-    table: NotEmptyString = Field(max_length=256)
-    description: NotEmptyString = Field(max_length=256)
-    availability: NotEmptyString = Field(max_length=256)
-    value: NotEmptyString = Field(max_length=256)
+    manufacturer: NotEmptyString = Field(default=None, max_length=256)
+    table: NotEmptyString = Field(default=None, max_length=256)
+    description: NotEmptyString = Field(default=None, max_length=1024)
+
+    value: NotEmptyString = Field(default=None, max_length=256)
+    availability: NotEmptyString = Field(default=None, max_length=256)
+    
+    libraryReference: NotEmptyString = Field(default=None, max_length=1024)
+    libraryPath: NotEmptyString = Field(default=None, max_length=1024)
+
+    footprintReferenceNo1: NotEmptyString = Field(default=None, max_length=1024)
+    footprintPathNo1: NotEmptyString = Field(default=None, max_length=1024)
+
+    footprintReferenceNo2: NotEmptyString = Field(default=None, max_length=1024)
+    footprintPathNo2: NotEmptyString = Field(default=None, max_length=1024)
+
+    footprintReferenceNo3: NotEmptyString = Field(default=None, max_length=1024)
+    footprintPathNo3: NotEmptyString = Field(default=None, max_length=1024)
+
     suppliers: dict = Field(default_factory=dict)
-    libraryReference: NotEmptyString = Field(max_length=1024)
-    libraryPath: NotEmptyString = Field(max_length=1024)
-    footprintReferenceNo1: NotEmptyString = Field(max_length=1024)
-    footprintPathNo1: NotEmptyString = Field(max_length=1024)
-    footprintReferenceNo2: NotEmptyString = Field(max_length=1024)
-    footprintPathNo2: NotEmptyString = Field(max_length=1024)
-    footprintReferenceNo3: NotEmptyString = Field(max_length=1024)
-    footprintPathNo3: NotEmptyString = Field(max_length=1024)
+    datasheets: dict = Field(default_factory=dict)
 
 class ElementFull(ElementBase):
     uuid: UUID

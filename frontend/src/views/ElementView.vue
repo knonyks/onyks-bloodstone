@@ -5,64 +5,44 @@
     import { useRoute } from 'vue-router';
     import { useRouter } from 'vue-router';
     import ElementForm from '@/components/ElementForm.vue';
-
-
-    
-
+    import { services } from '@/utils/api';
 
     const loaderStore = useLoaderStore();
     const route = useRoute();
     const router = useRouter();
     const schema = route.name === 'element-edit' ? 'edit' : route.name === 'element-duplicate' ? 'duplicate' : route.name === 'element-details' ? 'details' : 'create';
     
-    const element = reactive({
-        uuid: '2adf1234',
-        partName: 'Resistor 2k22 Ohm SMD',
-        value: '2k22 Ohm',
-        availability: 'In stock',
-        description: '2k22 Ohm SMD resistor',
-
-
-
-
-
-        manufacturer: 'test',
-        manufacturerId: 0,
-        table: '',
-        tableId: 0,
-
-        libraryReference: '',
-        libraryPath: '',
-
-        footprintReferenceNo1: '',
-        footprintPathNo1: '',
-
-        footprintReferenceNo2: '',
-        footprintPathNo2: '',
-
-        footprintReferenceNo3: '',
-        footprintPathNo3: '',
-
-        createdAt: '12:12:2023, 12:12:12',
-
-        suppliers: {
-            '62':'1111',
-            '2': '2222',
-            '232': '6666'
-        }
-    });
+    const element = reactive({});
 
     onMounted(async () =>
     {
         loaderStore.hide()
         loaderStore.globalHide()
     })
+
+
+    const btns = 
+    {
+        add:
+        {
+            action: async () =>
+            {
+                console.log(element)
+                console.log(await services.elements.create(element))
+            }
+        }
+    }
 </script>
 
 <template>
     <ManagerPage :title="schema === 'edit' ? 'Edit Element' : schema === 'duplicate' ? 'Duplicate Element' : schema === 'details' ? 'Element Details' : 'Create Element'">
         <onyks-button background="red" @click="router.back()">Back</onyks-button>
-        <ElementForm :schema="schema" v-model:element="element"></ElementForm> 
+        <ElementForm :schema="schema" v-model:element="element"></ElementForm>
+
+        <onyks-container align="end">
+            <onyks-button v-if="schema == 'create'" background="green" @click="btns.add.action()">Create</onyks-button>
+        </onyks-container>
+        
     </ManagerPage>
 </template>
 

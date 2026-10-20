@@ -1,6 +1,15 @@
 <script setup lang="js">
     import { computed } from 'vue';
-    const props = defineProps(['path', 'obj']);
+    const props = defineProps({
+        path: {
+            type: String,
+            default: ''
+        },
+        obj: {
+            type: String,
+            default: ''
+        }
+    });
 
     const convertedContent = computed(() => 
     {

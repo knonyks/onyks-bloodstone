@@ -15,9 +15,4 @@
 </template>
 
 <style>
-    onyks-select
-    {
-        height: 300px;
-        width: 100%;
-    }
 </style>
