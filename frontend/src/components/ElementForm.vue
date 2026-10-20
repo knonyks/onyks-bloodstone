@@ -117,11 +117,15 @@
             
             <onyks-container gap="m">
 
+                <onyks-header level="6" v-if="props.schema == 'details'">UUID</onyks-header>
+                <onyks-textfield v-if="props.schema == 'details'" v-model="element.uuid" :disabled="props.schema == 'details'"></onyks-textfield>
+
                 <onyks-header level="6">Part Name</onyks-header>
-                <onyks-textfield v-model="element.partName"></onyks-textfield>
+                <onyks-textfield v-model="element.partName" :disabled="props.schema == 'details'"></onyks-textfield>
 
                 <onyks-header level="6">Manufacturer</onyks-header>
-                <ValueSelector v-model="selectors.manufacturer" v-model:value="element.manufacturer"></ValueSelector>
+                <onyks-textfield v-if="props.schema == 'details'" v-model="element.manufacturer" :disabled="props.schema == 'details'"></onyks-textfield>
+                <ValueSelector v-if="props.schema != 'details'" v-model="selectors.manufacturer" v-model:value="element.manufacturer" :disabled="props.schema == 'details'"></ValueSelector>
 
                 <onyks-header level="6">Value</onyks-header>
                 <onyks-textfield v-model="element.value" :disabled="props.schema == 'details'"></onyks-textfield>
@@ -136,13 +140,14 @@
                 <onyks-textfield disabled v-model="element.createdAt" v-if="props.schema == 'details' || props.schema == 'edit'" :disabled="props.schema == 'details'"></onyks-textfield>
 
                 <onyks-header level="6">Table</onyks-header>
-                <ValueSelector v-model="selectors.tables" v-model:value="element.table"></ValueSelector>
+                <onyks-textfield v-if="props.schema == 'details'" v-model="element.table" :disabled="props.schema == 'details'"></onyks-textfield>
+                <ValueSelector v-if="props.schema != 'details'" v-model="selectors.tables" v-model:value="element.table" :disabled="props.schema == 'details'"></ValueSelector>
 
             </onyks-container>
 
         </onyks-container>
         <onyks-header level="6">Description</onyks-header>
-        <onyks-textarea v-model="element.description" size="m" placeholder="" resize="none"></onyks-textarea>
+        <onyks-textarea v-model="element.description" size="m" placeholder="" resize="none" :disabled="props.schema == 'details'"></onyks-textarea>
 
         <onyks-header level="4">Symbol & Footprints</onyks-header>
 
@@ -150,7 +155,7 @@
             <onyks-container gap="m" cols="1" type="grid">
                 <onyks-header level="6">Symbol</onyks-header>
                 <ElementPath class="element-path" v-model:path="element.libraryPath" v-model:obj="element.libraryReference"></ElementPath>
-                <onyks-container type="group" gap="m">
+                <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="blue" @click="dialogs.symbol.open = true">Select</onyks-button>
                     <onyks-button background="red" @click="element.libraryPath = ''; element.libraryReference = ''">Reset</onyks-button>
                 </onyks-container>
@@ -158,7 +163,7 @@
                 
                 <onyks-header level="6">Footprint No 2</onyks-header>
                 <ElementPath class="element-path" v-model:path="element.footprintPathNo2" v-model:obj="element.footprintReferenceNo2"></ElementPath>
-                <onyks-container type="group" gap="m">
+                <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="purple" @click="dialogs.footprintNo2.open = true">Select</onyks-button>
                     <onyks-button background="red" @click="element.footprintPathNo2 = ''; element.footprintReferenceNo2 = ''">Reset</onyks-button>
                 </onyks-container>
@@ -169,7 +174,7 @@
                 <onyks-header level="6">Footprint No 1</onyks-header>
                 <ElementPath class="element-path" v-model:path="element.footprintPathNo1" v-model:obj="element.footprintReferenceNo1"></ElementPath>
                 
-                <onyks-container type="group" gap="m">
+                <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="purple" @click="dialogs.footprintNo1.open = true">Select</onyks-button>
                     <onyks-button background="red" @click="element.footprintPathNo1 = ''; element.footprintReferenceNo1 = ''">Reset</onyks-button>
                 </onyks-container>
@@ -177,7 +182,7 @@
                 
                 <onyks-header level="6">Footprint No 3</onyks-header>
                 <ElementPath class="element-path" v-model:path="element.footprintPathNo3" v-model:obj="element.footprintReferenceNo3"></ElementPath>
-                <onyks-container type="group" gap="m">
+                <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="purple" @click="dialogs.footprintNo3.open = true">Select</onyks-button>
                     <onyks-button background="red" @click="element.footprintPathNo3 = ''; element.footprintReferenceNo3 = ''">Reset</onyks-button>
                 </onyks-container>  
@@ -190,7 +195,11 @@
         </onyks-container>
         <onyks-header level="6">Suppliers</onyks-header>
 
-        <SupplierSelector v-model="selectors.suppliers" v-model:value="element.suppliers"></SupplierSelector>
+        <onyks-container type="group" gap="m" v-if="props.schema == 'details'">
+            <onyks-text v-for="(value, key) in element.suppliers" :key="key">{{ key }}: {{ value }}</onyks-text>
+        </onyks-container>
+
+        <SupplierSelector v-model="selectors.suppliers" v-model:value="element.suppliers" v-else></SupplierSelector>
 
     </onyks-container>
 </template>

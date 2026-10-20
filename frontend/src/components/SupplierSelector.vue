@@ -11,7 +11,9 @@
         const nextValue = event.detail?.value ?? event.target?.value ?? event.detail ?? ''
         value.value = {
             ...value.value,
-            [String(id)]: nextValue
+            [String(id)]: {
+                value: nextValue
+            }
         }
     }
 </script>
@@ -23,7 +25,7 @@
             
             <onyks-container gap="m">
                 <onyks-text>{{ item.name }}</onyks-text>
-                <onyks-textfield :value="value[String(item.id)] ?? ''" @input="updateValue(item.id, $event)" style="position: relative; z-index: 10; pointer-events: auto;"></onyks-textfield>
+                <onyks-textfield :value="value?.[String(item.id)]?.['value'] ?? ''" @input="updateValue(item.id, $event)" style="position: relative; z-index: 10; pointer-events: auto;"></onyks-textfield>
             </onyks-container>
 
         </onyks-select-option>

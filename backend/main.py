@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, APIRouter, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 import models
 import schemas
 import utils
@@ -15,6 +15,8 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status, Path
 from sqlalchemy import select
 import uuid
+import uuid as uuid_module
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy import select, func
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.staticfiles import StaticFiles
@@ -79,34 +81,6 @@ async def get_repository_statistics():
         return {"schlib_count": schlib_count, "pcblib_count": pcblib_count, 'footprints_count': footprints_count, 'symbols_count':symbols_count}
     except redis.exceptions.ConnectionError as e:
         return {"error": "Failed to connect to Redis: " + str(e)}
-
-########################################
-
-# ELEMENTS
-@app.get('/elements/count')
-async def get_elements_count(db = Depends(get_db)):
-    query = select(func.count()).select_from(models.Element)
-    result = await db.execute(query)
-    totalCount = result.scalar()
-    return {'count': totalCount}
-
-@app.get('/elements/last-added')
-async def get_elements_last_added(db = Depends(get_db)):
-    query = (select(models.Element).order_by(models.Element.createdAt.desc()).limit(1))
-    result = await db.execute(query)
-    
-    item = result.scalar_one_or_none()
-    
-    if item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                "error_code": "ELEMENT_NOT_FOUND",
-                "message": "No elements found in the database."
-            }
-        )
-        
-    return item
 
 ########################################
 
@@ -533,6 +507,15 @@ async def post_suppliers(supplier: schemas.SupplierBase, db = Depends(get_db)):
             }
         )
 
+@app.post('/suppliers/by-ids')
+async def get_suppliers_by_ids(ids: list[int], db = Depends(get_db)):
+    result = await db.execute(
+        select(models.Supplier).where(models.Supplier.id.in_(ids))
+    )
+    suppliers = result.scalars().all()
+    suppliers_by_id = {supplier.id: supplier for supplier in suppliers}
+    return [suppliers_by_id[supplier_id] for supplier_id in ids if supplier_id in suppliers_by_id]
+
 @app.get('/suppliers/{id}')
 async def get_suppliers(id: int, db = Depends(get_db)):
     query = select(models.Supplier).where(models.Supplier.id == id)
@@ -596,15 +579,66 @@ async def get_server_info():
 ########################################
 
 # ELEMENTS
-@app.post("/element/create")
-async def create_element(element: schemas.ElementBase, db = Depends(get_db)):
-    new_element = models.Element(**element.model_dump())
-    db.add(new_element)
-    await db.commit()
-    await db.refresh(new_element)
-    return new_element
+@app.get('/elements/count')
+async def get_elements_count(db = Depends(get_db)):
+    query = select(func.count()).select_from(models.Element)
+    result = await db.execute(query)
+    totalCount = result.scalar()
+    return {'count': totalCount}
 
-@app.get("/elements", response_model = schemas.PageResponse[schemas.ElementFull])
+@app.get('/elements/last-added')
+async def get_elements_last_added(db = Depends(get_db)):
+    query = (select(models.Element).order_by(models.Element.createdAt.desc()).limit(1))
+    result = await db.execute(query)
+    
+    item = result.scalar_one_or_none()
+    
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error_code": "ELEMENT_NOT_FOUND",
+                "message": "No elements found in the database."
+            }
+        )
+        
+    return item
+
+@app.post("/element/create")
+async def create_element(element: dict, db = Depends(get_db)):
+    data = dict(element)
+    suppliers = data.pop("suppliers", None) or {}
+    allowed = {a.key for a in sa_inspect(models.Element).column_attrs} - {"uuid", "createdAt"}
+    data = {k: v for k, v in data.items() if k in allowed}
+    try:
+        item = models.Element(**data)
+        item.suppliers = [
+            models.ElementSupplier(supplierId=int(sid), value=(sdata or {}).get("value", ""))
+            for sid, sdata in suppliers.items()
+        ]
+        db.add(item)
+        await db.commit()
+        await db.refresh(item)
+        return _serialize_element(item)
+    except (IntegrityError, ValueError, TypeError, AttributeError):
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "INVALID_DATA",
+                "message": "Invalid element data."
+            }
+        )
+
+def _serialize_element(item):
+    out = {a.key: getattr(item, a.key) for a in sa_inspect(models.Element).column_attrs}
+    out["suppliers"] = {
+        str(es.supplierId): {"value": es.value, "name": es.suppliers.name}
+        for es in item.suppliers
+    }
+    return out
+
+@app.get("/elements")
 async def get_elements_list(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
@@ -613,41 +647,54 @@ async def get_elements_list(
     sortDesc: bool = Query(False),
     db = Depends(get_db)
 ):
-    element_model = models.Element
-    limit = max(1, min(limit, 100))
     skip = (page - 1) * limit
+    keys = {a.key for a in sa_inspect(models.Element).column_attrs}
+    sort_key = sortBy if sortBy in keys else "createdAt"
+    sort_column = getattr(models.Element, sort_key)
 
-    sort_column = getattr(element_model, sortBy, None)
-    if sort_column is None:
+    query = select(models.Element)
+    countQuery = select(func.count()).select_from(models.Element)
+    if search:
+        cond = models.Element.partName.ilike(f"%{search.strip()}%")
+        query = query.where(cond)
+        countQuery = countQuery.where(cond)
+
+    totalCount = (await db.execute(countQuery)).scalar() or 0
+    query = (
+        query
+        .order_by(sort_column.desc() if sortDesc else sort_column.asc())
+        .offset(skip)
+        .limit(limit)
+    )
+    entries = (await db.execute(query)).scalars().all()
+
+    return {
+        "items": [_serialize_element(e) for e in entries],
+        "total": totalCount,
+        "page": page,
+        "limit": limit,
+    }
+
+
+@app.get('/elements/{uuid}')
+async def get_element(uuid: str, db = Depends(get_db)):
+    try:
+        element_uuid = uuid_module.UUID(uuid)
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported sortBy value: {sortBy}"
+            detail={"error_code": "INVALID_UUID", "message": "Invalid UUID."}
         )
-
-    if sortDesc:
-        sort_column = sort_column.desc()
-
-    query = select(element_model)
-    if search:
-        query = query.where(element_model.partName.ilike(f"%{search}%"))
-    query = query.order_by(sort_column).offset(skip).limit(limit)
-
-    result = await db.execute(query)
-    items = result.scalars().all()
-
-    total_query = select(func.count()).select_from(element_model)
-    if search:
-        total_query = total_query.where(element_model.partName.ilike(f"%{search}%"))
-    total_result = await db.execute(total_query)
-    total = total_result.scalar_one()
-
-    return schemas.PageResponse(
-        items=items,
-        total=total,
-        page=page,
-        limit=limit
+    result = await db.execute(
+        select(models.Element).where(models.Element.uuid == element_uuid)
     )
-
+    item = result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "ELEMENT_NOT_FOUND", "message": "Element not found."}
+        )
+    return _serialize_element(item)
 
 
 ##################################################################################################################################

@@ -16,6 +16,7 @@
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
 
+    window.x = services.elements
     // tables
     const suppliersTable = reactive(useBasicTable(services.suppliers, [
         { label: 'Selected', key: 'selected' },
@@ -62,7 +63,7 @@
             <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 3</onyks-header>
             <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo3 || '') + ' / ' + (row?.footprintReferenceNo3 || '')}</onyks-text>
             <onyks-header level="6" style="width: 100%; text-align: left;">Suppliers</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${Object.values(row?.suppliers || {}).join(', ')}</onyks-text>
+            <onyks-text style="width: 100%; text-align: left;">${JSON.stringify(row?.suppliers || {})}</onyks-text>
             
         </onyks-container>
         

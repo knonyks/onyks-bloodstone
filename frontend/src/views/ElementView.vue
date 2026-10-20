@@ -16,6 +16,11 @@
 
     onMounted(async () =>
     {
+        if(schema == 'edit' || schema == 'duplicate' || schema == 'details')
+        {
+            let result = await services.elements.get(route.params.uuid);
+            Object.assign(element, result.data || {});
+        }
         loaderStore.hide()
         loaderStore.globalHide()
     })

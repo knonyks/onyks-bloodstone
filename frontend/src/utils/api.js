@@ -1,3 +1,4 @@
+import { get } from '@vueuse/core';
 import axios from 'axios';
 
 const api = axios.create(
@@ -401,6 +402,18 @@ export const elements =
             return error
         }
     },
+    get: async (uuid) =>
+    {
+        try 
+        {
+            const response = await api.get(`/elements/${uuid}`);
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    }
     // edit: async (id, element, datasheet = null) =>
     // {
     //     try 

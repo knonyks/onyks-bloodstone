@@ -79,12 +79,13 @@ class ElementBase(BaseModel):
     footprintReferenceNo3: NotEmptyString = Field(default=None, max_length=1024)
     footprintPathNo3: NotEmptyString = Field(default=None, max_length=1024)
 
+class ElementInsert(ElementBase):
     suppliers: dict = Field(default_factory=dict)
-    datasheets: dict = Field(default_factory=dict)
 
-class ElementFull(ElementBase):
+class ElementOutput(ElementBase):
     uuid: UUID
     createdAt: datetime
+    suppliers: dict = Field(default_factory=dict)
 
 # USERS
 class UserRank(str, Enum):

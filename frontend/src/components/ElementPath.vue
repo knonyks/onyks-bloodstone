@@ -8,6 +8,10 @@
         obj: {
             type: String,
             default: ''
+        },
+        disabled: {
+            type: Boolean,
+            default: true
         }
     });
 
@@ -25,7 +29,7 @@
 </script>
 
 <template>
-    <onyks-path :content="convertedContent" disabled></onyks-path>
+    <onyks-path :content="convertedContent" :disabled="props.disabled"></onyks-path>
 </template>
 
 <style scoped>
