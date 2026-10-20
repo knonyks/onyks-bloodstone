@@ -85,15 +85,11 @@ class Element(Base):
         nullable=True
     )
 
-    manufacturer_id = Column('manufacturer_id', Integer, ForeignKey("private.manufacturers.id", ondelete="SET NULL", onupdate="CASCADE"), nullable=True)
-
     table = Column('table',
         String(1024), 
         ForeignKey("private.tables.name", ondelete="CASCADE", onupdate="CASCADE"), 
         nullable=False
     )
-
-    table_id = Column('table_id', Integer, ForeignKey("private.tables.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
 
     description = Column('description', String(1024), nullable=True, default='')
     value = Column('value', String(1024), nullable=True, default='')
@@ -118,7 +114,6 @@ class Element(Base):
 
     tableCategory = relationship(
         "Table",
-        back_populates="elements",
-        foreign_keys=[table],
+        back_populates="elements"
     )
-    manufacturerRel = relationship("Manufacturer", foreign_keys=[manufacturer])
+    manufacturerRel = relationship("Manufacturer")

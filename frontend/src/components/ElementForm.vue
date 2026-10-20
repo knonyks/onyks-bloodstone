@@ -1,10 +1,14 @@
 <script setup lang="js">
     import ElementPath from './ElementPath.vue';
+    import ValueSelector from './ValueSelector.vue';
     import { reactive } from 'vue';
     import { onMounted } from 'vue';
-    import { useRepositoryModelDialog } from '../utils/tools';
+    import { useRepositoryModelDialog, useValueSelector, useSupplierSelector } from '../utils/tools';
     import RepositoryModelDialog from './RepositoryModelDialog.vue';
     import { OnyksHeader } from 'onyks-web-ui-system';
+    import { services } from '@/utils/api.js';
+    import SupplierSelector from './SupplierSelector.vue';
+    import CreateElementFiles from './CreateElementFiles.vue';
 
     const props = defineProps(['schema'])
     const element = defineModel('element');
@@ -65,6 +69,32 @@
         }, () => { dialogs.footprintNo3.open = false; element.value.footprintPathNo3 = ''; element.value.footprintReferenceNo3 = ''; })
     })
 
+    const selectors = reactive(
+    {
+        manufacturer: useValueSelector(services.manufacturers, (value) => 
+        { 
+            if(value.selected)
+            {
+                element.value.manufacturer = value.value.name
+            }
+            else
+            {
+                element.value.manufacturer = ''
+            }
+        }),
+        tables: useValueSelector(services.tables, (value) => 
+        { 
+            if(value.selected)
+            {
+                element.value.table = value.value.name
+            }
+            else
+            {
+                element.value.table = ''
+            }
+        }),
+        suppliers: useSupplierSelector(services.suppliers)
+    })
 
     onMounted(async () => 
     {
@@ -72,6 +102,9 @@
         dialogs.footprintNo1.init()
         dialogs.footprintNo2.init()
         dialogs.footprintNo3.init()
+        selectors.manufacturer.init()
+        selectors.tables.init()
+        selectors.suppliers.init()
     })
 </script>
 
@@ -88,6 +121,9 @@
                 <onyks-header level="6">Part Name</onyks-header>
                 <onyks-textfield v-model="element.partName" :disabled="props.schema == 'details'"></onyks-textfield>
 
+                <onyks-header level="6">Manufacturer</onyks-header>
+                <ValueSelector v-model="selectors.manufacturer" v-model:value="element.manufacturer"></ValueSelector>
+
                 <onyks-header level="6">Value</onyks-header>
                 <onyks-textfield v-model="element.value" :disabled="props.schema == 'details'"></onyks-textfield>
 
@@ -99,6 +135,9 @@
 
                 <onyks-header level="6" v-if="props.schema == 'details' || props.schema == 'edit'">Created At</onyks-header>
                 <onyks-textfield disabled v-model="element.createdAt" v-if="props.schema == 'details' || props.schema == 'edit'" :disabled="props.schema == 'details'"></onyks-textfield>
+
+                <onyks-header level="6">Table</onyks-header>
+                <ValueSelector v-model="selectors.tables" v-model:value="element.table"></ValueSelector>
 
             </onyks-container>
         </onyks-container>
@@ -151,7 +190,13 @@
         </onyks-container>
     </onyks-container>
     <onyks-header level="4">Suppliers</onyks-header>
+
+    <SupplierSelector v-model="selectors.suppliers" v-model:value="element.suppliers"></SupplierSelector>
+
     <onyks-header level="4">Datasheets</onyks-header>
+
+    <CreateElementFiles></CreateElementFiles>
+
     <onyks-header level="4">Tags</onyks-header>
 </template>
 

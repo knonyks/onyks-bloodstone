@@ -8,10 +8,11 @@
     import { useBasicTable, useAddItemDialog, useEditItemDialog, useDeleteItemsDialog } from '@/utils/tools';
     import { services } from '@/utils/api';
     import AddItemDialog from '@/components/AddItemDialog.vue';
-    import EditItemDialog from '@/components/EditItemDialog copy.vue';
+    import EditItemDialog from '@/components/EditItemDialog.vue';
     import DeleteItemsDialog from '@/components/DeleteItemsDialog.vue';
     import { addToast } from '@/utils/tools';
     import { html } from 'lit';
+    import ElementPath from '@/components/ElementPath.vue';
 
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
@@ -41,20 +42,32 @@
     const elementsTable = reactive(useBasicTable(services.elements, [
         { label: 'Selected', key: 'selected' },
         { label: 'Part Name', key: 'partName' },
+        { label: 'Manufacturer', key: 'manufacturer'},
+        { label: 'Table', key: 'table'},
         { label: 'Created At', key: 'createdAt' }
     ], true, (row) => html`
-    
-        <onyks-container type="grid" cols="2" gap="m" justify="center">
-            <onyks-header level="6">UUID</onyks-header>
-            <onyks-text>${row?.uuid || ''}</onyks-text>
-            <onyks-header level="6">Symbol</onyks-header>
-            <onyks-path .content=${['a', 'b']} size="s" disabled style="overflow-y: hidden;"></onyks-path>
-            <onyks-header level="6">Footprint No 1</onyks-header>
-            <onyks-text>A/B/C/D/E/F/G</onyks-text>
+
+            <onyks-container type="grid" gap="m" justify="left" align="center" cols="2" style="grid-template-columns: 150px 500px;">
+                <onyks-header level="6" style="width: 100%; text-align: left;">UUID</onyks-header>
+                <onyks-text style="width: 100%; text-align: left;">${row?.uuid || ''}</onyks-text>
+
+                <onyks-header level="6" style="width: 100%; text-align: left;">Symbol</onyks-header>
+                <onyks-path style="width: 100%; text-align: left;" .content=${row.libraryPath.split('/').concat(row.libraryReference)} size="s" disabled></onyks-path>
+
+                <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 1</onyks-header>
+                <onyks-path style="width: 100%; text-align: left;" .content=${row.footprintPathNo1.split('/').concat(row.footprintReference1)} size="s" disabled></onyks-path>
+
+                <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 2</onyks-header>
+                <onyks-path style="width: 100%; text-align: left;" .content=${row.footprintPathNo2.split('/').concat(row.footprintReference2)} size="s" disabled></onyks-path>
+
+                <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 3</onyks-header>
+                <onyks-path style="width: 100%; text-align: left;" .content=${row.footprintPathNo3.split('/').concat(row.footprintReference3)} size="s" disabled></onyks-path>
+
         </onyks-container>
         
     `))
-
+            // <onyks-header level="6" cols="1">Symbol</onyks-header>
+            // <onyks-path .content=${['a', 'b']} size="s" disabled style="overflow-y: hidden;" cols="9"></onyks-path>
     // dialogs
     const suppliersDialogs = reactive(
     {
@@ -117,7 +130,25 @@
         await tablesTable.init()
         await elementsTable.init()
 
-        elementsTable.data = [{'partName': 'Example Part', 'uuid': '123e4567-e89b-12d3-a456-426614174000'}]
+        elementsTable.data = [
+            {
+                selected: false,
+                partName: 'Example Part', 
+                uuid: '123e4567-e89b-12d3-a456-426614174000',
+                manufacturer: 'Example Manufacturer',
+                table: 'Example Table',
+                createdAt: new Date(),
+
+                libraryReference: 'Example Library Reference',
+                libraryPath: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
+                footprintPathNo1: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
+                footprintReference1: 'Example Footprint Reference 1',
+                footprintPathNo2: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
+                footprintReference2: 'Example Footprint Reference 2',
+                footprintPathNo3: 'FOLDER 1/FOLDER 2/FOLDER 3/FOLDER 4/FOLDER 5',
+                footprintReference3: 'Example Footprint Reference 3',
+                
+            }]
 
         loaderStore.hide()
         loaderStore.globalHide()

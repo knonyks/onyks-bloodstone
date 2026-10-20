@@ -26,9 +26,10 @@
 
 
 
-    //     manufacturer: '',
-    //     table: 'MCUsSS',
-    //     tableId: 0,
+        manufacturer: 'test',
+        manufacturerId: 0,
+        table: '',
+        tableId: 0,
 
         libraryReference: '',
         libraryPath: '',
@@ -44,11 +45,11 @@
 
         createdAt: '12:12:2023, 12:12:12',
 
-    //     suppliers: {
-    //         '1':'1111',
-    //         '2': '2222',
-    //         '6': '6666'
-    //     }
+        suppliers: {
+            '62':'1111',
+            '2': '2222',
+            '232': '6666'
+        }
     });
 
     onMounted(async () =>

@@ -267,6 +267,90 @@ export const useRepositoryModelDialog = (_title = '', _filter = (() => true), _h
     return { open, title, repository, init, handleOk, error }
 }
 
+export const useValueSelector = (_service, _handleChange = () => {}) =>
+{
+    const items = ref([])
+    const total = ref(0)
+    const service = _service
+    const page = ref(1)
+    const limit = ref(100)
+    const searchPhrase = ref('')
+    const sortBy = ref('id')
+    const sortDesc = ref(false)
+
+    const init = async () =>
+    {
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        items.value = result?.data?.items ?? []
+        items.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    const handleScrollEnd = async () =>
+    {
+        page.value++
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        items.value = items.value.concat(result?.data?.items ?? [])
+        items.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    const handleChange = _handleChange
+
+    const search = async () =>
+    {
+        page.value = 1
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        items.value = result?.data?.items ?? []
+        items.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    return { items, total, page, limit, searchPhrase, sortBy, sortDesc, init, handleScrollEnd, handleChange, search }
+}
+
+export const useSupplierSelector = (_service, _handleChange = () => {}) =>
+{
+    const items = ref([])
+    const total = ref(0)
+    const service = _service
+    const page = ref(1)
+    const limit = ref(100)
+    const searchPhrase = ref('')
+    const sortBy = ref('id')
+    const sortDesc = ref(false)
+
+    const init = async () =>
+    {
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        items.value = result?.data?.items ?? []
+        items.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    const handleScrollEnd = async () =>
+    {
+        page.value++
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        items.value = items.value.concat(result?.data?.items ?? [])
+        items.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    const handleChange = _handleChange
+
+    const search = async () =>
+    {
+        page.value = 1
+        const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
+        items.value = result?.data?.items ?? []
+        items.value.map((item) => item.selected = false)
+        total.value = result?.data?.total ?? 0
+    }
+
+    return { items, total, page, limit, searchPhrase, sortBy, sortDesc, init, handleScrollEnd, handleChange, search }
+}
+
 export const addToast = (message, duration = 3000, closable = true, size = 'm', type = 'info') =>
 {
     const toastContainer = document.querySelector('.toast-container-content')
