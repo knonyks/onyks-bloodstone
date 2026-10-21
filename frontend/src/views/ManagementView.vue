@@ -49,24 +49,25 @@
         { label: 'Created At', key: 'createdAt' }
     ], true, (row) => html`
 
-        <onyks-container type="grid" gap="m" justify="left" align="center" cols="2" style="grid-template-columns: 150px 500px;">
-            <onyks-header level="6" style="width: 100%; text-align: left;">UUID</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${row?.uuid || ''}</onyks-text>
-            <onyks-header level="6" style="width: 100%; text-align: left;">Description</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${row?.description || ''}</onyks-text>
-            <onyks-header level="6" style="width: 100%; text-align: left;">Symbol</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${(row?.libraryPath || '') + ' / ' + (row?.libraryReference || '')}</onyks-text>
-            <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 1</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo1 || '') + ' / ' + (row?.footprintReferenceNo1 || '')}</onyks-text>
-            <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 2</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo2 || '') + ' / ' + (row?.footprintReferenceNo2 || '')}</onyks-text>
-            <onyks-header level="6" style="width: 100%; text-align: left;">Footprint No 3</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${(row?.footprintPathNo3 || '') + ' / ' + (row?.footprintReferenceNo3 || '')}</onyks-text>
-            <onyks-header level="6" style="width: 100%; text-align: left;">Suppliers</onyks-header>
-            <onyks-text style="width: 100%; text-align: left;">${JSON.stringify(row?.suppliers || {})}</onyks-text>
-            
+        <onyks-container style="background-color: transparent; width: 100%; height: fit-content;" type="grid" cols="4" gap="m" mobile-breakpoint="900">
+            <onyks-container type="stack" gap="m" cols="1">
+                <onyks-header level="6">UUID</onyks-header>
+                <onyks-text>${row?.uuid || ''}</onyks-text>
+                <onyks-header level="6" style="width: 100%; text-align: left;">Suppliers Names</onyks-header>
+                <onyks-text>${Object.values(row.suppliers || {}).map(supplier => supplier.value).join(', ')}</onyks-text>
+                <onyks-header level="6">Symbol</onyks-header>
+                <onyks-header level="6">Footprints</onyks-header>
+                <onyks-header level="6">Datasheets</onyks-header>
+            </onyks-container>
+            <onyks-container type="stack" gap="m" cols="3">
+                <onyks-header level="6">Description</onyks-header>
+                <onyks-text>${row.description}</onyks-text>
+                <onyks-header level="6">Tags</onyks-header>
+                <onyks-container gap="m" type="group">
+                    ${row.tags.map(tag => html`<onyks-tag background="blue">${tag}</onyks-tag>`)}
+                </onyks-container>
+            </onyks-container>
         </onyks-container>
-        
     `))
             // <onyks-header level="6" cols="1">Symbol</onyks-header>
             // <onyks-path .content=${['a', 'b']} size="s" disabled style="overflow-y: hidden;" cols="9"></onyks-path>

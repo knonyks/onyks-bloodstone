@@ -1,4 +1,4 @@
-from sqlalchemy import DateTime, Enum, ForeignKey, String, func
+from sqlalchemy import DateTime, Enum, ForeignKey, String, func, Index
 from database import Base
 from datetime import datetime, timezone
 import uuid as uuid_module
@@ -8,6 +8,8 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy import DDL, event
 from typing import List
 from typing import Optional
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.dialects.postgresql import ARRAY
 
 event.listen(
     Base.metadata,
@@ -70,16 +72,14 @@ class Table(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column('name', String(256), unique=True, nullable=False)
     createdAt: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    elements = relationship(
-        "Element",
+    elements: Mapped[List["Element"]] = relationship(
         back_populates="tableCategory",
         foreign_keys="Element.table",
     )
 
 
-class Element(Base):
+class Element(Base):    
     __tablename__ = "elements"
-    __table_args__ = {'schema': 'private'}
 
     uuid: Mapped[uuid_module.UUID] = mapped_column('uuid', UUID(as_uuid=True), primary_key=True, default=uuid_module.uuid4)
     partName: Mapped[str] = mapped_column("part_name", String(256), nullable=False)
@@ -125,7 +125,12 @@ class Element(Base):
     )
 
     
-    
+    tags: Mapped[List[str]] = mapped_column(MutableList.as_mutable(ARRAY(String(50))), default=list, nullable=False)
+
+    __table_args__ = (
+        Index("ix_elements_tags_gin", "tags", postgresql_using="gin"),
+        {'schema': 'private'},
+    )
     
     
     datasheets: Mapped[dict] = mapped_column('datasheets', JSONB, default=dict)

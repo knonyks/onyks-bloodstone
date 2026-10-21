@@ -335,14 +335,47 @@ export const suppliers =
 }
 
 
+export const models = 
+{
+    elements: () =>
+    {
+        return {
+            partName: '',
+            manufacturer: '',
+            supplier: '',
+            tags: []
+        }
+    }
+}
 
 
 
 
 
 
-
-
+export const tags = 
+{
+    list: async (page = 1, limit = 10, search = null, sortBy = 'name', sortDesc = false) =>
+    {
+        try 
+        {
+            const response = await api.get(`/tags`, {
+                params: {
+                    page: page,
+                    limit: limit,
+                    search: search,
+                    sortBy: sortBy,
+                    sortDesc: sortDesc
+                }
+            });
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    }
+}
 
 export const elements = 
 {
@@ -535,7 +568,8 @@ export const services =
     tables,
     manufacturers,
     suppliers,
-    users
+    users,
+    tags
 }
 
-window.x = services.elements
+window.x = services

@@ -79,6 +79,14 @@ class ElementBase(BaseModel):
     footprintReferenceNo3: NotEmptyString = Field(default=None, max_length=1024)
     footprintPathNo3: NotEmptyString = Field(default=None, max_length=1024)
 
+    tags: List[str] = []
+
+    @field_validator("tags")
+    @classmethod
+    def clearTags(cls, v: List[str]) -> List[str]:
+        clear = [tag.strip().lower() for tag in v if tag.strip()]
+        return list(dict.fromkeys(clear))
+
 class ElementInsert(ElementBase):
     suppliers: dict = Field(default_factory=dict)
 

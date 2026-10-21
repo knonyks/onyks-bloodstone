@@ -1,17 +1,21 @@
 <script setup lang="js">
     import ElementPath from './ElementPath.vue';
     import ValueSelector from './ValueSelector.vue';
-    import { reactive } from 'vue';
+    import { reactive, toRef } from 'vue';
     import { onMounted } from 'vue';
     import { useRepositoryModelDialog, useValueSelector, useSupplierSelector } from '../utils/tools';
     import RepositoryModelDialog from './RepositoryModelDialog.vue';
     import { OnyksHeader } from 'onyks-web-ui-system';
     import { services } from '@/utils/api.js';
     import SupplierSelector from './SupplierSelector.vue';
-    import CreateElementFiles from './CreateElementFiles.vue';
+    import UploadFiles from './UploadFiles.vue';
+    import TagsSelector from './TagsSelector.vue';
+    import { ref } from 'vue';
+    import { useTagsSelector } from '../utils/tools';
 
     const props = defineProps(['schema'])
     const element = defineModel('element');
+    element.value.tags ??= [];
 
     const selectors = reactive(
     {
@@ -37,7 +41,8 @@
                 element.value.table = ''
             }
         }),
-        suppliers: useSupplierSelector(services.suppliers)
+        suppliers: useSupplierSelector(services.suppliers),
+        tags: useTagsSelector(services.tags, toRef(element.value, 'tags'))
     })
 
     const dialogs = reactive(
@@ -106,6 +111,7 @@
         selectors.manufacturer.init()
         selectors.tables.init()
         selectors.suppliers.init()
+        selectors.tags.init()
     })
 </script>
 
@@ -201,6 +207,13 @@
 
         <SupplierSelector v-model="selectors.suppliers" v-model:value="element.suppliers" v-else></SupplierSelector>
 
+
+        <!-- <onyks-header level="6">Datasheets</onyks-header>
+
+        <UploadFiles v-model:datasheets="element.datasheets"></UploadFiles> -->
+
+        <onyks-header level="6">Tags</onyks-header>
+        <TagsSelector v-model:tags="element.tags" v-model="selectors.tags"></TagsSelector>
     </onyks-container>
 </template>
 
