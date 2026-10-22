@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, constr, field_validator
 from datetime import datetime
-from typing import List, Optional, Generic, TypeVar
+from typing import Any, List, Optional, Generic, TypeVar
 from fastapi import Query
 from typing import Annotated
 from uuid import UUID
@@ -88,13 +88,14 @@ class ElementBase(BaseModel):
         return list(dict.fromkeys(clear))
 
 class ElementInsert(ElementBase):
-    suppliers: dict = Field(default_factory=dict)
-    datasheets: list[dict] = Field(default_factory=list)
+    suppliers: dict[str, Any] = Field(default_factory=dict)
+    datasheets: list = Field(default_factory=list)
 
 class ElementOutput(ElementBase):
     uuid: UUID
     createdAt: datetime
     suppliers: dict = Field(default_factory=dict)
+    datasheets: list = Field(default_factory=list)
 
 # USERS
 class UserRank(str, Enum):

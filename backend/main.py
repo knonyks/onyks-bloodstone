@@ -613,8 +613,8 @@ async def get_elements_last_added(db = Depends(get_db)):
         
     return item
 
-@app.post("/element/create")
-async def create_element(element: str = Form(...), datasheets: List[UploadFile] | None = File(default=None), db = Depends(get_db)):
+@app.post("/elements")
+async def post_elements(element: str = Form(...), files: List[UploadFile] | None = File(default=None), db = Depends(get_db)):
     try:
         data = json.loads(element)
     except json.JSONDecodeError:
@@ -631,7 +631,31 @@ async def create_element(element: str = Form(...), datasheets: List[UploadFile] 
             detail={"error_code": "INVALID_ELEMENT", "message": exc.errors()}
         )
 
-    if data.get("datasheets") is None or data.get("datasheets") == []:
+    if data.get("datasheets") is not None and data.get("datasheets") != []:
+
+        if len(data.get("datasheets")) == len(files):
+            print(files)
+            for i, file in enumerate(files):
+                if file.content_type != "application/pdf":
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail={"error_code": "INVALID_FILE_TYPE", "message": f"File {file.filename} is not a PDF."}
+                    )
+            for i in data.get("datasheets"):
+                i["uuid"] = str(uuid_module.uuid4())
+            print(data)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "MISMATCHED_FILE_COUNT", "message": "Number of datasheets does not match number of uploaded files."}
+            )
+
+        for i, file in enumerate(files or []):
+            with open(os.path.join(UPLOAD_DIR, f"{data['datasheets'][i]['uuid']}.pdf"), "wb") as f:
+                f.write(await file.read())
+
+    
+    # if data.get("datasheets") is None or data.get("datasheets") == []:
         suppliers = data.pop("suppliers", {})
         item = models.Element(**data)
         item.suppliers = [
@@ -652,8 +676,108 @@ async def create_element(element: str = Form(...), datasheets: List[UploadFile] 
                     "message": "Invalid data or an element with this name already exists."
                 }
             )
-    else:
-        print(data['datasheets'])
+    # else:
+    #     for i in range(len(data['datasheets'])):
+    #         data['datasheets'][i]["uuid"] = str(uuid_module.uuid4())
+
+@app.patch('/elements/{uuid}')
+async def path_elements(uuid: str, element: str = Form(...), files: List[UploadFile] | None = File(default=None), db = Depends(get_db)):
+    try:
+        element_uuid = uuid_module.UUID(uuid)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "INVALID_UUID", "message": "Invalid UUID."}
+        )
+
+    result = await db.execute(
+        select(models.Element).where(models.Element.uuid == element_uuid)
+    )
+    item = result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "ELEMENT_NOT_FOUND", "message": "Element not found."}
+        )
+
+    try:
+        data = json.loads(element)
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "INVALID_JSON", "message": "Invalid element JSON."}
+        )
+
+    try:
+        data = schemas.ElementInsert.model_validate(data).model_dump()
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error_code": "INVALID_ELEMENT", "message": exc.errors()}
+        )
+
+    datasheets = data.get("datasheets") or []
+
+    old_uuids = [datasheet["uuid"] for datasheet in item.datasheets]
+    new_uuid = [datasheet["uuid"] for datasheet in datasheets if datasheet.get("uuid")]
+    to_remove = list(set(old_uuids) - set(new_uuid))
+    to_add = [datasheet for datasheet in datasheets if not datasheet.get("uuid")]
+
+    files = files or []
+    if len(to_add) != len(files):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "MISMATCHED_FILE_COUNT",
+                "message": "Number of new datasheets does not match number of uploaded files."
+            }
+        )
+    for file in files:
+        if file.content_type != "application/pdf":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_FILE_TYPE", "message": f"File {file.filename} is not a PDF."}
+            )
+
+    for datasheet_uuid in to_remove:
+        pdf_path = os.path.join(UPLOAD_DIR, f"{datasheet_uuid}.pdf")
+        if os.path.isfile(pdf_path):
+            os.remove(pdf_path)
+
+    for datasheet, file in zip(to_add, files):
+        datasheet["uuid"] = str(uuid_module.uuid4())
+        pdf_path = os.path.join(UPLOAD_DIR, f"{datasheet['uuid']}.pdf")
+        with open(pdf_path, "wb") as pdf:
+            pdf.write(await file.read())
+
+    for field, value in data.items():
+        if field not in {"uuid", "datasheets", "suppliers"}:
+            setattr(item, field, value)
+    item.datasheets = datasheets
+
+    if "suppliers" in data:
+        item.suppliers = [
+            models.ElementSupplier(
+                supplierId=int(supplier_id),
+                value=(supplier_data or {}).get("value", "")
+            )
+            for supplier_id, supplier_data in (data["suppliers"] or {}).items()
+        ]
+
+    try:
+        await db.commit()
+        await db.refresh(item)
+        return _serialize_element(item)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or an element with this name already exists."
+            }
+        )
+
 
 
 @app.get("/elements")
@@ -713,6 +837,129 @@ async def get_element(uuid: str, db = Depends(get_db)):
             detail={"error_code": "ELEMENT_NOT_FOUND", "message": "Element not found."}
         )
     return _serialize_element(item)
+
+@app.post('/elements/{uuid}/duplicate')
+async def duplicate_element(
+    uuid: str,
+    element: str | None = Form(default=None),
+    files: List[UploadFile] | None = File(default=None),
+    db = Depends(get_db)
+):
+    try:
+        element_uuid = uuid_module.UUID(uuid)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "INVALID_UUID", "message": "Invalid UUID."}
+        )
+
+    result = await db.execute(
+        select(models.Element)
+        .options(selectinload(models.Element.suppliers))
+        .where(models.Element.uuid == element_uuid)
+    )
+    item = result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "ELEMENT_NOT_FOUND", "message": "Element not found."}
+        )
+
+    excluded_fields = {"uuid", "createdAt", "updatedAt"}
+    values = {
+        column.key: getattr(item, column.key)
+        for column in sa_inspect(models.Element).column_attrs
+        if column.key not in excluded_fields and column.key != "datasheets"
+    }
+    if "partName" in values:
+        values["partName"] = f"{values['partName']} (copy)"
+
+    data = None
+    if element is not None:
+        try:
+            data = json.loads(element)
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_JSON", "message": "Invalid element JSON."}
+            )
+        try:
+            data = schemas.ElementInsert.model_validate(data).model_dump()
+        except ValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"error_code": "INVALID_ELEMENT", "message": exc.errors()}
+            )
+        for field, value in data.items():
+            if field not in {"uuid", "datasheets", "suppliers"}:
+                values[field] = value
+        source_datasheets = data.get("datasheets") or []
+    else:
+        source_datasheets = list(item.datasheets or [])
+
+    files = files or []
+    to_add = [d for d in source_datasheets if not d.get("uuid")]
+    if len(to_add) != len(files):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "MISMATCHED_FILE_COUNT",
+                "message": "Number of new datasheets does not match number of uploaded files."
+            }
+        )
+    for file in files:
+        if file.content_type != "application/pdf":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_FILE_TYPE", "message": f"File {file.filename} is not a PDF."}
+            )
+
+    copied_datasheets = []
+    new_files = iter(files)
+    for datasheet in source_datasheets:
+        copied = dict(datasheet)
+        old_uuid = copied.get("uuid")
+        new_uuid = str(uuid_module.uuid4())
+        destination = os.path.join(UPLOAD_DIR, f"{new_uuid}.pdf")
+        if old_uuid:
+            source = os.path.join(UPLOAD_DIR, f"{old_uuid}.pdf")
+            if os.path.isfile(source):
+                shutil.copyfile(source, destination)
+        else:
+            with open(destination, "wb") as pdf:
+                pdf.write(await next(new_files).read())
+        copied["uuid"] = new_uuid
+        copied_datasheets.append(copied)
+    values["datasheets"] = copied_datasheets
+
+    duplicate = models.Element(**values)
+    if data is not None and "suppliers" in data:
+        duplicate.suppliers = [
+            models.ElementSupplier(
+                supplierId=int(supplier_id),
+                value=(supplier_data or {}).get("value", "")
+            )
+            for supplier_id, supplier_data in (data["suppliers"] or {}).items()
+        ]
+    else:
+        duplicate.suppliers = [
+            models.ElementSupplier(supplierId=supplier.supplierId, value=supplier.value)
+            for supplier in item.suppliers
+        ]
+    db.add(duplicate)
+    try:
+        await db.commit()
+        await db.refresh(duplicate)
+        return _serialize_element(duplicate)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "message": "Invalid data or an element with this name already exists."
+            }
+        )
 
 ########################################
 

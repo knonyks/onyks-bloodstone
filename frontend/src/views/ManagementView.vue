@@ -83,6 +83,9 @@ import router from '@/router';
                         ${row.tags.map(tag => html`<onyks-tag background="blue">${tag}</onyks-tag>`)}
                     </onyks-container>
                     <onyks-header level="6">Datasheets</onyks-header>
+                    <onyks-container type="group" gap="m">
+                        ${row.datasheets.map(datasheet => html`<onyks-tag size="s" @click=${() => window.open('/files/' + datasheet.uuid + '.pdf', '_blank')}>${datasheet.name}</onyks-tag>`)}
+                    </onyks-container>
                 </onyks-container>
             </onyks-container>
         </onyks-container>

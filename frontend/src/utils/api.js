@@ -415,9 +415,9 @@ export const elements =
                 return { ...existing, name: existing.name || file.name };
             });
             formData.append("element", JSON.stringify({ ...element, datasheets: meta }));
-            datasheets.forEach((datasheet) => formData.append("datasheets", datasheet));
+            datasheets.forEach((datasheet) => formData.append("files", datasheet));
 
-            const response = await api.post(`/element/create`, formData, {
+            const response = await api.post(`/elements`, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
             return response;
@@ -458,30 +458,59 @@ export const elements =
         {
             throw error
         }
-    }
-    // edit: async (id, element, datasheet = null) =>
-    // {
-    //     try 
-    //     {
-    //         const formData = new FormData();
-    //         formData.append('element', JSON.stringify(element));
+    },
+    edit: async (uuid, element, files = null) =>
+    {
+        try 
+        {
+            const formData = new FormData();
+            formData.append('element', JSON.stringify(element));
 
-    //         if (datasheet)
-    //         {
-    //             formData.append('datasheet', datasheet);
-    //         }
+            if (files)
+            {
+                (Array.isArray(files) ? files : [files]).forEach((file) =>
+                {
+                    formData.append('files', file);
+                });
+            }
 
-    //         const response = await api.put(`/element/edit/${id}`, formData,
-    //         {
-    //             headers: {'Content-Type': 'multipart/form-data'}
-    //         });
-    //         return response
-    //     } 
-    //     catch (error) 
-    //     {
-    //         return error
-    //     }
-    // },
+            const response = await api.patch(`/elements/${uuid}`, formData,
+            {
+                headers: {'Content-Type': 'multipart/form-data'}
+            });
+            return response
+        } 
+        catch (error) 
+        {
+            return error
+        }
+    },
+    duplicate: async (uuid, element, files = null) =>
+    {
+        try 
+        {
+            const formData = new FormData();
+            formData.append('element', JSON.stringify(element));
+
+            if (files)
+            {
+                (Array.isArray(files) ? files : [files]).forEach((file) =>
+                {
+                    formData.append('files', file);
+                });
+            }
+
+            const response = await api.post(`/elements/${uuid}/duplicate`, formData,
+            {
+                headers: {'Content-Type': 'multipart/form-data'}
+            });
+            return response
+        } 
+        catch (error) 
+        {
+            return error
+        }
+    },
     // delete: async (id) =>
     // {
     //     try 

@@ -10,7 +10,6 @@
     import SupplierSelector from './SupplierSelector.vue';
     import UploadFiles from './UploadFiles.vue';
     import TagsSelector from './TagsSelector.vue';
-    import { ref } from 'vue';
     import { useTagsSelector } from '../utils/tools';
 
     const props = defineProps(['schema'])
@@ -19,9 +18,7 @@
     const selectors = reactive(
     {
         manufacturer: useValueSelector(services.manufacturers, (value) => 
-        { 
-
-            console.log()
+        {
             if(value.selected)
             {
                 obj.value.details.manufacturer = value.value.name
@@ -214,7 +211,7 @@
 
         <onyks-header level="6">Datasheets</onyks-header>
 
-        <!-- <UploadFiles v-model:datasheets="element.datasheets"></UploadFiles> -->
+        <UploadFiles v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
 
         <onyks-header level="6">Tags</onyks-header>
         <TagsSelector v-model:tags="obj.details.tags" v-model="selectors.tags" v-if="props.schema != 'details'"></TagsSelector>
@@ -222,7 +219,6 @@
             <onyks-tag v-for="tag in obj.details.tags" :key="tag">{{ tag }}</onyks-tag>
         </onyks-container>
         <onyks-text v-else>No tags defined</onyks-text>
-
 
     </onyks-container>
 </template>

@@ -37,22 +37,32 @@
         {
             action: async () =>
             {
-                console.log(obj.details)
-                console.log(await services.elements.create(obj.details, obj.files))
+                try
+                {
+                    let result = await services.elements.create(obj.details, obj.files)
+                }
+                catch(err)
+                {
+
+                }
             }
         },
         edit:
         {
             action: async () =>
             {
-                // console.log(await services.elements.update(element))
+                console.log(obj.details)
+                console.log(obj.files)
+                console.log(await services.elements.edit(route.params.uuid, obj.details, obj.files))
             }
         },
         duplicate:
         {
             action: async () =>
             {
-                // console.log(await services.elements.create(element))
+                console.log(obj.details)
+                console.log(obj.files)
+                console.log(await services.elements.duplicate(route.params.uuid, obj.details, obj.files))
             }
         }
     }
@@ -68,7 +78,7 @@
             <onyks-button v-if="schema == 'edit'" background="green" @click="btns.edit.action()">Save</onyks-button>
             <onyks-button v-if="schema == 'duplicate'" background="green" @click="btns.duplicate.action()">Duplicate</onyks-button>
         </onyks-container>
-        
+    
     </ManagerPage>
 </template>
 
