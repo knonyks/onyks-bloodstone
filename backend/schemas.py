@@ -89,6 +89,7 @@ class ElementBase(BaseModel):
 
 class ElementInsert(ElementBase):
     suppliers: dict = Field(default_factory=dict)
+    datasheets: list[dict] = Field(default_factory=list)
 
 class ElementOutput(ElementBase):
     uuid: UUID

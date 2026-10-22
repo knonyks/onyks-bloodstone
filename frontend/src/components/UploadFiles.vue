@@ -2,12 +2,14 @@
     import { ref } from 'vue';
 
     const uploader = ref(null);
+    const originalNames = ref([]);
     let resetting = false;
 
     const datasheets = defineModel('datasheets', 
     {
         type: Object,
-        default: () => (
+        default: () => 
+        (
             [
 
             ]
@@ -28,6 +30,9 @@
 
         datasheets.value = [...datasheets.value, ...newFiles.map(file => ({ name: file.name.replace('.pdf', '') }))]
         files.value = [...files.value, ...newFiles]
+        newFiles.forEach(file => {
+            originalNames.value.push(file.name.replace('.pdf', ''));
+        });
 
         resetting = true;
         try
@@ -60,7 +65,7 @@
                     <onyks-tag background="yellow" v-else>Not uploaded yet</onyks-tag>
                     <onyks-container gap="m" type="stack" align="end" @click.stop>
                         <onyks-text>
-                            {{ item.name }}
+                            <span v-if="originalNames[item.name]">({{ originalNames[item.name] }})</span>
                         </onyks-text>
                         <onyks-textfield style="position: relative; z-index: 10; pointer-events: auto;" :value="item.name ?? ''" @input="updateValue(item.id, $event)"></onyks-textfield>
                         <onyks-container type="group" gap="m">

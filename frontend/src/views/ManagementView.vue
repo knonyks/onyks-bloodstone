@@ -12,6 +12,7 @@
     import DeleteItemsDialog from '@/components/DeleteItemsDialog.vue';
     import { addToast } from '@/utils/tools';
     import { html } from 'lit';
+import router from '@/router';
 
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
@@ -48,23 +49,40 @@
         { label: 'Availability', key: 'availability' },
         { label: 'Created At', key: 'createdAt' }
     ], true, (row) => html`
-
-        <onyks-container style="background-color: transparent; width: 100%; height: fit-content;" type="grid" cols="4" gap="m" mobile-breakpoint="900">
-            <onyks-container type="stack" gap="m" cols="1">
-                <onyks-header level="6">UUID</onyks-header>
-                <onyks-text>${row?.uuid || ''}</onyks-text>
-                <onyks-header level="6" style="width: 100%; text-align: left;">Suppliers Names</onyks-header>
-                <onyks-text>${Object.values(row.suppliers || {}).map(supplier => supplier.value).join(', ')}</onyks-text>
-                <onyks-header level="6">Symbol</onyks-header>
-                <onyks-header level="6">Footprints</onyks-header>
-                <onyks-header level="6">Datasheets</onyks-header>
+        <onyks-container gap="m" type="stack">
+            <onyks-container type="group" gap="m">
+                <onyks-tag background="blue" icon="" style="width: 75px; text-align: center;" @click=${() => router.push(`elements/edit/${row?.uuid}`)}>Edit</onyks-tag>
+                <onyks-tag background="yellow" icon="" style="width: 75px; text-align: center;" @click=${() => router.push(`elements/duplicate/${row?.uuid}`)}>Duplicate</onyks-tag>
+                <onyks-tag background="red" icon="" style="width: 75px; text-align: center;">Delete</onyks-tag>
             </onyks-container>
-            <onyks-container type="stack" gap="m" cols="3">
-                <onyks-header level="6">Description</onyks-header>
-                <onyks-text>${row.description}</onyks-text>
-                <onyks-header level="6">Tags</onyks-header>
-                <onyks-container gap="m" type="group">
-                    ${row.tags.map(tag => html`<onyks-tag background="blue">${tag}</onyks-tag>`)}
+        
+
+            <onyks-container style="background-color: transparent; width: 100%; height: fit-content;" type="group" gap="m" mobile-breakpoint="900">
+                <onyks-container type="stack" gap="m" cols="1" style="max-width: 50%;">
+                    
+                    <onyks-header level="6">UUID</onyks-header>
+                    <onyks-text>${row?.uuid || ''}</onyks-text>
+                    <onyks-header level="6" style="width: 100%; text-align: left;">Suppliers Names</onyks-header>
+                    <onyks-text>${Object.values(row.suppliers || {}).map(supplier => supplier.value).join(', ')}</onyks-text>
+                    <onyks-header level="6">Symbol</onyks-header>
+                    ${row.libraryPath != '' && row.libraryReference != '' ? html`<onyks-path .content=${(row.libraryPath.split('/')).concat(row.libraryReference)} size="s"></onyks-path>` : html`<onyks-text>Not defined</onyks-text>`}
+                    
+                    <onyks-header level="6">Footprints</onyks-header>
+                    <onyks-text>Footprint No 1</onyks-text>
+                    ${row.footprintPathNo1 != '' && row.footprintReferenceNo1 != '' ? html`<onyks-path .content=${row.footprintPathNo1.split('/').concat(row.footprintReferenceNo1)} size="s"></onyks-path>` : html`<onyks-text>Not defined</onyks-text>`}
+                    <onyks-text>Footprint No 2</onyks-text>
+                    ${row.footprintPathNo2 != '' && row.footprintReferenceNo2 != '' ? html`<onyks-path .content=${row.footprintPathNo2.split('/').concat(row.footprintReferenceNo2)} size="s"></onyks-path>` : html`<onyks-text>Not defined</onyks-text>`}
+                    <onyks-text>Footprint No 3</onyks-text>
+                    ${row.footprintPathNo3 != '' && row.footprintReferenceNo3 != '' ? html`<onyks-path .content=${row.footprintPathNo3.split('/').concat(row.footprintReferenceNo3)} size="s"></onyks-path>` : html`<onyks-text>Not defined</onyks-text>`}
+                </onyks-container>
+                <onyks-container type="stack" gap="m" style="max-width: 50%;">
+                    <onyks-header level="6">Description</onyks-header>
+                    <onyks-text>${row.description}</onyks-text>
+                    <onyks-header level="6">Tags</onyks-header>
+                    <onyks-container gap="m" type="group">
+                        ${row.tags.map(tag => html`<onyks-tag background="blue">${tag}</onyks-tag>`)}
+                    </onyks-container>
+                    <onyks-header level="6">Datasheets</onyks-header>
                 </onyks-container>
             </onyks-container>
         </onyks-container>
@@ -156,10 +174,10 @@
             <router-link to="/manager/elements/create">
                 <onyks-button background="green">Add</onyks-button>
             </router-link>
-            <onyks-button background="blue" :disabled="elementsTable.selected != 1">Edit</onyks-button>
-            <onyks-button background="yellow" :disabled="elementsTable.selected != 1">Duplicate</onyks-button>
+            <onyks-button background="blue" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/edit/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">Edit</onyks-button>
+            <onyks-button background="yellow" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/duplicate/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">Duplicate</onyks-button>
             <onyks-button background="red" :disabled="elementsTable.selected === 0">Delete</onyks-button>
-            <onyks-button background="gray">Details</onyks-button>
+            <onyks-button background="gray" @click="router.push(`/manager/elements/details/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">Details</onyks-button>
             <onyks-button background="green">Labels</onyks-button>
             <onyks-button background="blue">Scan</onyks-button>
         </BasicButtonsPanel>

@@ -403,11 +403,23 @@ export const elements =
             throw error
         }
     },
-    create: async (element) =>
+    create: async (element, datasheets = []) =>
     {
         try
         {
-            const response = await api.post(`/element/create`, element);
+            const formData = new FormData();
+            const meta = datasheets.map((file, i) => {
+                const existing = Array.isArray(element?.datasheets) && typeof element.datasheets[i] === "object" && element.datasheets[i] !== null
+                    ? element.datasheets[i]
+                    : {};
+                return { ...existing, name: existing.name || file.name };
+            });
+            formData.append("element", JSON.stringify({ ...element, datasheets: meta }));
+            datasheets.forEach((datasheet) => formData.append("datasheets", datasheet));
+
+            const response = await api.post(`/element/create`, formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
             return response;
         }
         catch (error)

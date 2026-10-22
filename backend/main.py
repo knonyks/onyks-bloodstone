@@ -6,6 +6,7 @@ import utils
 import crud
 from database import engine, AsyncSessionLocal
 from typing import List
+import json
 import os
 import shutil
 import database
@@ -17,10 +18,10 @@ from sqlalchemy import select
 import uuid
 import uuid as uuid_module
 from sqlalchemy import inspect as sa_inspect
-from sqlalchemy import select, func
+from sqlalchemy import select, func, Uuid
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.staticfiles import StaticFiles
-from pydantic import Json
+from pydantic import Json, ValidationError
 from sqlalchemy import text
 from utils import MyRepository, MyDatabase
 import redis
@@ -579,6 +580,14 @@ async def get_server_info():
 ########################################
 
 # ELEMENTS
+def _serialize_element(item):
+    out = {a.key: getattr(item, a.key) for a in sa_inspect(models.Element).column_attrs}
+    out["suppliers"] = {
+        str(es.supplierId): {"value": es.value, "name": es.suppliers.name}
+        for es in item.suppliers
+    }
+    return out
+
 @app.get('/elements/count')
 async def get_elements_count(db = Depends(get_db)):
     query = select(func.count()).select_from(models.Element)
@@ -605,38 +614,47 @@ async def get_elements_last_added(db = Depends(get_db)):
     return item
 
 @app.post("/element/create")
-async def create_element(element: dict, db = Depends(get_db)):
-    data = dict(element)
-    suppliers = data.pop("suppliers", None) or {}
-    allowed = {a.key for a in sa_inspect(models.Element).column_attrs} - {"uuid", "createdAt"}
-    data = {k: v for k, v in data.items() if k in allowed}
+async def create_element(element: str = Form(...), datasheets: List[UploadFile] | None = File(default=None), db = Depends(get_db)):
     try:
+        data = json.loads(element)
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "INVALID_JSON", "message": "Invalid element JSON."}
+        )
+
+    try:
+        data = schemas.ElementInsert.model_validate(data).model_dump()
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error_code": "INVALID_ELEMENT", "message": exc.errors()}
+        )
+
+    if data.get("datasheets") is None or data.get("datasheets") == []:
+        suppliers = data.pop("suppliers", {})
         item = models.Element(**data)
         item.suppliers = [
             models.ElementSupplier(supplierId=int(sid), value=(sdata or {}).get("value", ""))
             for sid, sdata in suppliers.items()
         ]
         db.add(item)
-        await db.commit()
-        await db.refresh(item)
-        return _serialize_element(item)
-    except (IntegrityError, ValueError, TypeError, AttributeError):
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error_code": "INVALID_DATA",
-                "message": "Invalid element data."
-            }
-        )
+        try:
+            await db.commit()
+            await db.refresh(item)
+            return _serialize_element(item)
+        except IntegrityError:
+            await db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                    "message": "Invalid data or an element with this name already exists."
+                }
+            )
+    else:
+        print(data['datasheets'])
 
-def _serialize_element(item):
-    out = {a.key: getattr(item, a.key) for a in sa_inspect(models.Element).column_attrs}
-    out["suppliers"] = {
-        str(es.supplierId): {"value": es.value, "name": es.suppliers.name}
-        for es in item.suppliers
-    }
-    return out
 
 @app.get("/elements")
 async def get_elements_list(

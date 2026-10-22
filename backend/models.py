@@ -80,6 +80,10 @@ class Table(Base):
 
 class Element(Base):    
     __tablename__ = "elements"
+    __table_args__ = (
+        Index("ix_elements_tags_gin", "tags", postgresql_using="gin"),
+        {'schema': 'private'},
+    )
 
     uuid: Mapped[uuid_module.UUID] = mapped_column('uuid', UUID(as_uuid=True), primary_key=True, default=uuid_module.uuid4)
     partName: Mapped[str] = mapped_column("part_name", String(256), nullable=False)
@@ -127,13 +131,10 @@ class Element(Base):
     
     tags: Mapped[List[str]] = mapped_column(MutableList.as_mutable(ARRAY(String(50))), default=list, nullable=False)
 
-    __table_args__ = (
-        Index("ix_elements_tags_gin", "tags", postgresql_using="gin"),
-        {'schema': 'private'},
-    )
+
     
     
-    datasheets: Mapped[dict] = mapped_column('datasheets', JSONB, default=dict)
+    datasheets: Mapped[list] = mapped_column('datasheets', JSONB, default=list)
 
     createdAt: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     
