@@ -16,7 +16,7 @@
     <onyks-path @path-change="model.pathChange($event)" :content="model.path"></onyks-path>
     <onyks-file-explorer :types="types" @enter-folder="model.enterFolder($event)" :content="model.content" @select="model.handleSelect($event)"></onyks-file-explorer>
     <onyks-container type="group" padding="" justify="end">
-        <onyks-button @click="model.refresh" background="yellow">Refresh</onyks-button>
+        <onyks-button @click="model.refresh" background="yellow">{{ $t('components.RepositoryExplorer.refresh') }}</onyks-button>
     </onyks-container>
 </template>
 

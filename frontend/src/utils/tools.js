@@ -9,6 +9,7 @@ import { OnyksToastContainer } from 'onyks-web-ui-system'
 import { computed } from 'vue';
 import { unref } from 'vue';
 import { html } from 'lit';
+import { i18n } from './localization';
 
 export const useRepository = (_filter = (e) => e.type === 'dir' || e.type === 'schlib' || e.type === 'pcblib' || e.type === 'footprint' || e.type === 'symbol') =>
 {
@@ -145,7 +146,8 @@ export const useAddItemDialog = (_service = null, _title = '', _handleEnd = () =
         }
         catch (e)
         {
-            error.value = e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'
+            // error.value = e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'
+            error.value = i18n.global.t(`error_codes.${e?.response?.data?.detail?.error_code}`) || e?.message || 'An error occurred'
         }
         finally
         {

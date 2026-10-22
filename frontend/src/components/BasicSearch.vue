@@ -4,7 +4,7 @@
 </script>
 
 <template>
-    <onyks-textfield placeholder="Search..." @input="props.search" v-model="model"></onyks-textfield>
+    <onyks-textfield :placeholder="$t('components.BasicSearch.search')" @input="props.search" v-model="model"></onyks-textfield>
 </template>
 
 <style>

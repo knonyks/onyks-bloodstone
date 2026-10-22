@@ -23,7 +23,7 @@
 </script>
 
 <template>
-    <ManagerPage title="Repository">
+    <ManagerPage :title="$t('views.RepositoryView.title')">
         <RepositoryExplorer v-model="repository"></RepositoryExplorer>
     </ManagerPage>
 </template>

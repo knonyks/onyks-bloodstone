@@ -1,11 +1,11 @@
 <script setup lang="js">
-    defineProps(['text', 'type', 'show'])
+    defineProps(['text', 'type', 'show', 'size'])
 </script>
 
 <template>
     <div class="alert-wrapper" :class="{ 'alert-hidden': !show }">
         <div class="alert-content">
-            <onyks-alert :type="type" size="m">{{ text }}</onyks-alert>
+            <onyks-alert :type="type" :size="size || 'm'">{{ text }}</onyks-alert>
         </div>
     </div>
 </template>

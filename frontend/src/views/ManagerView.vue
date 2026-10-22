@@ -10,11 +10,11 @@
     <onyks-container align="center" class="manager-view">
         <onyks-nav class="manager-nav" size="m" mobile-breakpoint="900" max-view-items="5">
             <img src="../../node_modules/onyks-web-ui-system/dist/logo.png" class="logo">
-            <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">Dashboard</router-link>
-            <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">Management</router-link>
-            <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">Repository</router-link>
-            <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">Settings</router-link>
-            <router-link slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">Admin</router-link>
+            <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">{{ $t('views.ManagerView.nav.dashboard') }}</router-link>
+            <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">{{ $t('views.ManagerView.nav.management') }}</router-link>
+            <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">{{ $t('views.ManagerView.nav.repository') }}</router-link>
+            <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('views.ManagerView.nav.settings') }}</router-link>
+            <router-link slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">{{ $t('views.ManagerView.nav.admin') }}</router-link>
         </onyks-nav>
         <onyks-container class="content" gap="m">
             

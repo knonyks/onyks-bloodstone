@@ -10,7 +10,7 @@
         
         <onyks-container type="group" align="center" justify="center" gap="m">
             <onyks-pagination-nav :max-index="Math.ceil((model?.total ?? 0) / (model?.limit || 1))" :index="model?.page ?? 1" max-view="3" size="m" @page-change="model.pageChange($event.detail?.index)"></onyks-pagination-nav>
-            <onyks-text>Selected:&emsp;{{model.selected}}&emsp;|&emsp;Total:&emsp;{{ model?.total ?? 0 }}</onyks-text>
+            <onyks-text>{{$t('components.BasicTable.selected')}}:&emsp;{{model.selected}}&emsp;|&emsp;{{$t('components.BasicTable.total')}}:&emsp;{{ model?.total ?? 0 }}</onyks-text>
         </onyks-container>
     </onyks-container>
 </template>

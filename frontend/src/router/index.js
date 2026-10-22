@@ -8,6 +8,9 @@ import ManagerView from '@/views/ManagerView.vue';
 import AdminView from '@/views/AdminView.vue';
 import SettingsView from '@/views/SettingsView.vue';
 import { useLoaderStore } from '@/stores/loader';
+import { i18n } from '@/utils/localization';
+
+
 
 const routes = [
   {
@@ -28,51 +31,51 @@ const routes = [
       {
         path: 'dashboard',
         component: DashboardView,
-        meta: { title: 'Dashboard - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.DashboardView.title') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'management',
         component: ManagementView,
-        meta: { title: 'Management - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.ManagementView.title') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'repository',
         component: RepositoryView,
-        meta: { title: 'Repository - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.RepositoryView.title') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'admin',
         component: AdminView,
-        meta: { title: 'Admin - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.AdminView.title') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'settings',
         component: SettingsView,
-        meta: { title: 'Settings - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.SettingsView.title') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/create',
         name: 'element-create',
         component: ElementView,
-        meta: { title: 'Create an element - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('pages.titles.createElement') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/details/:uuid',
         name: 'element-details',
         component: ElementView,
-        meta: { title: 'Element details - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('pages.titles.elementDetails') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/edit/:uuid',
         name: 'element-edit',
         component: ElementView,
-        meta: { title: 'Edit an element - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('pages.titles.editElement') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/duplicate/:uuid',
         name: 'element-duplicate',
         component: ElementView,
-        meta: { title: 'Duplicate an element - ONYKS Bloodstone' },
+        meta: { title: i18n.global.t('pages.titles.duplicateElement') + ' - ONYKS Bloodstone' },
         props: { schema: 'duplicate' }
       },
     ]

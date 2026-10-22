@@ -1,3 +1,3 @@
 <template>
-    <onyks-alert type="warning">This software is in development. It can be unstable.</onyks-alert>
+    <onyks-alert type="warning">{{ $t('components.WarningAlert.title') }}</onyks-alert>
 </template>
