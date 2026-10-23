@@ -14,6 +14,7 @@
     import { html } from 'lit';
     import router from '@/router';
     import { i18n } from '@/utils/localization';
+    import { OnyksToastContainer } from 'onyks-web-ui-system';
 
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
@@ -24,21 +25,21 @@
         { label: i18n.global.t('views.ManagementView.tables.columns.id'), key: 'id' },
         { label: i18n.global.t('views.ManagementView.tables.columns.name'), key: 'name' },
         { label: i18n.global.t('views.ManagementView.tables.columns.createdAt'), key: 'createdAt' }
-    ]))
+    ],undefined, undefined,  (item) => { item.selected = false; item.createdAt = i18n.global.d(new Date(item.createdAt), 'short')}))
 
     const manufacturersTable = reactive(useBasicTable(services.manufacturers, [
         { label: i18n.global.t('views.ManagementView.tables.columns.selected'), key: 'selected' },
         { label: i18n.global.t('views.ManagementView.tables.columns.id'), key: 'id' },
         { label: i18n.global.t('views.ManagementView.tables.columns.name'), key: 'name' },
         { label: i18n.global.t('views.ManagementView.tables.columns.createdAt'), key: 'createdAt' }
-    ]))
+    ],undefined, undefined, (item) => { item.selected = false; item.createdAt = i18n.global.d(new Date(item.createdAt), 'short')}))
 
     const tablesTable = reactive(useBasicTable(services.tables, [
         { label: i18n.global.t('views.ManagementView.tables.columns.selected'), key: 'selected' },
         { label: i18n.global.t('views.ManagementView.tables.columns.id'), key: 'id' },
         { label: i18n.global.t('views.ManagementView.tables.columns.name'), key: 'name' },
         { label: i18n.global.t('views.ManagementView.tables.columns.createdAt'), key: 'createdAt' }
-    ]))
+    ],undefined, undefined, (item) => { item.selected = false; item.createdAt = i18n.global.d(new Date(item.createdAt), 'short')}))
 
     const elementsTable = reactive(useBasicTable(services.elements, [
         { label: i18n.global.t('views.ManagementView.tables.columns.selected'), key: 'selected' },
@@ -89,25 +90,29 @@
                 </onyks-container>
             </onyks-container>
         </onyks-container>
-    `))
-            // <onyks-header level="6" cols="1">Symbol</onyks-header>
-            // <onyks-path .content=${['a', 'b']} size="s" disabled style="overflow-y: hidden;" cols="9"></onyks-path>
-    // dialogs
+    `, (item) => 
+    { 
+        item.selected = false; 
+        item.createdAt = i18n.global.d(new Date(item.createdAt), 'short'); item.manufacturer = item.manufacturer || 'Brak' }))
+
     const suppliersDialogs = reactive(
     {
         add: useAddItemDialog(services.suppliers, i18n.global.t('views.ManagementView.dialogs.suppliers.add'), () => 
         {
+            elementsTable.search()
             suppliersTable.search()
-            addToast('Supplier added successfully', 3000, true, 'm', 'success')
+            OnyksToastContainer.success(i18n.global.t('views.ManagementView.toasts.supplierAdded'), 3000, true, 'm')
         }),
         edit: useEditItemDialog(services.suppliers, i18n.global.t('views.ManagementView.dialogs.suppliers.edit'), () => 
         {
             suppliersTable.search()
-            addToast('Supplier edited successfully', 3000, true, 'm', 'success')
+            elementsTable.search()
+            OnyksToastContainer.success(i18n.global.t('views.ManagementView.toasts.supplierEdited'), 3000, true, 'm')
         }, computed(() => suppliersTable.data.find(item => item.selected) || null)),
         delete: useDeleteItemsDialog(services.suppliers, i18n.global.t('views.ManagementView.dialogs.suppliers.delete'), () => 
         {
             suppliersTable.search()
+            elementsTable.search()
         }, computed(() => suppliersTable.data.filter(item => item.selected)))
     })
     
@@ -116,16 +121,19 @@
         add: useAddItemDialog(services.manufacturers, i18n.global.t('views.ManagementView.dialogs.manufacturers.add'), () => 
         {
             manufacturersTable.search()
-            addToast('Manufacturer added successfully', 3000, true, 'm', 'success')
+            elementsTable.search()
+            OnyksToastContainer.success(i18n.global.t('views.ManagementView.toasts.manufacturerAdded'), 3000, true, 'm')
         }),
         edit: useEditItemDialog(services.manufacturers, i18n.global.t('views.ManagementView.dialogs.manufacturers.edit'), () => 
         {
             manufacturersTable.search()
-            addToast('Manufacturer edited successfully', 3000, true, 'm', 'success')
+            elementsTable.search()
+            OnyksToastContainer.success(i18n.global.t('views.ManagementView.toasts.manufacturerEdited'), 3000, true, 'm')
         }, computed(() => manufacturersTable.data.find(item => item.selected) || null)),
         delete: useDeleteItemsDialog(services.manufacturers, i18n.global.t('views.ManagementView.dialogs.manufacturers.delete'), () => 
         {
             manufacturersTable.search()
+            elementsTable.search()
         }, computed(() => manufacturersTable.data.filter(item => item.selected)))
     })
 
@@ -134,16 +142,19 @@
         add: useAddItemDialog(services.tables, i18n.global.t('views.ManagementView.dialogs.tables.add'), () => 
         {
             tablesTable.search()
-            addToast('Table added successfully', 3000, true, 'm', 'success')
+            elementsTable.search()
+            OnyksToastContainer.success(i18n.global.t('views.ManagementView.toasts.tableAdded'), 3000, true, 'm')
         }),
         edit: useEditItemDialog(services.tables, i18n.global.t('views.ManagementView.dialogs.tables.edit'), () => 
         {
             tablesTable.search()
-            addToast('Table edited successfully', 3000, true, 'm', 'success')
+            elementsTable.search()
+            OnyksToastContainer.success(i18n.global.t('views.ManagementView.toasts.tableEdited'), 3000, true, 'm')
         }, computed(() => tablesTable.data.find(item => item.selected) || null)),
         delete: useDeleteItemsDialog(services.tables, i18n.global.t('views.ManagementView.dialogs.tables.delete'), () => 
         {
             tablesTable.search()
+            elementsTable.search()
         }, computed(() => tablesTable.data.filter(item => item.selected)))
     })
 

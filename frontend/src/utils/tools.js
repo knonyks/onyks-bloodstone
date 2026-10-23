@@ -61,7 +61,7 @@ export const useRepository = (_filter = (e) => e.type === 'dir' || e.type === 's
 
 export const useBasicTable = (_service, _columns, _expandable = false, _expandedTemplate = (row) => html`
     ${row ? JSON.stringify(row) : ''}
-`) =>
+`, formatData = (item) => item) =>
 {
     const columns = ref(_columns)
     const data = ref([{name: 'xx'}])
@@ -80,7 +80,7 @@ export const useBasicTable = (_service, _columns, _expandable = false, _expanded
     {
         const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
         data.value = result?.data?.items ?? []
-        data.value.map((item) => item.selected = false)
+        data.value.map((item) => formatData(item))
         total.value = result?.data?.total ?? 0
     }
 
@@ -101,13 +101,12 @@ export const useBasicTable = (_service, _columns, _expandable = false, _expanded
     watch(() => data.value, (newItems) => 
     {
         selected.value = (newItems || []).filter((item) => item.selected).length
-
     });
 
     const pageChange = async (index) =>
     {
         data.value = (await service.list(index, limit.value, searchPhrase.value, sortBy.value, sortDesc.value))?.data?.items ?? []
-        data.value.map((item) => item.selected = false)
+        data.value.map((item) => formatData(item))
         if (index == null) return;
         page.value = index;
     }
@@ -117,7 +116,7 @@ export const useBasicTable = (_service, _columns, _expandable = false, _expanded
         page.value = 1
         const result = await service.list(page.value, limit.value, searchPhrase.value, sortBy.value, sortDesc.value)
         data.value = result?.data?.items ?? []
-        data.value.map((item) => item.selected = false)
+        data.value.map((item) => formatData(item))
         total.value = result?.data?.total ?? 0
     }
 
@@ -184,7 +183,8 @@ export const useEditItemDialog = (_service = null, _title = '', _handleEnd = () 
         catch (e)
         {
             console.dir(e)
-            error.value = e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'
+            // error.value = e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'
+            error.value = i18n.global.t(`error_codes.${e?.response?.data?.detail?.error_code}`) || e?.message || 'An error occurred'
         }
         finally
         {

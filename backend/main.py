@@ -22,6 +22,7 @@ from sqlalchemy import select, func, Uuid
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from pydantic import Json, ValidationError
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy import text
 from utils import MyRepository, MyDatabase
 import redis
@@ -489,8 +490,19 @@ async def delete_suppliers(id: int, db = Depends(get_db)):
     
     return id
 
+# creating a new supplier
 @app.post('/suppliers')
-async def post_suppliers(supplier: schemas.SupplierBase, db = Depends(get_db)):
+async def post_suppliers(supplier_data: dict, db = Depends(get_db)):
+    name = supplier_data.get('name')
+    if not isinstance(name, str) or not name.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "EMPTY_SUPPLIER_NAME",
+                "message": "Supplier name cannot be empty."
+            }
+        )
+    supplier = schemas.SupplierBase.model_validate(supplier_data)
     item = models.Supplier(**supplier.model_dump())
     db.add(item)
     try:
@@ -503,19 +515,11 @@ async def post_suppliers(supplier: schemas.SupplierBase, db = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
-                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "error_code": "INVALID_DATA_OR_SUPPLIER_ALREADY_EXISTS",
                 "message": "Invalid data or a supplier with this name already exists."
             }
         )
 
-@app.post('/suppliers/by-ids')
-async def get_suppliers_by_ids(ids: list[int], db = Depends(get_db)):
-    result = await db.execute(
-        select(models.Supplier).where(models.Supplier.id.in_(ids))
-    )
-    suppliers = result.scalars().all()
-    suppliers_by_id = {supplier.id: supplier for supplier in suppliers}
-    return [suppliers_by_id[supplier_id] for supplier_id in ids if supplier_id in suppliers_by_id]
 
 @app.get('/suppliers/{id}')
 async def get_suppliers(id: int, db = Depends(get_db)):
@@ -535,7 +539,7 @@ async def get_suppliers(id: int, db = Depends(get_db)):
     return item
 
 @app.patch('/suppliers/{id}')
-async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(get_db)):
+async def patch_suppliers(id: int, supplier: dict, db = Depends(get_db)):
     query = select(models.Supplier).where(models.Supplier.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -549,6 +553,22 @@ async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(
             }
         )
     
+    if "name" in supplier and (
+        not isinstance(supplier["name"], str) or not supplier["name"].strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "EMPTY_SUPPLIER_NAME",
+                "message": "Supplier name cannot be empty."
+            }
+        )
+
+    try:
+        supplier = schemas.SupplierBase.model_validate(supplier)
+    except ValidationError as exc:
+        raise RequestValidationError(exc.errors()) from exc
+
     update_data = supplier.model_dump(exclude_unset=True)
 
     for field, value in update_data.items():
@@ -565,7 +585,7 @@ async def patch_suppliers(id: int, supplier: schemas.SupplierBase, db = Depends(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
-                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "error_code": "INVALID_DATA_OR_SUPPLIER_ALREADY_EXISTS",
                 "message": "Invalid data or a supplier with this name already exists."
             }
         )

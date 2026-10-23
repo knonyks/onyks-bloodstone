@@ -138,6 +138,15 @@ const pl =
                     edit: 'Edytuj tabelę',
                     delete: 'Usuń tabelę'
                 }
+            },
+            toasts:
+            {
+                supplierAdded: 'Dostawca został dodany pomyślnie.',
+                supplierEdited: 'Dostawca został edytowany pomyślnie.',
+                manufacturerAdded: 'Producent został dodany pomyślnie.',
+                manufacturerEdited: 'Producent został edytowany pomyślnie.',
+                tableAdded: 'Tabela została dodana pomyślnie.',
+                tableEdited: 'Tabela została edytowana pomyślnie.'
             }
         }
     },
@@ -166,7 +175,8 @@ const pl =
         },
         EditItemDialog:
         {
-            edit: 'Edytuj'
+            subtitle1: 'Obecna nazwa:',
+            subtitle2: 'Wprowadź nową nazwę poniżej:',
         },
         DeleteItemsDialog:
         {
@@ -175,7 +185,8 @@ const pl =
     },
     error_codes:
     {
-        INVALID_DATA_OR_OBJECT_ALREADY_EXISTS: 'Nieprawidłowe dane lub taki obiekt już istnieje.'
+        INVALID_DATA_OR_SUPPLIER_ALREADY_EXISTS: 'Nieprawidłowe dane lub taki dostawca już istnieje.',
+        EMPTY_SUPPLIER_NAME: 'Nazwa dostawcy nie może być pusta.',
     }
     // pages:
     // {
@@ -250,8 +261,9 @@ const datetimeFormats =
     },
     'pl-PL': 
     {
-        short: {
-            year: 'numeric', month: 'short', day: 'numeric'
+        short: 
+        {
+            year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
         },
         long: {
             year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: 'numeric', minute: 'numeric', second: 'numeric'

@@ -6,8 +6,8 @@
 
 <template>
 
-    <onyks-container padding="m" class="toast-container">
-        <onyks-toast-container class="toast-container-content"></onyks-toast-container>
+    <onyks-container padding="m" class="toast-parent">
+        <onyks-toast-container class="toast-container"></onyks-toast-container>
     </onyks-container> 
 
     <onyks-container class="container" align="center">
@@ -32,17 +32,6 @@
     #app
     {
         overflow-y: hidden;
-    }
-
-    .toast-container
-    {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        max-width: 400px;
-        width: 100%;
-        box-sizing: border-box;
-        z-index: 101;
     }
 
     onyks-nav
@@ -77,6 +66,24 @@
     .fade-enter-to, .fade-leave-from
     {
         opacity: 1;
+    }
+
+    .toast-parent
+    {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        max-width: 400px;
+        width: 100%;
+        box-sizing: border-box;
+        z-index: 101;
+        pointer-events: none;
+        height: fit-content;
+    }
+
+    .toast-container
+    {
+        justify-content: end;
     }
 </style>
 
