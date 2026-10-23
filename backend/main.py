@@ -87,6 +87,8 @@ async def get_repository_statistics():
 ########################################
 
 # TABLES
+
+# xxx
 @app.get('/tables/count')
 async def get_tables_count(db = Depends(get_db)):
     query = select(func.count()).select_from(models.Table)
@@ -94,6 +96,7 @@ async def get_tables_count(db = Depends(get_db)):
     totalCount = result.scalar()
     return {'count': totalCount}
 
+# xxx
 @app.get('/tables/counts')
 async def get_tables_counts(db = Depends(get_db)):
     query = select(models.Table.name, func.count(models.Element.uuid)).select_from(models.Table).outerjoin(models.Element, models.Table.name == models.Element.table).group_by(models.Table.name)
@@ -106,6 +109,7 @@ async def get_tables_counts(db = Depends(get_db)):
     
     return data
 
+# xxx
 @app.get("/tables", response_model = schemas.PageResponse[schemas.TableFull])
 async def get_tables_list(
     page: int = Query(1, ge=1),
@@ -186,8 +190,24 @@ async def delete_tables(id: int, db = Depends(get_db)):
     
     return id
 
+# xxx
 @app.post('/tables')
-async def post_tables(table: schemas.TableBase, db = Depends(get_db)):
+async def post_tables(table_data: dict, db = Depends(get_db)):
+    name = table_data.get("name")
+    if not isinstance(name, str) or not name.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "TABLE_EMPTY_NAME",
+                "message": "Name cannot be empty."
+            }
+        )
+
+    try:
+        table = schemas.TableBase.model_validate(table_data)
+    except ValidationError as exc:
+        raise RequestValidationError(exc.errors()) from exc
+
     item = models.Table(**table.model_dump())
     db.add(item)
     try:
@@ -200,8 +220,8 @@ async def post_tables(table: schemas.TableBase, db = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
-                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
-                "message": "Invalid data or a supplier with this name already exists."
+                "error_code": "INVALID_DATA_OR_TABLE_ALREADY_EXISTS",
+                "message": "Invalid data or a table with this name already exists."
             }
         )
 
@@ -223,7 +243,7 @@ async def get_tables(id: int, db = Depends(get_db)):
     return item
 
 @app.patch('/tables/{id}')
-async def patch_tables(id: int, table: schemas.TableBase, db = Depends(get_db)):
+async def patch_tables(id: int, table: dict, db = Depends(get_db)):
     query = select(models.Table).where(models.Table.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -237,7 +257,25 @@ async def patch_tables(id: int, table: schemas.TableBase, db = Depends(get_db)):
             }
         )
     
-    update_data = table.model_dump(exclude_unset=True)
+    name = table.get("name")
+    if "name" in table and (not isinstance(name, str) or not name.strip()):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "TABLE_EMPTY_NAME",
+                "message": "Name cannot be empty."
+            }
+        )
+
+    try:
+        validated_table = schemas.TableBase.model_validate(table)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=exc.errors()
+        )
+
+    update_data = validated_table.model_dump(exclude_unset=True)
 
     for field, value in update_data.items():
         setattr(item, field, value)
@@ -253,14 +291,16 @@ async def patch_tables(id: int, table: schemas.TableBase, db = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
-                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
-                "message": "Invalid data or a supplier with this name already exists."
+                "error_code": "INVALID_DATA_OR_TABLE_ALREADY_EXISTS",
+                "message": "Invalid data or a table with this name already exists."
             }
         )
 
 ########################################
 
 # MANUFACTURERS
+
+# count manufacturers
 @app.get('/manufacturers/count')
 async def get_manufacturers_count(db = Depends(get_db)):
     query = select(func.count()).select_from(models.Manufacturer)
@@ -268,6 +308,7 @@ async def get_manufacturers_count(db = Depends(get_db)):
     totalCount = result.scalar()
     return {'count': totalCount}
 
+# count manufacturers
 @app.get('/manufacturers/counts')
 async def get_manufacturers_counts(db = Depends(get_db)):
     query = select(models.Manufacturer.name, func.count(models.Element.uuid)).select_from(models.Manufacturer).outerjoin(models.Element, models.Manufacturer.name == models.Element.manufacturer).group_by(models.Manufacturer.name)
@@ -280,6 +321,7 @@ async def get_manufacturers_counts(db = Depends(get_db)):
     
     return data
 
+# list manufacturers
 @app.get("/manufacturers", response_model = schemas.PageResponse[schemas.ManufacturerFull])
 async def get_manufacturers_list(
     page: int = Query(1, ge=1),
@@ -326,6 +368,7 @@ async def get_manufacturers_list(
 
     return schemas.PageResponse(items=entries, total=totalCount, page=page, limit=limit)
 
+# delete manufacturers
 @app.delete('/manufacturers/{id}')
 async def delete_manufacturers(id: int, db = Depends(get_db)):
     query = select(models.Manufacturer).where(models.Manufacturer.id == id)
@@ -344,11 +387,20 @@ async def delete_manufacturers(id: int, db = Depends(get_db)):
     await db.delete(item)
     await db.commit()
     # await MyDatabase.updateElementsViews(db)
-    
     return id
 
+# create manufacturers
 @app.post('/manufacturers')
 async def post_manufacturers(manufacturer: schemas.ManufacturerBase, db = Depends(get_db)):
+    if manufacturer.name == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "EMPTY_MANUFACTURER_NAME",
+                "message": "Manufacturer name cannot be 0."
+            }
+        )
+
     item = models.Manufacturer(**manufacturer.model_dump())
     db.add(item)
     try:
@@ -361,8 +413,8 @@ async def post_manufacturers(manufacturer: schemas.ManufacturerBase, db = Depend
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
-                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
-                "message": "Invalid data or a supplier with this name already exists."
+                "error_code": "INVALID_DATA_OR_MANUFACTURER_ALREADY_EXISTS",
+                "message": "Invalid data or a manufacturer with this name already exists."
             }
         )
 
@@ -383,8 +435,28 @@ async def get_manufacturers(id: int, db = Depends(get_db)):
     
     return item
 
+# edit manufacturers
 @app.patch('/manufacturers/{id}')
-async def patch_manufacturers(id: int, manufacturer: schemas.ManufacturerBase, db = Depends(get_db)):
+async def patch_manufacturers(id: int, manufacturer: dict, db = Depends(get_db)):
+    if "name" in manufacturer and (
+        not isinstance(manufacturer["name"], str) or not manufacturer["name"].strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "EMPTY_MANUFACTURER_NAME",
+                "message": "Manufacturer name cannot be empty."
+            }
+        )
+
+    try:
+        manufacturer = schemas.ManufacturerBase.model_validate(manufacturer)
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=exc.errors()
+        )
+
     query = select(models.Manufacturer).where(models.Manufacturer.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -400,6 +472,17 @@ async def patch_manufacturers(id: int, manufacturer: schemas.ManufacturerBase, d
     
     update_data = manufacturer.model_dump(exclude_unset=True)
 
+    if "name" in update_data and (
+        not isinstance(update_data["name"], str) or not update_data["name"].strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "EMPTY_MANUFACTURER_NAME",
+                "message": "Manufacturer name cannot be empty."
+            }
+        )
+
     for field, value in update_data.items():
         setattr(item, field, value)
     
@@ -412,13 +495,15 @@ async def patch_manufacturers(id: int, manufacturer: schemas.ManufacturerBase, d
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
-            "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
-            "message": "Invalid data or an object with this name already exists."
+            "error_code": "INVALID_DATA_OR_MANUFACTURER_ALREADY_EXISTS",
+            "message": "Invalid data or a manufacturer with this name already exists."
         })
 
 ########################################
 
 # SUPPLIERS
+
+# get the total count of suppliers
 @app.get('/suppliers/count')
 async def get_suppliers_count(db = Depends(get_db)):
     query = select(func.count()).select_from(models.Supplier)
@@ -426,6 +511,7 @@ async def get_suppliers_count(db = Depends(get_db)):
     totalCount = result.scalar()
     return {'count': totalCount}
 
+# get a list of suppliers with pagination, search, and sorting
 @app.get("/suppliers", response_model = schemas.PageResponse[schemas.SupplierFull])
 async def get_suppliers_list(
     page: int = Query(1, ge=1),
@@ -469,6 +555,7 @@ async def get_suppliers_list(
 
     return schemas.PageResponse(items=entries, total=totalCount, page=page, limit=limit)
 
+# delete a supplier by id
 @app.delete('/suppliers/{id}')
 async def delete_suppliers(id: int, db = Depends(get_db)):
     query = select(models.Supplier).where(models.Supplier.id == id)
@@ -520,7 +607,7 @@ async def post_suppliers(supplier_data: dict, db = Depends(get_db)):
             }
         )
 
-
+# getting a single supplier by id
 @app.get('/suppliers/{id}')
 async def get_suppliers(id: int, db = Depends(get_db)):
     query = select(models.Supplier).where(models.Supplier.id == id)
@@ -538,6 +625,7 @@ async def get_suppliers(id: int, db = Depends(get_db)):
     
     return item
 
+# updating a supplier by id
 @app.patch('/suppliers/{id}')
 async def patch_suppliers(id: int, supplier: dict, db = Depends(get_db)):
     query = select(models.Supplier).where(models.Supplier.id == id)

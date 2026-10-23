@@ -180,13 +180,25 @@ const pl =
         },
         DeleteItemsDialog:
         {
-            delete: 'Usuń'
+            subtitle1: 'Próbujesz usunać {count} obiekt.',
+            subtitle2: 'Próbujesz usunąć {count} obiekty:',
+            confirm: 'Potwierdź',
+            deleted: 'Usunięto { counter } z { length } obiektów pomyślnie.',   
+            result: 'Wynik',
+            someItemsCouldNotBeDeleted: 'Niektóre obiekty nie mogły zostać usunięte:'
         }
     },
     error_codes:
     {
         INVALID_DATA_OR_SUPPLIER_ALREADY_EXISTS: 'Nieprawidłowe dane lub taki dostawca już istnieje.',
         EMPTY_SUPPLIER_NAME: 'Nazwa dostawcy nie może być pusta.',
+        ITEM_DELETE_SUCCESS: 'Pomyślnie usunięto.',
+        SUPPLIER_NOT_FOUND: 'Dostawca nie został znaleziony.',
+        INVALID_DATA_OR_MANUFACTURER_ALREADY_EXISTS: 'Nieprawidłowe dane lub taki producent już istnieje.',
+        EMPTY_MANUFACTURER_NAME: 'Nazwa producenta nie może być pusta.',
+        INVALID_DATA_OR_TABLE_ALREADY_EXISTS: 'Nieprawidłowe dane lub taka tabela już istnieje.',
+        TABLE_EMPTY_NAME: 'Nazwa tabeli nie może być pusta.',
+        TABLE_NOT_EMPTY: 'Tabela nie jest pusta.'
     }
     // pages:
     // {
