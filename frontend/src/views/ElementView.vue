@@ -40,10 +40,11 @@
                 try
                 {
                     let result = await services.elements.create(obj.details, obj.files)
+                    console.log(result)
                 }
                 catch(err)
                 {
-
+                    console.error(err)
                 }
             }
         },

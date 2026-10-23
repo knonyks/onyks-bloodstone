@@ -59,16 +59,16 @@
                 <onyks-container gap="m" cols="2" rows="4" type="grid" mobile-breakpoint="900" style="grid-template-columns: 125px auto;">
 
                     <onyks-header level="6" cols="1">{{ $t('views.DashboardView.partName') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.partName || $t('DashboardView.none') }}</onyks-text>
+                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.partName || $t('views.DashboardView.noData') }}</onyks-text>
 
                     <onyks-header level="6" cols="1">{{ $t('views.DashboardView.manufacturer') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{data.elements?.lastAdded?.manufacturer || $t('DashboardView.none')}}</onyks-text>
+                    <onyks-text size="m" cols="1">{{data.elements?.lastAdded?.manufacturer || $t('views.DashboardView.noData')}}</onyks-text>
 
                     <onyks-header level="6" cols="1">{{ $t('views.DashboardView.table') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{data.elements?.lastAdded?.table || $t('DashboardView.none')}}</onyks-text>
+                    <onyks-text size="m" cols="1">{{data.elements?.lastAdded?.table || $t('views.DashboardView.noData')}}</onyks-text>
 
                     <onyks-header level="6" cols="1">{{ $t('views.DashboardView.createdAt') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.createdAt ? $d(new Date(data.elements.lastAdded.createdAt), 'long') : $t('DashboardView.none') }}</onyks-text>
+                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.createdAt ? $d(new Date(data.elements.lastAdded.createdAt), 'long') : $t('views.DashboardView.noData') }}</onyks-text>
 
                 </onyks-container>
             </onyks-card>

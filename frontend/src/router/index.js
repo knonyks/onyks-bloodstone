@@ -57,25 +57,25 @@ const routes = [
         path: 'elements/create',
         name: 'element-create',
         component: ElementView,
-        meta: { title: i18n.global.t('pages.titles.createElement') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.ElementView.titles.create') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/details/:uuid',
         name: 'element-details',
         component: ElementView,
-        meta: { title: i18n.global.t('pages.titles.elementDetails') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.ElementView.titles.details') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/edit/:uuid',
         name: 'element-edit',
         component: ElementView,
-        meta: { title: i18n.global.t('pages.titles.editElement') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('views.ElementView.titles.edit') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/duplicate/:uuid',
         name: 'element-duplicate',
         component: ElementView,
-        meta: { title: i18n.global.t('pages.titles.duplicateElement') + ' - ONYKS Bloodstone' },
+        meta: { title: i18n.global.t('views.ElementView.titles.duplicate') + ' - ONYKS Bloodstone' },
         props: { schema: 'duplicate' }
       },
     ]

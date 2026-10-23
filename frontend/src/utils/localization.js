@@ -41,7 +41,7 @@ const pl =
         DashboardView:
         {
             title: 'Panel główny',
-            none: 'Brak',
+            noData: 'Brak danych',
             overview: 'Przegląd',
             lastAddedElement: 'Ostatnio dodany element',
             partName: 'Nazwa części',
@@ -92,31 +92,28 @@ const pl =
                 labels: 'Etykiety',
                 scan: 'Skanuj'
             },
-            tables:
+            columns:
             {
-                columns:
-                {
-                    selected: 'Wybrano',
-                    id: 'ID',
-                    name: 'Nazwa',
-                    createdAt: 'Utworzono',
-                    partName: 'Nazwa części',
-                    manufacturer: 'Producent',
-                    table: 'Tabela',
-                    symbol: 'Symbol',
-                    availability: 'Dostępność',
-                    value: 'Wartość',
-                    description: 'Opis',
-                    tags: 'Tagi',
-                    uuid: 'UUID',
-                    suppliers: 'Dostawcy',
-                    footprints: 'Footprinty',
-                    datasheets: 'Karty danych',
-                    footprintNo1: 'Footprint nr 1',
-                    footprintNo2: 'Footprint nr 2',
-                    footprintNo3: 'Footprint nr 3'
-                    
-                }
+                selected: 'Wybrano',
+                id: 'ID',
+                name: 'Nazwa',
+                createdAt: 'Utworzono',
+                partName: 'Nazwa części',
+                manufacturer: 'Producent',
+                table: 'Tabela',
+                symbol: 'Symbol',
+                availability: 'Dostępność',
+                value: 'Wartość',
+                description: 'Opis',
+                tags: 'Tagi',
+                uuid: 'UUID',
+                suppliers: 'Dostawcy',
+                footprints: 'Footprinty',
+                datasheets: 'Karty danych',
+                footprintNo1: 'Footprint nr 1',
+                footprintNo2: 'Footprint nr 2',
+                footprintNo3: 'Footprint nr 3',
+                noData: 'Brak danych'
             },
             dialogs:
             {
@@ -147,6 +144,16 @@ const pl =
                 manufacturerEdited: 'Producent został edytowany pomyślnie.',
                 tableAdded: 'Tabela została dodana pomyślnie.',
                 tableEdited: 'Tabela została edytowana pomyślnie.'
+            }
+        },
+        ElementView:
+        {
+            titles:
+            {
+                details: 'Szczegóły elementu',
+                create: 'Dodaj element',
+                edit: 'Edytuj element',
+                duplicate: 'Duplikuj element'
             }
         }
     },
