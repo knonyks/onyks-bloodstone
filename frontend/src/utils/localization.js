@@ -206,6 +206,18 @@ const pl =
         INVALID_DATA_OR_TABLE_ALREADY_EXISTS: 'Nieprawidłowe dane lub taka tabela już istnieje.',
         TABLE_EMPTY_NAME: 'Nazwa tabeli nie może być pusta.',
         TABLE_NOT_EMPTY: 'Tabela nie jest pusta.'
+    },
+    other:
+    {
+        labels:
+        {
+            uuid: 'UUID',
+            partName: 'Nazwa',
+            manufacturer: 'Producent',
+            table: 'Tabela',
+            value: 'Wartość',
+            description: 'Opis'
+        }
     }
     // pages:
     // {

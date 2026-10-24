@@ -10,11 +10,11 @@
     import AddItemDialog from '@/components/AddItemDialog.vue';
     import EditItemDialog from '@/components/EditItemDialog.vue';
     import DeleteItemsDialog from '@/components/DeleteItemsDialog.vue';
-    import { addToast } from '@/utils/tools';
     import { html } from 'lit';
     import router from '@/router';
     import { i18n } from '@/utils/localization';
     import { OnyksToastContainer } from 'onyks-web-ui-system';
+    import { useLabels } from '@/utils/tools';
 
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
@@ -57,8 +57,8 @@
                 <onyks-tag style="cursor: pointer; width: 75px; text-align: center;" background="red" icon="" style="width: 75px; text-align: center;">${i18n.global.t('views.ManagementView.btns.delete')}</onyks-tag>
             </onyks-container>
         
-            <onyks-container style="background-color: transparent; width: 100%; height: fit-content;" type="group" gap="m" mobile-breakpoint="900">
-                <onyks-container type="stack" gap="m" cols="1" style="width: 500px; min-width: 0;">
+            <onyks-container style="grid-template-columns: 400px minmax(0, 1fr);" type="grid" gap="m">
+                <onyks-container type="stack" gap="m" cols="1">
                     
                     <onyks-header level="6">${i18n.global.t('views.ManagementView.columns.uuid')}</onyks-header>
                     <onyks-text size="s">${row?.uuid || ''}</onyks-text>
@@ -76,7 +76,7 @@
                     <onyks-header level="6">${i18n.global.t('views.ManagementView.columns.footprintNo3')}</onyks-header>
                     ${row.footprintPathNo3 != '' && row.footprintReferenceNo3 != '' ? html`<onyks-path style="width: 100%; max-width: 100%; min-width: 0; overflow: hidden;" .content=${row.footprintPathNo3.split('/').concat(row.footprintReferenceNo3)} size="s"></onyks-path>` : html`<onyks-text size="s">${i18n.global.t('views.ManagementView.columns.noData')}</onyks-text>`}
                 </onyks-container>
-                <onyks-container type="stack" gap="m" style="width: 500px; min-width: 0;">
+                <onyks-container type="stack" gap="m">
                     <onyks-header level="6">${i18n.global.t('views.ManagementView.columns.description')}</onyks-header>
                     ${row.description != '' ? html`<onyks-text size="s" style="text-align: justify;">${row.description}</onyks-text>` : html`<onyks-text size="s">${i18n.global.t('views.ManagementView.columns.noData')}</onyks-text>`}
                     <onyks-header level="6">${i18n.global.t('views.ManagementView.columns.tags')}</onyks-header>
@@ -85,16 +85,18 @@
                         : html`<onyks-text size="s">${i18n.global.t('views.ManagementView.columns.noData')}</onyks-text>`}
 
                     <onyks-header level="6">${i18n.global.t('views.ManagementView.columns.datasheets')}</onyks-header>
-                    <onyks-container type="group" gap="m">
-                        ${row.datasheets.map(datasheet => html`<onyks-tag background="yellow" size="s" icon="F756" @click=${() => window.open('/files/' + datasheet.uuid + '.pdf', '_blank')}>${datasheet.name}</onyks-tag>`)}
-                    </onyks-container>
+                    ${row.datasheets.length > 0
+                        ? html`<onyks-container type="group" gap="m">${row.datasheets.map(datasheet => html`<onyks-tag background="yellow" size="s" icon="F756" @click=${() => window.open('/files/' + datasheet.uuid + '.pdf', '_blank')}>${datasheet.name}</onyks-tag>`)}</onyks-container>`
+                        : html`<onyks-text size="s">${i18n.global.t('views.ManagementView.columns.noData')}</onyks-text>`}
                 </onyks-container>
             </onyks-container>
         </onyks-container>
     `, (item) => 
     { 
         item.selected = false; 
-        item.createdAt = i18n.global.d(new Date(item.createdAt), 'short'); item.manufacturer = item.manufacturer || i18n.global.t('views.ManagementView.columns.noData') }))
+        item.description = item.description || i18n.global.t('views.ManagementView.columns.noData')
+        item.createdAt = i18n.global.d(new Date(item.createdAt), 'short'); 
+        item.manufacturer = item.manufacturer || i18n.global.t('views.ManagementView.columns.noData') }))
 
     const suppliersDialogs = reactive(
     {
@@ -159,6 +161,8 @@
         }, computed(() => tablesTable.data.filter(item => item.selected)))
     })
 
+    const labels = reactive(useLabels())
+
     onMounted(async () =>
     {
         await suppliersTable.init()
@@ -191,7 +195,7 @@
             <onyks-button background="yellow" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/duplicate/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('views.ManagementView.btns.duplicate')}}</onyks-button>
             <onyks-button background="red" :disabled="elementsTable.selected === 0">{{$t('views.ManagementView.btns.delete')}}</onyks-button>
             <onyks-button background="gray" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/details/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('views.ManagementView.btns.details')}}</onyks-button>
-            <onyks-button background="green">{{$t('views.ManagementView.btns.labels')}}</onyks-button>
+            <onyks-button @click="labels.generate(elementsTable?.data.filter(item => item.selected))" background="green" :disabled="elementsTable.selected === 0">{{$t('views.ManagementView.btns.labels')}}</onyks-button>
             <onyks-button background="blue">{{$t('views.ManagementView.btns.scan')}}</onyks-button>
         </BasicButtonsPanel>
         <BasicSearch v-model="elementsTable.searchPhrase" :search="elementsTable.search"></BasicSearch>

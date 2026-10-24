@@ -5,7 +5,6 @@ import { services } from './api';
 import { reactive } from 'vue'
 import { ref } from 'vue';
 import { watch } from 'vue';
-import { OnyksToastContainer } from 'onyks-web-ui-system'
 import { computed } from 'vue';
 import { unref } from 'vue';
 import { html } from 'lit';
@@ -403,210 +402,299 @@ export const useTagsSelector = (_service, tags) =>
     return { options, init, keydownHandler, text, search, select }
 }
 
-export const addToast = (message, duration = 3000, closable = true, size = 'm', type = 'info') =>
+export const useLabels = () =>
 {
-    const toastContainer = document.querySelector('.toast-container-content')
-    if (toastContainer)
+    const columns = ref(2)
+    const rows = ref(6)
+    const data = ref([])
+    const pdf = ref(null)
+    const pages = ref([])
+    const width = ref(PageSizes.A4[0])
+    const height = ref(PageSizes.A4[1])
+    const spacing = ref(5)
+    const size = ref(8)
+
+    const init = async () =>
     {
-        toastContainer.appendChild(OnyksToastContainer.addToast(message, duration, closable, size, type))
-    }
-}
-
-
-
-export class LabelsDoc
-{
-    constructor(labelsAmount)
-    {
-        this.columns = 2
-        this.rows = 6
-        this.spacing = 7
-        this.normalSize = 8
-        this.bigSize = 12
-        this.labelsAmount = labelsAmount
-        this.width = PageSizes.A4[0]
-        this.height = PageSizes.A4[1]
-        this.widthStep = this.width / this.columns
-        this.heightStep = this.height / this.rows
-    }
-
-    async addLogo(logoUrl)
-    {
-        this.logoBytes = await fetch(logoUrl).then((res) => res.arrayBuffer())
-        this.logoImg = await this.pdf.embedPng(this.logoBytes)
-        this.logoDims = await this.logoImg.scale(0.01)
-    }
-
-    async init()
-    {
-        this.pdf = await PDFDocument.create()
-        for(let i=0; i<Math.ceil(this.labelsAmount/(this.columns*this.rows)); i++)
+        pdf.value = await PDFDocument.create()
+        for(let i=0; i<Math.ceil(data.value.length/(columns.value*rows.value)); i++)
         {
-            await this.pdf.addPage(PageSizes.A4)
+            await pdf.value.addPage(PageSizes.A4)
         }
-        this.pages = await this.pdf.getPages()
+        pages.value = await pdf.value.getPages()
     }
 
-    async drawBorders()
-    {
-        for(let i=0; i<this.labelsAmount; i++)
-        {
-            await this.__drawBorder(i)
-        }
-    }
-
-    async __drawBorder(index)
+    const __drawBorder = async (index) =>
     {
         let settings = 
         {
             thickness: 1,
             color: rgb(0, 0, 0),
-            opacity: 0.5,
+            opacity: 0.2,
+            dashArray: [10, 20]
+        }
+        let col = index % columns.value
+        let row = Math.floor((index % (rows.value * columns.value)) / columns.value)
+        let page = Math.floor(index / (rows.value*columns.value))
+
+        // is the end of the page?
+        if(row != rows.value - 1)
+        {
+            if(col == 0)
+            {
+                settings.start = { x: 0 , y:  height.value - (height.value / rows.value)*(row + 1) }
+                settings.end = { x: width.value/2, y:  height.value - (height.value / rows.value)*(row + 1) }
+                await pages.value[page].drawLine(settings)
+            }
+            else
+            {
+                settings.start = { x: width.value/2 , y:  height.value - (height.value / rows.value)*(row + 1) }
+                settings.end = { x: width.value, y:  height.value - (height.value / rows.value)*(row + 1) }
+                await pages.value[page].drawLine(settings)
+            }
         }
 
-        let col = index % this.columns
-        let row = Math.floor((index % (this.rows * this.columns)) / 2)
-        let page = Math.floor(index / (this.rows*this.columns))
-
-        settings.start = { x: (this.width/2)*col, y: this.height - this.heightStep*(row + 1) }
-        settings.end = { x: col == 0? this.width/2:this.width, y: this.height - this.heightStep*(row + 1) }
-
-        await this.pages[page].drawLine(settings)
-
+        // is the right edge of the page?
         if(col == 0)
         {
-            settings.start = { x: this.width/2, y: this.height - this.heightStep*(row) }
-            settings.end = { x: this.width/2, y: this.height - this.heightStep*(row + 1) }
-            await this.pages[page].drawLine(settings)
+            settings.start = { x: width.value/2 , y:  height.value - (height.value / rows.value)*(row + 1) }
+            settings.end = { x: width.value/2, y:  height.value - (height.value / rows.value)*row}
+            await pages.value[page].drawLine(settings)
         }
     }
 
-    async drawData(index, data)
+    const drawBorders = async () =>
     {
-        let col = index % this.columns
-        let row = Math.floor((index % (this.rows * this.columns)) / 2)
-        let page = Math.floor(index / (this.rows*this.columns))
-
-        let positionLift = this.height - this.spacing - this.normalSize - this.heightStep * row
-
-        this.pages[page].drawText(`UUID:\t${data.uuid}`, 
+        for(let i=0; i<data.value.length; i++)
         {
-            x: this.spacing + col*(this.width/2),
-            y: positionLift,
-            size: this.normalSize,
-            color: rgb(0, 0, 0),
-            rotate: degrees(0),
-            lineHeight: this.normalSize
-        })
-
-        positionLift += -this.spacing - this.bigSize
-
-        this.pages[page].drawText(`Part Name:\t${data.partName}`, 
-        {
-            x: this.spacing + col*(this.width/2),
-            y: positionLift,
-            size: this.bigSize,
-            color: rgb(0, 0, 0),
-            rotate: degrees(0),
-            lineHeight: this.normalSize
-        })
-
-        positionLift += -this.spacing - this.bigSize
-
-        this.pages[page].drawText(`Manufacturer:\t${data.manufacturer}`, 
-        {
-            x: this.spacing + col*(this.width/2),
-            y: positionLift,
-            size: this.normalSize,
-            color: rgb(0, 0, 0),
-            rotate: degrees(0),
-            lineHeight: this.normalSize
-        })
-
-        positionLift += -this.spacing - this.normalSize
-
-        this.pages[page].drawText(`Value:\t${data.value}`, 
-        {
-            x: this.spacing + col*(this.width/2),
-            y: positionLift,
-            size: this.normalSize,
-            color: rgb(0, 0, 0),
-            rotate: degrees(0),
-            lineHeight: this.normalSize
-        })
-
-        positionLift += -this.spacing - this.normalSize
-
-        this.pages[page].drawText(`Created at:\t${data.createdAt}`, 
-        {
-            x: this.spacing + col*(this.width/2),
-            y: positionLift,
-            size: this.normalSize,
-            color: rgb(0, 0, 0),
-            rotate: degrees(0),
-            lineHeight: this.normalSize
-        })
-
-        positionLift += -this.spacing - this.normalSize
-
-        this.pages[page].drawText(`Description:\t${data.description}`, 
-        {
-            x: this.spacing + col*(this.width/2),
-            y: positionLift,
-            size: this.normalSize,
-            color: rgb(0, 0, 0),
-            rotate: degrees(0),
-            maxWidth: 200,
-            lineHeight: this.normalSize
-        })
+            await __drawBorder(i)
+        }
     }
-
-    async drawQR(index, uuid)
+    
+    const __drawQR = async (index, uuid) =>
     {
-        let col = index % this.columns
-        let row = Math.floor((index % (this.rows * this.columns)) / 2)
-        let page = Math.floor(index / (this.rows*this.columns))
+        let col = index % columns.value
+        let row = Math.floor((index % (rows.value * columns.value)) / columns.value)
+        let page = Math.floor(index / (rows.value*columns.value))
 
         let qr = await QRCode.toDataURL(uuid)
-        const qrImage = await this.pdf.embedPng(qr)
+        const qrImage = await pdf.value.embedPng(qr)
         const qrDims = await qrImage.scale(0.5)
 
-        await this.pages[page].drawImage(qrImage, 
+        await pages.value[page].drawImage(qrImage, 
         {
-            x: (this.width/2)*(col + 1) - qrDims.width - this.spacing + 5,
-            y: this.height + this.spacing - (row + 1)*this.heightStep + 58,
+            x: (width.value/2)*(col + 1) - qrDims.width,
+            y: height.value - qrDims.height - row*(height.value / rows.value),
             width: qrDims.width,
             height: qrDims.height,
         })
     }
 
-    async drawLogo(index)
+    const __cutText = (text, maxLength) =>
     {
-        let col = index % this.columns
-        let row = Math.floor((index % (this.rows * this.columns)) / 2)
-        let page = Math.floor(index / (this.rows*this.columns))
+        if(!text) return ''
+        if(text.length <= maxLength) return text
+        return text.substring(0, maxLength) + '...'
+    }
 
-        await this.pages[page].drawImage(this.logoImg, 
+    const drawQR = async () =>
+    {
+        for(let i=0; i<data.value.length; i++)
         {
-            x: (this.width/2)*(col + 1) - this.logoDims.width - 3*this.spacing,
-            y: this.height + 2*this.spacing - (row + 1)*this.heightStep + 95,
-            width: this.logoDims.width,
-            height: this.logoDims.height,
+            await __drawQR(i, data.value[i].uuid)
+        }
+    }
+
+    // const drawLogo = async (index) =>
+    // {
+    //     let col = index % columns.value
+    //     let row = Math.floor((index % (rows.value * columns.value)) / rows.value)
+    //     let page = Math.floor(index / (rows.value*columns.value))
+
+    //     await pages.value[page].drawImage(logoImg.value, 
+    //     {
+    //         x: (width.value/2)*(col + 1) - logoDims.value.width - 3*spacing.value,
+    //         y: height.value + 2*spacing.value - (row + 1)*heightStep.value + 95,
+    //         width: logoDims.value.width,
+    //         height: logoDims.value.height,
+    //     })
+    // }
+
+    // const addLogo = async (logoUrl) =>
+    // {
+    //     logoBytes.value = await fetch(logoUrl).then((res) => res.arrayBuffer())
+    //     logoImg.value = await pdf.value.embedPng(logoBytes.value)
+    //     logoDims.value = await logoImg.value.scale(0.01)
+    // }
+
+    const __drawData = async (index, data) =>
+    {
+        const toWinAnsi = (text) => String(text ?? '')
+            .replace(/[łŁ]/g, (character) => character === 'ł' ? 'l' : 'L')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+
+        let col = index % columns.value
+        let row = Math.floor((index % (rows.value * columns.value)) / columns.value)
+        let page = Math.floor(index / (rows.value*columns.value))
+
+        let positionLift = height.value - spacing.value - size.value - (height.value / rows.value) * row
+        const helveticaBoldFont = await pdf.value.embedFont(StandardFonts.HelveticaBold);
+
+
+        pages.value[page].drawText(toWinAnsi(i18n.global.t('other.labels.uuid')), 
+        {
+            x: spacing.value + col*(width.value/2),
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value,
+            font: helveticaBoldFont,
+            bold: true
+        })
+
+        
+        pages.value[page].drawText(toWinAnsi(data.uuid), 
+        {
+            x: spacing.value + col*(width.value/2) + 55,
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value
+        })
+
+        positionLift += -spacing.value - size.value
+
+        pages.value[page].drawText(toWinAnsi(i18n.global.t('other.labels.partName')), 
+        {
+            x: spacing.value + col*(width.value/2),
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value,
+            font: helveticaBoldFont,
+        })
+
+        pages.value[page].drawText(toWinAnsi(data.partName), 
+        {
+            x: spacing.value + col*(width.value/2) + 55,
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value
+        })
+
+        positionLift += -spacing.value - size.value
+
+        pages.value[page].drawText(toWinAnsi(i18n.global.t('other.labels.manufacturer')), 
+        {
+            x: spacing.value + col*(width.value/2),
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value,
+            font: helveticaBoldFont
+        })
+
+        pages.value[page].drawText(toWinAnsi(data.manufacturer), 
+        {
+            x: spacing.value + col*(width.value/2) + 55,
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value
+        })
+
+
+        positionLift += -spacing.value - size.value
+
+        pages.value[page].drawText(toWinAnsi(i18n.global.t('other.labels.value')), 
+        {
+            x: spacing.value + col*(width.value/2),
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value,
+            font: helveticaBoldFont
+        })
+
+        pages.value[page].drawText(toWinAnsi(__cutText(data.value, 35)), 
+        {
+            x: spacing.value + col*(width.value/2) + 55,
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            lineHeight: size.value
+        })
+
+        positionLift += -spacing.value - size.value
+
+        pages.value[page].drawText(toWinAnsi(i18n.global.t('other.labels.description')), 
+        {
+            x: spacing.value + col*(width.value/2),
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            maxWidth: 200,
+            lineHeight: size.value,
+            font: helveticaBoldFont
+        })
+
+        positionLift += -spacing.value - size.value
+
+        pages.value[page].drawText(toWinAnsi(__cutText(data.description, 512-128)), 
+        {
+            x: spacing.value + col*(width.value/2),
+            y: positionLift,
+            size: size.value,
+            color: rgb(0, 0, 0),
+            rotate: degrees(0),
+            maxWidth: 205,
+            lineHeight: size.value
         })
     }
 
-    async finish()
+    const drawData = async () =>
     {
-        const pdfBytes = await this.pdf.save()
+        for(let i=0; i<data.value.length; i++)
+        {
+            await __drawData(i, data.value[i])
+        }
+    }
+
+    const finish = async () =>
+    {
+        const pdfBytes = await pdf.value.save()
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement('a');
         link.href = url
-        link.download = `onyks_bloodstone_label_${DateTime.now().setZone('Europe/Warsaw').toFormat('yyyy-MM-dd_HH-mm-ss')}.pdf`;
+        link.download = `labels_${DateTime.now().setZone('Europe/Warsaw').toFormat('yyyy-MM-dd_HH-mm-ss')}.pdf`;
 
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
+
+    const generate = async (newData) =>
+    {
+        data.value = newData
+        await init()
+        await drawBorders()
+        await drawQR()
+        await drawData()
+        await finish()
+    }
+
+    return { generate }
 }
