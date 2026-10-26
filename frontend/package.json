@@ -16,6 +16,7 @@
     "onyks-web-ui-system": "github:knonyks/onyks-web-ui-system",
     "pdf-lib": "^1.17.1",
     "pinia": "^4.0.3",
+    "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
     "vue": "^3.5.28",
     "vue-i18n": "^11.4.16",

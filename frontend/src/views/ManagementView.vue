@@ -15,6 +15,7 @@
     import { i18n } from '@/utils/localization';
     import { OnyksToastContainer } from 'onyks-web-ui-system';
     import { useLabels } from '@/utils/tools';
+    import QRScanner from '@/components/QRScanner.vue';
 
     const loaderStore = useLoaderStore();
     const expandPage = ref(false);
@@ -161,13 +162,26 @@
         }, computed(() => tablesTable.data.filter(item => item.selected)))
     })
 
+    const elementsDialogs = reactive(
+    {
+        delete: useDeleteItemsDialog(services.elements, i18n.global.t('views.ManagementView.dialogs.elements.delete'), () => 
+        {
+            elementsTable.search()
+        }, computed(() => elementsTable.data.filter(item => item.selected)))
+    })
+
     const labels = reactive(useLabels())
+
+    console.log(elementsDialogs.delete.keys)
+    elementsDialogs.delete.keys = ['uuid', 'partName']
+    
 
     onMounted(async () =>
     {
         await suppliersTable.init()
         await manufacturersTable.init()
         await tablesTable.init()
+        
 
         elementsTable.sortBy = "createdAt"
         await elementsTable.init()
@@ -193,13 +207,14 @@
             <onyks-button @click="router.push('/manager/elements/create')" background="green">{{$t('views.ManagementView.btns.add')}}</onyks-button>
             <onyks-button background="blue" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/edit/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('views.ManagementView.btns.edit')}}</onyks-button>
             <onyks-button background="yellow" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/duplicate/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('views.ManagementView.btns.duplicate')}}</onyks-button>
-            <onyks-button background="red" :disabled="elementsTable.selected === 0">{{$t('views.ManagementView.btns.delete')}}</onyks-button>
+            <onyks-button background="red" :disabled="elementsTable.selected === 0" @click="elementsDialogs.delete.firstOpen = true">{{$t('views.ManagementView.btns.delete')}}</onyks-button>
             <onyks-button background="gray" :disabled="elementsTable.selected != 1" @click="router.push(`/manager/elements/details/${elementsTable?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('views.ManagementView.btns.details')}}</onyks-button>
             <onyks-button @click="labels.generate(elementsTable?.data.filter(item => item.selected))" background="green" :disabled="elementsTable.selected === 0">{{$t('views.ManagementView.btns.labels')}}</onyks-button>
             <onyks-button background="blue">{{$t('views.ManagementView.btns.scan')}}</onyks-button>
         </BasicButtonsPanel>
         <BasicSearch v-model="elementsTable.searchPhrase" :search="elementsTable.search"></BasicSearch>
         <BasicTable v-model="elementsTable"></BasicTable>
+        <DeleteItemsDialog v-model="elementsDialogs.delete"></DeleteItemsDialog>
 
         <onyks-header level="3">{{$t('views.ManagementView.titles.tables')}}</onyks-header>
         <BasicButtonsPanel>
@@ -238,6 +253,7 @@
         <DeleteItemsDialog v-model="suppliersDialogs.delete"></DeleteItemsDialog>
         <DeleteItemsDialog v-model="suppliersDialogs.delete"></DeleteItemsDialog>
 
+        <!-- <QRScanner :open="qrScannerOpen"></QRScanner> -->
     </ManagerPage>
 </template>
 

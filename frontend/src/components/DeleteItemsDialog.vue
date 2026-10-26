@@ -9,12 +9,12 @@
             <onyks-text v-else>{{$t('components.DeleteItemsDialog.subtitle2', { count: model.items.length })}}</onyks-text>
             <onyks-container class="delete-items" padding="m" gap="m">
 
-                <onyks-text v-for="(item, index) in model.items" :key="item.id">{{ index + 1 }}. {{ item.name }}</onyks-text>
+                <onyks-text v-for="(item, index) in model.items" :key="item[model.keys[0]]">{{ index + 1 }}. {{ item[model.keys[1]] }}</onyks-text>
 
             </onyks-container>
             <onyks-loading-bar size="m" striped animated :max="model.items.length" :current-state="model.counter"></onyks-loading-bar>
         </onyks-container>
-        <onyks-button background="green" slot="footer" @click="model.handleDelete" :disabled="model.isLoading" size="m">{{$t('components.DeleteItemsDialog.confirm')}}</onyks-button>
+        <onyks-button background="green" slot="footer" @click="() => model.handleDelete(model.keys)" :disabled="model.isLoading" size="m">{{$t('components.DeleteItemsDialog.confirm')}}</onyks-button>
     </onyks-dialog>
 
     <onyks-dialog :open="model.secondOpen" @dialog-close="() => { model.secondOpen = false; model.counter = 0; model.errorCodes = []; model.succesCounter = 0; model.errorCounter = 0; model.handleEnd() }" corner-close :title="$t('components.DeleteItemsDialog.result')" modal>

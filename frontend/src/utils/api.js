@@ -511,18 +511,18 @@ export const elements =
             return error
         }
     },
-    // delete: async (id) =>
-    // {
-    //     try 
-    //     {
-    //         const response = await api.delete(`/element/delete/${id}`);
-    //         return response
-    //     } 
-    //     catch (error) 
-    //     {
-    //         return error
-    //     }
-    // },
+    delete: async (id) =>
+    {
+        try 
+        {
+            const response = await api.delete(`/elements/${id}`);
+            return response
+        } 
+        catch (error) 
+        {
+            return error
+        }
+    },
     // openDatasheet: (uuid) =>
     // {
     //     window.open(`/files/${uuid}.pdf`, '_blank');

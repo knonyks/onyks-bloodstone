@@ -207,9 +207,10 @@ export const useDeleteItemsDialog = (_service = null, _title = '', _handleEnd = 
     const errorCodes = ref([])
     const succesCounter = ref(0)
     const errorCounter = ref(0)
+    const keys = ref(['id', 'name'])
     const handleEnd = _handleEnd
 
-    const handleDelete = async () =>
+    const handleDelete = async (keys) =>
     {
         succesCounter.value = 0
         errorCounter.value = 0
@@ -223,15 +224,15 @@ export const useDeleteItemsDialog = (_service = null, _title = '', _handleEnd = 
             {
                 try
                 {
-                    await _service.delete(item.id)
+                    await _service.delete(item[keys[0]])
                     counter.value++ 
                     succesCounter.value++
-                    errorCodes.value.push([item.name, 'ITEM_DELETE_SUCCESS'])
+                    errorCodes.value.push([item[keys[1]], 'ITEM_DELETE_SUCCESS'])
                 }
                 catch (e)
                 {
 
-                    errorCodes.value.push([item.name, e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'])
+                    errorCodes.value.push([item[keys[1]], e?.response?.data?.detail?.error_code || e?.message || 'An error occurred'])
                     errorCounter.value++
                 }
             }
@@ -249,7 +250,7 @@ export const useDeleteItemsDialog = (_service = null, _title = '', _handleEnd = 
         }
     }
 
-    return { firstOpen, secondOpen, items, isLoading, handleDelete, title, counter, errorCodes, succesCounter, errorCounter, handleEnd }
+    return { firstOpen, secondOpen, items, isLoading, handleDelete, title, counter, errorCodes, succesCounter, errorCounter, handleEnd, keys }
 }
 
 export const useRepositoryModelDialog = (_title = '', _filter = (() => true), _handleOk = () => {}, _handleReset = () => {}) =>

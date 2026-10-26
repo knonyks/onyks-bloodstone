@@ -134,6 +134,10 @@ const pl =
                     add: 'Dodaj tabelę',
                     edit: 'Edytuj tabelę',
                     delete: 'Usuń tabelę'
+                },
+                elements:
+                {
+                    delete: 'Usuń element'
                 }
             },
             toasts:

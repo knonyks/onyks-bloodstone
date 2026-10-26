@@ -1069,6 +1069,28 @@ async def duplicate_element(
             }
         )
 
+@app.delete('/elements/{uuid}')
+async def delete_element(uuid: str, db: Session = Depends(get_db)):
+    element = await db.get(models.Element, uuid)
+    if not element:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "ELEMENT_NOT_FOUND", "message": "Element not found."}
+        )
+    await db.delete(element)
+    try:
+        await db.commit()
+        return {"message": "Element deleted successfully."}
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": "DELETE_FAILED",
+                "message": "Failed to delete element due to integrity constraints."
+            }
+        )
+
 ########################################
 
 @app.get("/tags")
