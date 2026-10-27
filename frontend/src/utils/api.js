@@ -1,4 +1,3 @@
-import { get } from '@vueuse/core';
 import axios from 'axios';
 
 const api = axios.create(
@@ -86,7 +85,7 @@ export const tables =
     },
     create: async (name) =>
     {
-        try 
+        try
         {
             const response = await api.post(`/tables`, { name }, { timeout: 30000 });
             return response
@@ -118,7 +117,7 @@ export const tables =
     },
     delete: async (id) =>
     {
-        try 
+        try
         {
             const response = await api.delete(`/tables/${id}`);
             return response
@@ -153,6 +152,15 @@ export const tables =
         }
     }
 }
+
+
+
+
+
+
+
+
+
 
 export const manufacturers = 
 {
@@ -334,25 +342,6 @@ export const suppliers =
     }
 }
 
-
-export const models = 
-{
-    elements: () =>
-    {
-        return {
-            partName: '',
-            manufacturer: '',
-            supplier: '',
-            tags: []
-        }
-    }
-}
-
-
-
-
-
-
 export const tags = 
 {
     list: async (page = 1, limit = 10, search = null, sortBy = 'name', sortDesc = false) =>
@@ -360,7 +349,8 @@ export const tags =
         try 
         {
             const response = await api.get(`/tags`, {
-                params: {
+                params: 
+                {
                     page: page,
                     limit: limit,
                     search: search,
@@ -379,6 +369,10 @@ export const tags =
 
 export const elements = 
 {
+
+
+
+
     lastAdded: async () =>
     {
         try 
@@ -403,6 +397,12 @@ export const elements =
             throw error
         }
     },
+
+
+
+
+
+
     create: async (element, datasheets = []) =>
     {
         try
@@ -522,11 +522,7 @@ export const elements =
         {
             return error
         }
-    },
-    // openDatasheet: (uuid) =>
-    // {
-    //     window.open(`/files/${uuid}.pdf`, '_blank');
-    // }
+    }
 }
 
 

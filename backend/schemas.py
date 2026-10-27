@@ -18,44 +18,14 @@ def emptyToNone(v: str | None) -> str | None:
 NotEmptyString = Annotated[str | None, BeforeValidator(emptyToNone)]
 
 # GENERAL
-T = TypeVar('T')
 
-class PageQuery(BaseModel):
-    search: Optional[str] = None
-    sortBy: str = "id"
-    sortDesc: bool = True
-    page: int = 1
-    limit: int = 100
-
-class PageResponse(BaseModel, Generic[T]):
-    items: list[T]
-    total: int
-    page: int
-    limit: int
 
 # SUPPLIERS
-class SupplierBase(BaseModel):
-    name: str = Field(min_length=1, max_length=256)
-
-class SupplierFull(SupplierBase):
-    id: int
-    createdAt: datetime
 
 # MANUFACTURERS
-class ManufacturerBase(BaseModel):
-    name: str = Field(min_length=1, max_length=256)
-
-class ManufacturerFull(ManufacturerBase):
-    id: int
-    createdAt: datetime
 
 # TABLES
-class TableBase(BaseModel):
-    name: str = Field(min_length=1, max_length=256)
 
-class TableFull(TableBase):
-    id: int
-    createdAt: datetime
 
 # ELEMENTS
 class ElementBase(BaseModel):
@@ -111,3 +81,41 @@ class UserBase(BaseModel):
 class UserFull(UserBase):
     id: int
     expirationTime: datetime
+
+
+# FINAL
+T = TypeVar('T')
+
+class PageQuery(BaseModel):
+    search: Optional[str] = None
+    sortBy: str = "id"
+    sortDesc: bool = True
+    page: int = 1
+    limit: int = 100
+
+class PageResponse(BaseModel, Generic[T]):
+    items: list[T]
+    total: int
+    page: int
+    limit: int
+    
+class TableBase(BaseModel):
+    name: str = Field(min_length=1, max_length=256)
+
+class TableFull(TableBase):
+    id: int
+    createdAt: datetime
+
+class ManufacturerBase(BaseModel):
+    name: str = Field(min_length=1, max_length=256)
+
+class ManufacturerFull(ManufacturerBase):
+    id: int
+    createdAt: datetime
+
+class SupplierBase(BaseModel):
+    name: str = Field(min_length=1, max_length=256)
+
+class SupplierFull(SupplierBase):
+    id: int
+    createdAt: datetime
