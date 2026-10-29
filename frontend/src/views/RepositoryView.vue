@@ -3,12 +3,11 @@
     import { onMounted, reactive } from 'vue';
     import ManagerPage from '@/components/ManagerPage.vue';
     import { useLoaderStore } from '@/stores/loader';
-    import { useRepository } from '@/utils/tools';
+    import { useRepositoryExplorer } from '@/composables/useRepositoryExplorer';
 
     const loaderStore = useLoaderStore()
-    const repository = reactive(useRepository())
+    const repository = reactive(useRepositoryExplorer())
     
-
     onMounted(async () =>
     {
         try 
@@ -18,12 +17,14 @@
             loaderStore.globalHide()
         } 
         catch (err) 
-        {}
+        {
+            console.error(err)
+        }
     })
 </script>
 
 <template>
-    <ManagerPage :title="$t('views.RepositoryView.title')">
+    <ManagerPage :title="$t('common.repository')">
         <RepositoryExplorer v-model="repository"></RepositoryExplorer>
     </ManagerPage>
 </template>

@@ -17,32 +17,7 @@ event.listen(
     DDL("CREATE EXTENSION IF NOT EXISTS pgcrypto"),
 )
 
-class UserRank(PyEnum):
-    viewer = "viewer"
-    admin = "admin"
-    editor = "editor"
 
-
-class User(Base):
-    __tablename__ = "users"
-    __table_args__ = {'schema': 'private'}
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    login: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    expirationTime: Mapped[datetime] = mapped_column(
-        'expiration_time',
-        DateTime(timezone=True),
-        nullable=False,
-        default=lambda: datetime.now(timezone.utc),
-        server_default=func.now(),
-    )
-    rank: Mapped[UserRank] = mapped_column(
-        Enum(UserRank, name='user_rank', native_enum=True),
-        nullable=False,
-        default=UserRank.viewer,
-    )
 
 class Manufacturer(Base):
     __tablename__ = "manufacturers"
@@ -50,7 +25,7 @@ class Manufacturer(Base):
 
     id:  Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column('name', String(256), unique=True, index=True, nullable=False)
-    createdAt: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     elements: Mapped[List["Element"]] = relationship(back_populates="manufacturerRel")
 
 class Supplier(Base):
@@ -59,7 +34,7 @@ class Supplier(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column('name', String(256), unique=True, index=True, nullable=False)
-    createdAt: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     elementSuppliers: Mapped[List["ElementSupplier"]] = relationship(
         back_populates="suppliers",
         passive_deletes=True,
@@ -71,7 +46,7 @@ class Table(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column('name', String(256), unique=True, nullable=False)
-    createdAt: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     elements: Mapped[List["Element"]] = relationship(
         back_populates="tableCategory",
         foreign_keys="Element.table",
@@ -86,7 +61,7 @@ class Element(Base):
     )
 
     uuid: Mapped[uuid_module.UUID] = mapped_column('uuid', UUID(as_uuid=True), primary_key=True, default=uuid_module.uuid4)
-    partName: Mapped[str] = mapped_column("part_name", String(256), nullable=False)
+    part_name: Mapped[str] = mapped_column("part_name", String(256), nullable=False)
 
     manufacturer: Mapped[Optional[str]] = mapped_column(
         String(256), 
@@ -110,17 +85,17 @@ class Element(Base):
     availability: Mapped[Optional[str]] = mapped_column('availability', String(256), nullable=True, default='')
 
     
-    libraryReference: Mapped[Optional[str]] = mapped_column('library_ref', String(1024), nullable=True, default='')
-    libraryPath: Mapped[Optional[str]] = mapped_column('library_path', String(1024), nullable=True, default='')
+    library_reference: Mapped[Optional[str]] = mapped_column('library_ref', String(1024), nullable=True, default='')
+    library_path: Mapped[Optional[str]] = mapped_column('library_path', String(1024), nullable=True, default='')
     
-    footprintReferenceNo1: Mapped[Optional[str]] = mapped_column('footprint_reference_1', String(1024), nullable=True, default='')
-    footprintPathNo1: Mapped[Optional[str]] = mapped_column('footprint_path_1', String(1024), nullable=True, default='')
+    footprint_reference_1: Mapped[Optional[str]] = mapped_column('footprint_reference_1', String(1024), nullable=True, default='')
+    footprint_path_1: Mapped[Optional[str]] = mapped_column('footprint_path_1', String(1024), nullable=True, default='')
     
-    footprintReferenceNo2: Mapped[Optional[str]] = mapped_column('footprint_reference_2', String(1024), nullable=True, default='')
-    footprintPathNo2: Mapped[Optional[str]] = mapped_column('footprint_path_2', String(1024), nullable=True, default='')
+    footprint_reference_2: Mapped[Optional[str]] = mapped_column('footprint_reference_2', String(1024), nullable=True, default='')
+    footprint_path_2: Mapped[Optional[str]] = mapped_column('footprint_path_2', String(1024), nullable=True, default='')
     
-    footprintReferenceNo3: Mapped[Optional[str]] = mapped_column('footprint_reference_3', String(1024), nullable=True, default='')
-    footprintPathNo3: Mapped[Optional[str]] = mapped_column('footprint_path_3', String(1024), nullable=True, default='')
+    footprint_reference_3: Mapped[Optional[str]] = mapped_column('footprint_reference_3', String(1024), nullable=True, default='')
+    footprint_path_3: Mapped[Optional[str]] = mapped_column('footprint_path_3', String(1024), nullable=True, default='')
     
     suppliers: Mapped[List["ElementSupplier"]] = relationship(
         back_populates="elements",
@@ -136,7 +111,7 @@ class Element(Base):
     
     datasheets: Mapped[list] = mapped_column('datasheets', JSONB, default=list)
 
-    createdAt: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     
     tableCategory = relationship(
         "Table",
@@ -168,3 +143,41 @@ class ElementSupplier(Base):
     @property
     def name(self) -> str:
         return self.suppliers.name
+
+
+
+# FINAL
+class UserRank(PyEnum):
+    viewer = "viewer"
+    admin = "admin"
+    editor = "editor"
+
+class User(Base):
+    __tablename__ = "users"
+    __table_args__ = {'schema': 'private'}
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=False, nullable=True)
+    surname: Mapped[str] = mapped_column(String, unique=False, nullable=True)
+    login: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    expiration_time: Mapped[datetime] = mapped_column(
+        'expiration_time',
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+    )
+    rank: Mapped[UserRank] = mapped_column(
+        Enum(UserRank, name='user_rank', native_enum=True),
+        nullable=False,
+        default=UserRank.viewer,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        'created_at',
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+    )

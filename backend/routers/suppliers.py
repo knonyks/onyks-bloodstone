@@ -29,8 +29,8 @@ async def get_suppliers_list(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     search: str | None = Query(None),
-    sortBy: str = Query("id"),
-    sortDesc: bool = Query(False),
+    sort_by: str = Query("id"),
+    sort_desc: bool = Query(False),
     db = Depends(get_db)
 ):
     limit = max(1, min(limit, 100))
@@ -44,11 +44,14 @@ async def get_suppliers_list(
     count_result = await db.execute(count_query)
     totalCount = count_result.scalar() or 0
 
-    sort_column = getattr(models.Supplier, sortBy, None)
+    sort_column = getattr(models.Supplier, sort_by, None)
     if sort_column is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported sortBy value: {sortBy}"
+            detail={
+                "error_code": "UNSUPPORTED_SORT_BY",
+                "message": f"Unsupported sort_by value: {sort_by}"
+            }
         )
 
     queryEntries = select(models.Supplier)
@@ -58,7 +61,7 @@ async def get_suppliers_list(
 
     queryEntries = (
         queryEntries
-        .order_by(sort_column.desc() if sortDesc else sort_column.asc())
+        .order_by(sort_column.desc() if sort_desc else sort_column.asc())
         .offset(skip)
         .limit(limit)
     )
@@ -132,7 +135,7 @@ async def get_suppliers(id: int, db = Depends(get_db)):
     return item
 
 @router.patch('/suppliers/{id}')
-async def patch_suppliers(id: int, supplier: dict, db = Depends(get_db)):
+async def update_suppliers(id: int, supplier: dict, db = Depends(get_db)):
     query = select(models.Supplier).where(models.Supplier.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()

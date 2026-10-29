@@ -32,172 +32,62 @@ const en =
 
 const pl = 
 {
-    views:
+    common:
     {
-        RepositoryView:
-        {
-            title: 'Repozytorium'
-        },
-        DashboardView:
-        {
-            title: 'Panel główny',
-            noData: 'Brak danych',
-            overview: 'Przegląd',
-            lastAddedElement: 'Ostatnio dodany element',
-            partName: 'Nazwa części',
-            manufacturer: 'Producent',
-            table: 'Tabela',
-            createdAt: 'Utworzono',
-            repository: 'Repozytorium',
-            symbolsFiles: 'Pliki symboli',
-            footprintsFiles: 'Pliki footprintów',
-            symbols: 'Symbole',
-            footprints: 'Footprinty',
-            elements: 'Elementy',
-            tables: 'Tabele',
-            manufacturers: 'Producenci',
-            suppliers: 'Dostawcy',
-            noTables: 'Brak tabel do wyświetlenia.',
-            noManufacturers: 'Brak producentów do wyświetlenia.'
-        },
-        ManagerView:
-        {
-            nav:
-            {
-                dashboard: 'Panel główny',
-                management: 'Zarządzanie',
-                repository: 'Repozytorium',
-                settings: 'Ustawienia',
-                admin: 'Panel Admina'
-            }
-        },
-        ManagementView:
-        {
-            title: 'Zarządzanie',
-            expandPage: 'Rozszerz stronę',
-            titles:
-            {
-                elements: 'Elementy',
-                tables: 'Tabele',
-                manufacturers: 'Producenci',
-                suppliers: 'Dostawcy'
-            },
-            btns:
-            {
-                add: 'Dodaj',
-                edit: 'Edytuj',
-                duplicate: 'Duplikuj',
-                delete: 'Usuń',
-                details: 'Szczegóły',
-                labels: 'Etykiety',
-                scan: 'Skanuj'
-            },
-            columns:
-            {
-                selected: 'Wybrano',
-                id: 'ID',
-                name: 'Nazwa',
-                createdAt: 'Utworzono',
-                partName: 'Nazwa części',
-                manufacturer: 'Producent',
-                table: 'Tabela',
-                symbol: 'Symbol',
-                availability: 'Dostępność',
-                value: 'Wartość',
-                description: 'Opis',
-                tags: 'Tagi',
-                uuid: 'UUID',
-                suppliers: 'Dostawcy',
-                footprints: 'Footprinty',
-                datasheets: 'Karty danych',
-                footprintNo1: 'Footprint nr 1',
-                footprintNo2: 'Footprint nr 2',
-                footprintNo3: 'Footprint nr 3',
-                noData: 'Brak danych'
-            },
-            dialogs:
-            {
-                suppliers:
-                {
-                    add: 'Dodaj dostawcę',
-                    edit: 'Edytuj dostawcę',
-                    delete: 'Usuń dostawcę'
-                },
-                manufacturers:
-                {
-                    add: 'Dodaj producenta',
-                    edit: 'Edytuj producenta',
-                    delete: 'Usuń producenta'
-                },
-                tables:
-                {
-                    add: 'Dodaj tabelę',
-                    edit: 'Edytuj tabelę',
-                    delete: 'Usuń tabelę'
-                },
-                elements:
-                {
-                    delete: 'Usuń element'
-                }
-            },
-            toasts:
-            {
-                supplierAdded: 'Dostawca został dodany pomyślnie.',
-                supplierEdited: 'Dostawca został edytowany pomyślnie.',
-                manufacturerAdded: 'Producent został dodany pomyślnie.',
-                manufacturerEdited: 'Producent został edytowany pomyślnie.',
-                tableAdded: 'Tabela została dodana pomyślnie.',
-                tableEdited: 'Tabela została edytowana pomyślnie.'
-            }
-        },
-        ElementView:
-        {
-            titles:
-            {
-                details: 'Szczegóły elementu',
-                create: 'Dodaj element',
-                edit: 'Edytuj element',
-                duplicate: 'Duplikuj element'
-            }
-        }
-    },
-    components:
-    {
-        WarningAlert:
-        {
-            title: 'To oprogramowanie jest w fazie rozwoju. Może zawierać błędy.'
-        },
-        RepositoryExplorer:
-        {
-            refresh: 'Odśwież'
-        },
-        BasicSearch:
-        {
-            search: 'Szukaj...'
-        },
-        BasicTable:
-        {
-            selected: 'Wybrano',
-            total: 'Wszystkich'
-        },
-        AddItemDialog:
-        {
-            subtitle: 'Wprowadź nazwę poniżej:',
-        },
-        EditItemDialog:
-        {
-            subtitle1: 'Obecna nazwa:',
-            subtitle2: 'Wprowadź nową nazwę poniżej:',
-        },
-        DeleteItemsDialog:
-        {
-            subtitle1: 'Próbujesz usunać {count} obiekt.',
-            subtitle2: 'Próbujesz usunąć {count} obiekty:',
-            confirm: 'Potwierdź',
-            deleted: 'Usunięto { counter } z { length } obiektów pomyślnie.',   
-            result: 'Wynik',
-            someItemsCouldNotBeDeleted: 'Niektóre obiekty nie mogły zostać usunięte:'
-        }
+        last_added_element: 'Ostatnio dodany element',
+        symbols_files: 'Pliki symboli',
+        footprints_files: 'Pliki footprintów',
+        symbols: 'Symbole',
+        footprints: 'Footprinty',
+        dashboard: 'Panel główny',
+        repository: 'Repozytorium',
+        management: 'Zarządzanie',
+        settings: 'Ustawienia',
+        admin_panel: 'Panel Admina',
+        manufacturers: 'Producenci',
+        elements: 'Elementy',
+        suppliers: 'Dostawcy',
+        tables: 'Tabele',
+        overview: 'Przegląd',
+        add: 'Dodaj',
+        remove: 'Usuń',
+        edit: 'Edytuj',
+        reset: 'Resetuj',
+        import: 'Importuj',
+        total: 'Łącznie',
+        selected: 'Wybrane',
+        search_placeholder: 'Szukaj...',
+        no_data: 'Brak danych',
+        no_tables: 'Brak tabel do wyświetlenia',
+        no_manufacturers: 'Brak producentów do wyświetlenia',
+        id: 'Identyfikator',
+        created_at: 'Utworzono',
+        refresh: 'Odśwież',
+        user_list: 'Lista użytkowników',
+        backup: 'Kopia zapasowa',
+        software_in_development: 'Oprogramowanie jest w fazie rozwoju - może być niestabilne',
+        enter_name_below: 'Wprowadź nazwę poniżej:',
+        enter_new_name_below: 'Wprowadź nową nazwę poniżej:',
+        you_editing: "Edytujesz ,,{0}''.",
+        trying_to_remove_1: 'Próbujesz usunąć {count} obiekt.',
+        trying_to_remove_2: 'Próbujesz usunąć {count} obiekty:',
+        confirm: 'Potwierdź',
+        removed_x_of_y: 'Usunięto { 0 } z { 1 } obiektów pomyślnie.',   
+        removing_result: 'Wynik usuwania',
+        some_items_could_not_be_deleted: 'Niektóre obiekty nie mogły zostać usunięte:',
+        expand_page: 'Rozszerz stronę',
+        uuid: 'Identyfikator',
+        details: 'Szczegóły',
+        labels: 'Etykiety',
+        scan: 'Skanuj',
+        duplicate: 'Duplikuj',
+        back: 'Powrót',
+        create: 'Utwórz',
+        edit: 'Edytuj',
+        duplicate: 'Duplikuj',
+        select: 'Wybierz',
+        reset: 'Resetuj',
+        datasheets: 'Karty katalogowe',
     },
     error_codes:
     {
@@ -209,69 +99,74 @@ const pl =
         EMPTY_MANUFACTURER_NAME: 'Nazwa producenta nie może być pusta.',
         INVALID_DATA_OR_TABLE_ALREADY_EXISTS: 'Nieprawidłowe dane lub taka tabela już istnieje.',
         TABLE_EMPTY_NAME: 'Nazwa tabeli nie może być pusta.',
-        TABLE_NOT_EMPTY: 'Tabela nie jest pusta.'
+        TABLE_NOT_EMPTY: 'Tabela nie jest pusta.',
+        INVALID_DATA_OR_ELEMENT_ALREADY_EXISTS: 'Nieprawidłowe dane wejściowe lub taki element już istnieje.'
     },
-    other:
+    suppliers:
     {
-        labels:
-        {
-            uuid: 'UUID',
-            partName: 'Nazwa',
-            manufacturer: 'Producent',
-            table: 'Tabela',
-            value: 'Wartość',
-            description: 'Opis'
-        }
+        name: 'Nazwa',
+        add: 'Dodaj dostawcę',
+        edit: 'Edytuj dostawcę',
+        delete: 'Usuń dostawcę',
+        added: 'Dostawca został dodany',
+        edited: 'Dostawca został zaktualizowany',
+        supplier_name: 'Nazwa dostawcy',
+        suppliers_code: 'Kod dostawcy'
+    },
+    manufacturers:
+    {
+        name: 'Nazwa',
+        add: 'Dodaj producenta',
+        edit: 'Edytuj producenta',
+        delete: 'Usuń producenta',
+        added: 'Producent został dodany',
+        edited: 'Producent został zaktualizowany',
+    },
+    tables:
+    {
+        name: 'Nazwa',
+        add: 'Dodaj tabelę',
+        edit: 'Edytuj tabelę',
+        delete: 'Usuń tabelę',
+        added: 'Tabela została dodana',
+        edited: 'Tabela została zaktualizowana',
+    },
+    elements:
+    {
+        uuid: 'UUID',
+        part_name: 'Nazwa',
+        manufacturer: 'Producent',
+        table: 'Tabela',
+        value: 'Wartość',
+        description: 'Opis',
+        availability: 'Dostępność',
+        create: 'Utwórz element',
+        edit: 'Edytuj element',
+        duplicate: 'Duplikuj element',
+        remove: 'Usuń element',
+        details: 'Szczegóły elementu',
+        creating: 'Tworzenie elementu...',
+        duplicating: 'Duplikowanie elementu...',
+        editing: 'Edytowanie elementu...',
+        created_successfully: 'Element został utworzony pomyślnie.',
+        duplicated_successfully: 'Element został zduplikowany pomyślnie.',
+        edited_successfully: 'Element został zaktualizowany pomyślnie.',
+        basic_information: 'Podstawowe informacje',
+        selected: 'Wybrano',
+        none: 'Brak',
+        symbols_and_footprints: 'Symbole i wzór montażowy',
+        symbol: 'Symbol',
+        footprint_no_1: 'Wzór montażowy nr 1',
+        footprint_no_2: 'Wzór montażowy nr 2',
+        footprint_no_3: 'Wzór montażowy nr 3',
+        select_symbol: 'Wybierz symbol',
+        select_footprint_no: 'Wybierz wzór montażowy nr {0}',
+        please_select_symbol: 'Proszę wybrać symbol',
+        please_select_footprint: 'Proszę wybrać wzór montażowy',
+        other_details: 'Pozostałe szczegóły',
+        suppliers_codes: 'Kody dostawców',
+        no_suppliers_codes_defined: 'Brak zdefiniowanych kodów dostawców'
     }
-    // pages:
-    // {
-    //     titles:
-    //     {
-    //         dashboard: 'Panel główny',
-    //         management: 'Zarządzanie',
-    //         repository: 'Repozytorium',
-    //         settings: 'Ustawienia',
-    //         admin: 'Panel Admina',
-    //         createElement: 'Dodaj element',
-    //         elementDetails: 'Szczegóły elementu',
-    //         editElement: 'Edytuj element',
-    //         duplicateElement: 'Duplikuj element'
-    //     }
-    // },
-    // nav:
-    // {
-    //     dashboard: 'Panel główny',
-    //     management: 'Zarządzanie',
-    //     repository: 'Repozytorium',
-    //     settings: 'Ustawienia',
-    //     admin: 'Panel Admina'
-    // },
-    // dashboard:
-    // {
-    //     title: 'Panel główny',
-    //     none: 'Brak',
-    //     overview: 'Przegląd',
-    //     lastAddedElement: 'Ostatnio dodany element',
-    //     partName: 'Nazwa części',
-    //     manufacturer: 'Producent',
-    //     table: 'Tabela',
-    //     createdAt: 'Utworzono',
-    //     repository: 'Repozytorium',
-    //     symbolsFiles: 'Pliki symboli',
-    //     footprintsFiles: 'Pliki footprintów',
-    //     symbols: 'Symbole',
-    //     footprints: 'Footprinty',
-    //     elements: 'Elementy',
-    //     tables: 'Tabele',
-    //     manufacturers: 'Producenci',
-    //     suppliers: 'Dostawcy',
-    //     noTables: 'Brak tabel do wyświetlenia.',
-    //     noManufacturers: 'Brak producentów do wyświetlenia.'
-    // },
-    // repository:
-    // {
-    //     title: 'Repozytorium'
-    // },
 }
 
 const datetimeFormats = 

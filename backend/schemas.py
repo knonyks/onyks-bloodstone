@@ -1,14 +1,8 @@
-from pydantic import BaseModel, ConfigDict, Field, constr, field_validator
+from pydantic import BaseModel, Field, field_validator, BeforeValidator
 from datetime import datetime
-from typing import Any, List, Optional, Generic, TypeVar
-from fastapi import Query
-from typing import Annotated
+from typing import Any, List, Optional, Generic, TypeVar, Annotated
 from uuid import UUID
 from enum import Enum
-from typing import Generic, TypeVar
-from pydantic import BaseModel
-
-from pydantic import BaseModel, Field, BeforeValidator
 
 def emptyToNone(v: str | None) -> str | None:
     if isinstance(v, str) and not v.strip():
@@ -17,19 +11,8 @@ def emptyToNone(v: str | None) -> str | None:
 
 NotEmptyString = Annotated[str | None, BeforeValidator(emptyToNone)]
 
-# GENERAL
-
-
-# SUPPLIERS
-
-# MANUFACTURERS
-
-# TABLES
-
-
-# ELEMENTS
 class ElementBase(BaseModel):
-    partName: NotEmptyString = Field(min_length=3, max_length=256)
+    part_name: NotEmptyString = Field(min_length=3, max_length=256)
     manufacturer: NotEmptyString = Field(default=None, max_length=256)
     table: NotEmptyString = Field(default=None, max_length=256)
     description: NotEmptyString = Field(default=None, max_length=1024)
@@ -37,17 +20,17 @@ class ElementBase(BaseModel):
     value: NotEmptyString = Field(default=None, max_length=256)
     availability: NotEmptyString = Field(default=None, max_length=256)
     
-    libraryReference: NotEmptyString = Field(default=None, max_length=1024)
-    libraryPath: NotEmptyString = Field(default=None, max_length=1024)
+    library_reference: NotEmptyString = Field(default=None, max_length=1024)
+    library_path: NotEmptyString = Field(default=None, max_length=1024)
 
-    footprintReferenceNo1: NotEmptyString = Field(default=None, max_length=1024)
-    footprintPathNo1: NotEmptyString = Field(default=None, max_length=1024)
+    footprint_reference_1: NotEmptyString = Field(default=None, max_length=1024)
+    footprint_path_1: NotEmptyString = Field(default=None, max_length=1024)
 
-    footprintReferenceNo2: NotEmptyString = Field(default=None, max_length=1024)
-    footprintPathNo2: NotEmptyString = Field(default=None, max_length=1024)
+    footprint_reference_2: NotEmptyString = Field(default=None, max_length=1024)
+    footprint_path_2: NotEmptyString = Field(default=None, max_length=1024)
 
-    footprintReferenceNo3: NotEmptyString = Field(default=None, max_length=1024)
-    footprintPathNo3: NotEmptyString = Field(default=None, max_length=1024)
+    footprint_reference_3: NotEmptyString = Field(default=None, max_length=1024)
+    footprint_path_3: NotEmptyString = Field(default=None, max_length=1024)
 
     tags: List[str] = []
 
@@ -63,33 +46,34 @@ class ElementInsert(ElementBase):
 
 class ElementOutput(ElementBase):
     uuid: UUID
-    createdAt: datetime
+    created_at: datetime
     suppliers: dict = Field(default_factory=dict)
     datasheets: list = Field(default_factory=list)
 
-# USERS
 class UserRank(str, Enum):
     EDITOR = 'editor'
-    USER = "user"
+    VIEWER = "viewer"
     ADMIN = "admin"
 
 class UserBase(BaseModel):
-    login: str
-    email: str
-    rank: UserRank
+    login: Optional[str] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    email: Optional[str] = None
+    rank: Optional[UserRank] = None
+    expiration_time: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
 class UserFull(UserBase):
     id: int
-    expirationTime: datetime
+    password: Optional[str] = None
 
-
-# FINAL
 T = TypeVar('T')
 
 class PageQuery(BaseModel):
     search: Optional[str] = None
-    sortBy: str = "id"
-    sortDesc: bool = True
+    sort_by: str = "id"
+    sort_desc: bool = True
     page: int = 1
     limit: int = 100
 
@@ -104,18 +88,18 @@ class TableBase(BaseModel):
 
 class TableFull(TableBase):
     id: int
-    createdAt: datetime
+    created_at: datetime
 
 class ManufacturerBase(BaseModel):
     name: str = Field(min_length=1, max_length=256)
 
 class ManufacturerFull(ManufacturerBase):
     id: int
-    createdAt: datetime
+    created_at: datetime
 
 class SupplierBase(BaseModel):
     name: str = Field(min_length=1, max_length=256)
 
 class SupplierFull(SupplierBase):
     id: int
-    createdAt: datetime
+    created_at: datetime

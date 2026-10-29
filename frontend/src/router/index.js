@@ -10,8 +10,6 @@ import SettingsView from '@/views/SettingsView.vue';
 import { useLoaderStore } from '@/stores/loader';
 import { i18n } from '@/utils/localization';
 
-
-
 const routes = [
   {
     path: '/',
@@ -31,52 +29,51 @@ const routes = [
       {
         path: 'dashboard',
         component: DashboardView,
-        meta: { title: i18n.global.t('views.DashboardView.title') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.dashboard') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'management',
         component: ManagementView,
-        meta: { title: i18n.global.t('views.ManagementView.title') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.management') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'repository',
         component: RepositoryView,
-        meta: { title: i18n.global.t('views.RepositoryView.title') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.repository') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'admin',
         component: AdminView,
-        meta: { title: i18n.global.t('views.AdminView.title') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.admin_panel') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'settings',
         component: SettingsView,
-        meta: { title: i18n.global.t('views.SettingsView.title') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.settings') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/create',
         name: 'element-create',
         component: ElementView,
-        meta: { title: i18n.global.t('views.ElementView.titles.create') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('elements.create') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/details/:uuid',
         name: 'element-details',
         component: ElementView,
-        meta: { title: i18n.global.t('views.ElementView.titles.details') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('elements.details') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/edit/:uuid',
         name: 'element-edit',
         component: ElementView,
-        meta: { title: i18n.global.t('views.ElementView.titles.edit') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('elements.edit') + ' - ONYKS Bloodstone' }
       },
       {
         path: 'elements/duplicate/:uuid',
         name: 'element-duplicate',
         component: ElementView,
-        meta: { title: i18n.global.t('views.ElementView.titles.duplicate') + ' - ONYKS Bloodstone' },
-        props: { schema: 'duplicate' }
+        meta: { title: i18n.global.t('elements.duplicate') + ' - ONYKS Bloodstone' },
       },
     ]
   }

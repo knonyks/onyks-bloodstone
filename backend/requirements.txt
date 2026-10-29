@@ -7,3 +7,4 @@ pyaltiumlib
 python-multipart
 dotenv
 redis
+bcrypt

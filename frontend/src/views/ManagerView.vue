@@ -10,17 +10,17 @@
     <onyks-container align="center" class="manager-view">
         <onyks-nav class="manager-nav" size="m" mobile-breakpoint="900" max-view-items="5">
             <img src="../../node_modules/onyks-web-ui-system/dist/logo.png" class="logo">
-            <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">{{ $t('views.ManagerView.nav.dashboard') }}</router-link>
-            <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">{{ $t('views.ManagerView.nav.management') }}</router-link>
-            <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">{{ $t('views.ManagerView.nav.repository') }}</router-link>
-            <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('views.ManagerView.nav.settings') }}</router-link>
-            <router-link slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">{{ $t('views.ManagerView.nav.admin') }}</router-link>
+            <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">{{ $t('common.dashboard') }}</router-link>
+            <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">{{ $t('common.management') }}</router-link>
+            <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">{{ $t('common.repository') }}</router-link>
+            <!-- <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('views.ManagerView.nav.settings') }}</router-link> -->
+            <!-- <router-link slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">{{ $t('common.admin_panel') }}</router-link> -->
         </onyks-nav>
         <onyks-container class="content" gap="m">
             
-            <router-view v-slot="{ Component }">
+            <router-view v-slot="{ Component, route }" >
                 <transition name="fade" mode="out-in">
-                    <component :is="Component"/>
+                    <component :is="Component" :key="route.fullPath"/>
                 </transition>
             </router-view>
             <onyks-container class="footer"></onyks-container>

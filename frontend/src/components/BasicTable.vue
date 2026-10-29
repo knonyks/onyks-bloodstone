@@ -4,13 +4,10 @@
 
 <template>
     <onyks-container gap="l" align="center">
-
-        <onyks-table :expandedTemplate="model.expandedTemplate" :expandable="model.expandable" :columns="model?.columns ?? []" :data="model?.data ?? []" @checkbox-click="model.checkboxClick($event.detail)"></onyks-table>
-
-        
+        <onyks-table :expandedTemplate="model.expanded_template" :expandable="model.expandable" :columns="model?.columns ?? []" :data="model?.data ?? []" @checkbox-click="model.checkbox_click($event.detail)"></onyks-table>
         <onyks-container type="group" align="center" justify="center" gap="m">
-            <onyks-pagination-nav :max-index="Math.ceil((model?.total ?? 0) / (model?.limit || 1))" :index="model?.page ?? 1" max-view="3" size="m" @page-change="model.pageChange($event.detail?.index)"></onyks-pagination-nav>
-            <onyks-text>{{$t('components.BasicTable.selected')}}:&emsp;{{model.selected}}&emsp;|&emsp;{{$t('components.BasicTable.total')}}:&emsp;{{ model?.total ?? 0 }}</onyks-text>
+            <onyks-pagination-nav :max-index="Math.ceil((model?.total ?? 0) / (model?.limit || 1))" :index="model?.page ?? 1" max-view="3" size="m" @page-change="model.page_change($event.detail?.index)"></onyks-pagination-nav>
+            <onyks-text>{{$t('common.selected')}}:&emsp;{{model.selected}}&emsp;|&emsp;{{$t('common.total')}}:&emsp;{{ model?.total ?? 0 }}</onyks-text>
         </onyks-container>
     </onyks-container>
 </template>

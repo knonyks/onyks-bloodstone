@@ -6,24 +6,24 @@ export const models =
         {
             return {
                 uuid: '',
-                partName: '',
+                part_name: '',
                 manufacturer: '',
                 table: '',
                 description: '',
                 availability: '',
                 value: '',
-                createdAt: '',
+                created_at: '',
 
-                libraryReference: '',
-                libraryPath: '',
+                library_reference: '',
+                library_path: '',
 
-                footprintReferenceNo1: '',
-                footprintReferenceNo2: '',
-                footprintReferenceNo3: '',
+                footprint_reference_1: '',
+                footprint_reference_2: '',
+                footprint_reference_3: '',
 
-                footprintPathNo1: '',
-                footprintPathNo2: '',
-                footprintPathNo3: '',
+                footprint_path_1: '',
+                footprint_path_2: '',
+                footprint_path_3: '',
 
                 tags: [],
                 suppliers: {},
@@ -31,6 +31,22 @@ export const models =
                 datasheets: []
             }
 
+        }
+    },
+    user:
+    {
+        getModel: () =>
+        {
+            return {
+                id: '',
+                name: '',
+                surname: '',
+                login: '',
+                password: '',
+                rank: '',
+                expirationTime: '',
+                createdAt: ''
+            }
         }
     }
 }

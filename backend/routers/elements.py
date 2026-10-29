@@ -109,7 +109,7 @@ async def post_elements(element: str = Form(...), files: List[UploadFile] | None
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
-                "error_code": "INVALID_DATA_OR_OBJECT_ALREADY_EXISTS",
+                "error_code": "INVALID_DATA_OR_ELEMENT_ALREADY_EXISTS",
                 "message": "Invalid data or an element with this name already exists."
             }
         )
@@ -219,13 +219,13 @@ async def get_elements_list(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     search: str | None = Query(None),
-    sortBy: str = Query("createdAt"),
+    sortBy: str = Query("created_at"),
     sortDesc: bool = Query(False),
     db = Depends(get_db)
 ):
     skip = (page - 1) * limit
     keys = {a.key for a in sa_inspect(models.Element).column_attrs}
-    sort_key = sortBy if sortBy in keys else "createdAt"
+    sort_key = sortBy if sortBy in keys else "created_at"
     sort_column = getattr(models.Element, sort_key)
 
     query = select(models.Element)

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, APIRouter, HTTPException, status, Query
-from routers import tables, manufacturers, suppliers, tags, elements
+from routers import tables, manufacturers, suppliers, tags, elements, users, repository
 from sqlalchemy.orm import Session, selectinload
 import models
 import schemas
@@ -24,7 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import Json, ValidationError
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import text
-from routers import repository, manufacturers, suppliers, tables
+from routers import repository, manufacturers, suppliers, tables, users
 from redis_client import r
 
 app = FastAPI()
@@ -35,6 +35,7 @@ app.include_router(manufacturers.router)
 app.include_router(suppliers.router)
 app.include_router(tags.router)
 app.include_router(elements.router)
+app.include_router(users.router)
 
 
 UPLOAD_DIR = "/uploads"

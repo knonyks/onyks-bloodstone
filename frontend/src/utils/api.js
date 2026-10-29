@@ -57,6 +57,90 @@ export const repository =
     }
 }
 
+export const suppliers = 
+{
+    count: async () =>
+    {
+        try 
+        {
+            const response = await api.get(`/suppliers/count`);
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    },
+    create: async (name) =>
+    {
+        try 
+        {
+            const response = await api.post(`/suppliers`, { name }, { timeout: 30000 });
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    },
+    list: async (page = 1, limit = 100, search = '', sort_by = 'id', sort_desc = false) =>
+    {
+        try 
+        {
+            const response = await api.get(`/suppliers`, {
+                params: {
+                    page: page,
+                    limit: limit,
+                    search: search,
+                    sort_by: sort_by,
+                    sort_desc: sort_desc
+                }
+            });
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    },
+    delete: async (id) =>
+    {
+        try 
+        {
+            const response = await api.delete(`/suppliers/${id}`);
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    },
+    update: async (id, supplier) =>
+    {
+        try 
+        {
+            const response = await api.patch(`/suppliers/${id}`, {name: supplier});
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    },
+    get: async (id) =>
+    {
+        try 
+        {
+            const response = await api.get(`/suppliers/${id}`);
+            return response
+        } 
+        catch (error) 
+        {
+            throw error
+        }
+    }
+}
+
 export const tables = 
 {
     count: async () =>
@@ -104,8 +188,8 @@ export const tables =
                     page: page,
                     limit: limit,
                     search: search || undefined,
-                    sortBy: sortBy,
-                    sortDesc: sortDesc
+                    sort_by: sortBy,
+                    sort_desc: sortDesc
                 }
             });
             return response
@@ -127,7 +211,7 @@ export const tables =
             throw error
         }
     },
-    edit: async (id, table) =>
+    update: async (id, table) =>
     {
         try 
         {
@@ -152,15 +236,6 @@ export const tables =
         }
     }
 }
-
-
-
-
-
-
-
-
-
 
 export const manufacturers = 
 {
@@ -200,7 +275,7 @@ export const manufacturers =
             throw error
         }
     },
-    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = false) =>
+    list: async (page = 1, limit = 100, search = '', sort_by = 'id', sort_desc = false) =>
     {
         try 
         {
@@ -209,8 +284,8 @@ export const manufacturers =
                     page: page,
                     limit: limit,
                     search: search,
-                    sortBy: sortBy,
-                    sortDesc: sortDesc
+                    sort_by: sort_by,
+                    sort_desc: sort_desc
                 }
             });
             return response
@@ -232,7 +307,7 @@ export const manufacturers =
             throw error
         }
     },
-    edit: async (id, manufacturer) =>
+    update: async (id, manufacturer) =>
     {
         try 
         {
@@ -258,93 +333,15 @@ export const manufacturers =
     }
 }
 
-export const suppliers = 
-{
-    count: async () =>
-    {
-        try 
-        {
-            const response = await api.get(`/suppliers/count`);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    create: async (name) =>
-    {
-        try 
-        {
-            const response = await api.post(`/suppliers`, { name }, { timeout: 30000 });
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = false) =>
-    {
-        try 
-        {
-            const response = await api.get(`/suppliers`, {
-                params: {
-                    page: page,
-                    limit: limit,
-                    search: search,
-                    sortBy: sortBy,
-                    sortDesc: sortDesc
-                }
-            });
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    delete: async (id) =>
-    {
-        try 
-        {
-            const response = await api.delete(`/suppliers/${id}`);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    edit: async (id, supplier) =>
-    {
-        try 
-        {
-            const response = await api.patch(`/suppliers/${id}`, {name: supplier});
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    get: async (id) =>
-    {
-        try 
-        {
-            const response = await api.get(`/suppliers/${id}`);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    }
-}
+
+
+
+
+
 
 export const tags = 
 {
-    list: async (page = 1, limit = 10, search = null, sortBy = 'name', sortDesc = false) =>
+    list: async (page = 1, limit = 10, search = null, sort_by = 'name', sort_desc = false) =>
     {
         try 
         {
@@ -354,8 +351,8 @@ export const tags =
                     page: page,
                     limit: limit,
                     search: search,
-                    sortBy: sortBy,
-                    sortDesc: sortDesc
+                    sort_by: sort_by,
+                    sort_desc: sort_desc
                 }
             });
             return response
@@ -367,13 +364,77 @@ export const tags =
     }
 }
 
+export const users = 
+{
+    list: async (page = 1, limit = 10, search = null, sort_by = 'created_at', sort_desc = false) =>
+    {
+        try
+        {
+            const response = await api.get(`/users`, {
+                params:
+                {
+                    page: page,
+                    limit: limit,
+                    search: search,
+                    sort_by: sort_by,
+                    sort_desc: sort_desc
+                }
+            });
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    delete: async (id) =>
+    {
+        try
+        {
+            const response = await api.delete(`/users/${id}`);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    update: async (id, user) =>
+    {
+        try
+        {
+            const response = await api.patch(`/users/${id}`, user);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    create: async (user) =>
+    {
+        try
+        {
+            const response = await api.post(`/users`, user);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    
+}
+
+
+
+
+
+
+
 export const elements = 
 {
-
-
-
-
-    lastAdded: async () =>
+    last_added: async () =>
     {
         try 
         {
@@ -397,12 +458,6 @@ export const elements =
             throw error
         }
     },
-
-
-
-
-
-
     create: async (element, datasheets = []) =>
     {
         try
@@ -427,7 +482,7 @@ export const elements =
             throw error;
         }
     },
-    list: async (page = 1, limit = 100, search = null, sortBy = "uuid", sortDesc = false) =>
+    list: async (page = 1, limit = 100, search = null, sort_by = "created_at", sort_desc = false) =>
     {
         try 
         {
@@ -436,8 +491,8 @@ export const elements =
                     page: page,
                     limit: limit,
                     search: search,
-                    sortBy: sortBy,
-                    sortDesc: sortDesc
+                    sort_by: sort_by,
+                    sort_desc: sort_desc
                 }
             });
             return response
@@ -459,7 +514,7 @@ export const elements =
             throw error
         }
     },
-    edit: async (uuid, element, files = null) =>
+    update: async (uuid, element, files = null) =>
     {
         try 
         {
@@ -526,77 +581,6 @@ export const elements =
 }
 
 
-export const users = 
-{
-    create: async (name) =>
-    {
-        try 
-        {
-            const response = await api.post(`/users`, name);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    list: async (page = 1, limit = 100, search = '', sortBy = 'id', sortDesc = true) =>
-    {
-        try 
-        {
-            const response = await api.get(`/users`, {
-                params: {
-                    page: page,
-                    limit: limit,
-                    search: search,
-                    sortBy: sortBy,
-                    sortDesc: sortDesc
-                }
-            });
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    delete: async (id) =>
-    {
-        try 
-        {
-            const response = await api.delete(`/suppliers/${id}`);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    edit: async (id, supplier) =>
-    {
-        try 
-        {
-            const response = await api.patch(`/suppliers/${id}`, supplier);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    },
-    get: async (id) =>
-    {
-        try 
-        {
-            const response = await api.get(`/suppliers/${id}`);
-            return response
-        } 
-        catch (error) 
-        {
-            throw error
-        }
-    }
-}
 
 export const services = 
 {
