@@ -92,8 +92,9 @@ async def delete_manufacturers(id: int, db = Depends(get_db)):
     return id
 
 @router.post('/manufacturers')
-async def post_manufacturers(manufacturer: schemas.ManufacturerBase, db = Depends(get_db)):
-    if manufacturer.name == '':
+async def post_manufacturers(manufacturer: dict, db = Depends(get_db)):
+    name = manufacturer.get("name")
+    if isinstance(name, str) and not name.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
@@ -102,7 +103,18 @@ async def post_manufacturers(manufacturer: schemas.ManufacturerBase, db = Depend
             }
         )
 
-    item = models.Manufacturer(**manufacturer.model_dump())
+    try:
+        validated_manufacturer = schemas.ManufacturerBase.model_validate(manufacturer)
+    except ValidationError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "error_code": "INVALID_MANUFACTURER_DATA",
+                "message": "Invalid manufacturer data."
+            }
+        )
+
+    item = models.Manufacturer(**validated_manufacturer.model_dump())
     db.add(item)
     try:
         await db.commit()

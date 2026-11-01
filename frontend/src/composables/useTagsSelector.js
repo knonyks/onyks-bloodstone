@@ -31,6 +31,22 @@ export const useTagsSelector = (_service, tags) =>
             text.value = ''
             await init()
         }
+        if(event.key === 'Escape')
+        {
+            text.value = ''
+            await init()
+        }
+        if(event.key == ' ')
+        {
+            if (text.value.trim() !== '')
+            {
+                const tag = text.value.trim().toLowerCase()
+                if (!tags.value.some(existing => existing.trim().toLowerCase() === tag))
+                    tags.value.push(tag)
+            }
+            text.value = ''
+            await init()
+        }
     }
 
     const select = async (event) =>

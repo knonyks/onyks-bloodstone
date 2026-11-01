@@ -73,8 +73,9 @@
     {
         width: 100%;
         height: 300px;
+        min-height: 300px;
+        flex-shrink: 0;
         box-sizing: border-box;
-        overflow-y: hidden;
         overflow-y: auto;
     }
 
@@ -91,6 +92,5 @@
         height: fit-content;
         flex-shrink: 0;
         box-sizing: border-box;
-        /* margin-right: var(--onyks-spacing-md); */
     }
 </style>

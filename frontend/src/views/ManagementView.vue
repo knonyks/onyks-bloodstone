@@ -9,19 +9,16 @@
     import AddItemDialog from '@/components/AddItemDialog.vue';
     import EditItemDialog from '@/components/EditItemDialog.vue';
     import RemoveItemsDialog from '@/components/RemoveItemsDialog.vue';
-    import { html } from 'lit';
     import router from '@/router';
     import { i18n } from '@/utils/localization';
     import { OnyksToastContainer } from 'onyks-web-ui-system';
-    import { elements_table_expand_template, useLabels } from '@/utils/tools';
-    import QRScanner from '@/components/QRScanner.vue';
-
-
+    import { elements_table_expand_template } from '@/utils/tools';
     import { useAddItemDialog } from '@/composables/useAddItemDialog';
     import { useEditItemDialog } from '@/composables/useEditItemDialog';
     import { useRemoveItemsDialog } from '@/composables/useRemoveItemsDialog';
     import { useBasicTable } from '@/composables/useBasicTable';
     import SubTitle from '@/components/SubTitle.vue';
+    import { labels_generate } from '@/utils/generateLabels';
     
     const loaderStore = useLoaderStore()
     const expand_page = ref(false)
@@ -89,13 +86,21 @@
         { label: i18n.global.t('elements.value'), key: 'value' },
         { label: i18n.global.t('elements.availability'), key: 'availability' },
         { label: i18n.global.t('common.created_at'), key: 'created_at' }
-        ], 'uuid', (item) => {return { 
+        ], 'created_at', (item) => {return { 
             ...item, 
             selected: false, 
             created_at: i18n.global.d(new Date(item.created_at), 'short') ,
             availability: item.availability || i18n.global.t('common.no_data'),
             value: item.value || i18n.global.t('common.no_data'),
-            manufacturer: item.manufacturer || i18n.global.t('common.no_data')
+            manufacturer: item.manufacturer || i18n.global.t('common.no_data'),
+            footprint_path_1: item.footprint_path_1 || '',
+            footprint_path_2: item.footprint_path_2 || '',
+            footprint_path_3: item.footprint_path_3 || '',
+            footprint_reference_1: item.footprint_reference_1 || '',
+            footprint_reference_2: item.footprint_reference_2 || '',
+            footprint_reference_3: item.footprint_reference_3 || '',
+            library_reference: item.library_reference || '',
+            library_path: item.library_path || ''
         }}, elements_table_expand_template)
     })  
 
@@ -162,13 +167,6 @@
             {
                 tables.elements.search()
             }, () => tables.elements.data.filter(item => item.selected))
-        },
-        elements2:
-        {
-            remove: useRemoveItemsDialog(services.elements, i18n.global.t('elements.delete'), ['uuid', 'part_name'], (item) =>
-            {
-                tables.elements.search()
-            })
         }
     })
 
@@ -199,18 +197,16 @@
             <onyks-button background="yellow" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/duplicate/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.duplicate')}}</onyks-button>
             <onyks-button background="red" :disabled="tables.elements.selected === 0" @click="dialogs.elements.remove.items = tables.elements.data.filter(item => item.selected); dialogs.elements.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
             <onyks-button background="gray" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/details/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.details')}}</onyks-button>
-            <!-- <onyks-button @click="labels.generate(tables.elements?.data.filter(item => item.selected))" background="green" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button> -->
-            <!-- <onyks-button background="blue">{{$t('common.scan')}}</onyks-button> -->
+            <onyks-button @click="labels_generate(tables.elements?.data.filter(item => item.selected))" background="green" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button>
+            <onyks-button background="blue">{{$t('common.scan')}}</onyks-button>
         </BasicButtonsPanel>
         <BasicSearch v-model="tables.elements.search_phrase" :search="tables.elements.search"></BasicSearch>
         <BasicTable v-model="tables.elements" @remove-element="(event) => {
-            console.log(event.detail);
-            console.log(dialogs.elements2.remove.items)
-            dialogs.elements2.remove.items = [event.detail];
-            dialogs.elements2.remove.first_open = true;
+            dialogs.elements.remove.items = [event.detail];
+            dialogs.elements.remove.first_open = true;
         }"></BasicTable>
         <RemoveItemsDialog v-model="dialogs.elements.remove"></RemoveItemsDialog>
-        <RemoveItemsDialog v-model="dialogs.elements2.remove"></RemoveItemsDialog>
+        <RemoveItemsDialog v-model="dialogs.elements.remove"></RemoveItemsDialog>
 
         <!-- Tables -->
         <SubTitle>{{ $t('common.tables') }}</SubTitle>

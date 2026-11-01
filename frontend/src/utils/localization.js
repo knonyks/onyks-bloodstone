@@ -178,7 +178,8 @@ const pl =
         add_datasheets: 'Dodaj arkusze danych',
         already_uploaded: 'Obecny na serwerze',
         not_uploaded_yet: 'Jeszcze nie przesłano',
-        delete: 'Usuń element'
+        removed_successfully: 'Element został usunięty pomyślnie.',
+        no_datasheets_defined: 'Brak zdefiniowanych arkuszy danych'
     }
 }
 

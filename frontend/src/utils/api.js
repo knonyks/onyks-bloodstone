@@ -333,12 +333,6 @@ export const manufacturers =
     }
 }
 
-
-
-
-
-
-
 export const tags = 
 {
     list: async (page = 1, limit = 10, search = null, sort_by = 'name', sort_desc = false) =>
@@ -363,6 +357,10 @@ export const tags =
         }
     }
 }
+
+
+
+
 
 export const users = 
 {

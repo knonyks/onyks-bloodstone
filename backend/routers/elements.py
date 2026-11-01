@@ -72,25 +72,37 @@ async def post_elements(element: str = Form(...), files: List[UploadFile] | None
             detail={"error_code": "INVALID_ELEMENT", "message": exc.errors()}
         )
 
-    if data.get("datasheets"):
-        if len(data.get("datasheets") or []) == len(files or []):
-            for i, file in enumerate(files or []):
-                if file.content_type != "application/pdf":
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail={"error_code": "INVALID_FILE_TYPE", "message": f"File {file.filename} is not a PDF."}
-                    )
-            for i in data.get("datasheets") or []:
-                i["uuid"] = str(uuid_module.uuid4())
-        else:
+    datasheets = data.get("datasheets") or []
+    uploaded_files = files or []
+    if len(datasheets) != len(uploaded_files):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "MISMATCHED_FILE_COUNT", "message": "Number of datasheets does not match number of uploaded files."}
+        )
+
+    max_pdf_size = 1 * 1024 * 1024 * 1024
+    pdf_contents = []
+    for file in uploaded_files:
+        content = await file.read(max_pdf_size + 1)
+        if len(content) > max_pdf_size:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={"error_code": "FILE_TOO_LARGE", "message": "Datasheet files must be no larger than 1 GB."}
+            )
+        if b"%PDF-" not in content[:1024]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error_code": "MISMATCHED_FILE_COUNT", "message": "Number of datasheets does not match number of uploaded files."}
+                detail={"error_code": "INVALID_FILE_TYPE", "message": "Datasheet uploads must contain a valid PDF header."}
             )
+        pdf_contents.append(content)
 
-        for i, file in enumerate(files or []):
-            with open(os.path.join(UPLOAD_DIR, f"{data['datasheets'][i]['uuid']}.pdf"), "wb") as f:
-                f.write(await file.read())
+    if datasheets:
+        os.makedirs(UPLOAD_DIR, mode=0o750, exist_ok=True)
+        for datasheet, content in zip(datasheets, pdf_contents):
+            datasheet["uuid"] = str(uuid_module.uuid4())
+            file_path = os.path.join(UPLOAD_DIR, f"{datasheet['uuid']}.pdf")
+            with open(file_path, "xb") as f:
+                f.write(content)
 
 
     suppliers = data.pop("suppliers", {})
@@ -152,11 +164,30 @@ async def path_elements(uuid: str, element: str = Form(...), files: List[UploadF
 
     datasheets = data.get("datasheets") or []
 
-    old_uuids = [datasheet["uuid"] for datasheet in item.datasheets]
-    new_uuid = [datasheet["uuid"] for datasheet in datasheets if datasheet.get("uuid")]
-    to_remove = list(set(old_uuids) - set(new_uuid))
-    to_add = [datasheet for datasheet in datasheets if not datasheet.get("uuid")]
+    old_uuids = {str(datasheet["uuid"]) for datasheet in item.datasheets}
+    retained_uuids = set()
+    to_add = []
+    for datasheet in datasheets:
+        supplied_uuid = datasheet.get("uuid")
+        if not supplied_uuid:
+            to_add.append(datasheet)
+            continue
+        try:
+            supplied_uuid = str(uuid_module.UUID(str(supplied_uuid)))
+        except (ValueError, TypeError, AttributeError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_DATASHEET_UUID", "message": "Invalid datasheet UUID."}
+            )
+        if supplied_uuid not in old_uuids or supplied_uuid in retained_uuids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_DATASHEET_REFERENCE", "message": "Datasheet reference is invalid or duplicated."}
+            )
+        datasheet["uuid"] = supplied_uuid
+        retained_uuids.add(supplied_uuid)
 
+    to_remove = old_uuids - retained_uuids
     files = files or []
     if len(to_add) != len(files):
         raise HTTPException(
@@ -166,44 +197,53 @@ async def path_elements(uuid: str, element: str = Form(...), files: List[UploadF
                 "message": "Number of new datasheets does not match number of uploaded files."
             }
         )
+    max_pdf_size = 1 * 1024 * 1024 * 1024
+    pdf_contents = []
     for file in files:
-        if file.content_type != "application/pdf":
+        content = await file.read(max_pdf_size + 1)
+        if len(content) > max_pdf_size:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={"error_code": "FILE_TOO_LARGE", "message": "Datasheet files must be no larger than 10 MB."}
+            )
+        if not content.startswith(b"%PDF-"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error_code": "INVALID_FILE_TYPE", "message": f"File {file.filename} is not a PDF."}
+                detail={"error_code": "INVALID_FILE_TYPE", "message": "Datasheet uploads must contain a valid PDF header."}
             )
+        pdf_contents.append(content)
 
-    for datasheet_uuid in to_remove:
-        pdf_path = os.path.join(UPLOAD_DIR, f"{datasheet_uuid}.pdf")
-        if os.path.isfile(pdf_path):
-            os.remove(pdf_path)
-
-    for datasheet, file in zip(to_add, files):
-        datasheet["uuid"] = str(uuid_module.uuid4())
-        pdf_path = os.path.join(UPLOAD_DIR, f"{datasheet['uuid']}.pdf")
-        with open(pdf_path, "wb") as pdf:
-            pdf.write(await file.read())
-
-    for field, value in data.items():
-        if field not in {"uuid", "datasheets", "suppliers"}:
-            setattr(item, field, value)
-    item.datasheets = datasheets
-
-    if "suppliers" in data:
-        item.suppliers = [
-            models.ElementSupplier(
-                supplierId=int(supplier_id),
-                value=(supplier_data or {}).get("value", "")
-            )
-            for supplier_id, supplier_data in (data["suppliers"] or {}).items()
-        ]
-
+    os.makedirs(UPLOAD_DIR, mode=0o750, exist_ok=True)
+    created_paths = []
     try:
+        for datasheet, content in zip(to_add, pdf_contents):
+            datasheet["uuid"] = str(uuid_module.uuid4())
+            pdf_path = os.path.join(UPLOAD_DIR, f"{datasheet['uuid']}.pdf")
+            with open(pdf_path, "xb") as pdf:
+                pdf.write(content)
+            created_paths.append(pdf_path)
+
+        for field, value in data.items():
+            if field not in {"uuid", "datasheets", "suppliers"}:
+                setattr(item, field, value)
+        item.datasheets = datasheets
+
+        if "suppliers" in data:
+            item.suppliers = [
+                models.ElementSupplier(
+                    supplierId=int(supplier_id),
+                    value=(supplier_data or {}).get("value", "")
+                )
+                for supplier_id, supplier_data in (data["suppliers"] or {}).items()
+            ]
+
         await db.commit()
         await db.refresh(item)
-        return _serialize_element(item)
     except IntegrityError:
         await db.rollback()
+        for path in created_paths:
+            if os.path.isfile(path):
+                os.remove(path)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
@@ -211,6 +251,18 @@ async def path_elements(uuid: str, element: str = Form(...), files: List[UploadF
                 "message": "Invalid data or an element with this name already exists."
             }
         )
+    except Exception:
+        await db.rollback()
+        for path in created_paths:
+            if os.path.isfile(path):
+                os.remove(path)
+        raise
+
+    for datasheet_uuid in to_remove:
+        pdf_path = os.path.join(UPLOAD_DIR, f"{datasheet_uuid}.pdf")
+        if os.path.isfile(pdf_path):
+            os.remove(pdf_path)
+    return _serialize_element(item)
 
 @router.get("/elements")
 async def get_elements_list(
@@ -329,7 +381,30 @@ async def duplicate_element(
         source_datasheets = list(item.datasheets or [])
 
     files = files or []
-    to_add = [d for d in source_datasheets if not d.get("uuid")]
+    original_datasheets = list(item.datasheets or [])
+    original_uuids = {str(uuid_module.UUID(str(d["uuid"]))) for d in original_datasheets if d.get("uuid")}
+    retained_uuids = set()
+    to_add = []
+    for datasheet in source_datasheets:
+        supplied_uuid = datasheet.get("uuid")
+        if not supplied_uuid:
+            to_add.append(datasheet)
+            continue
+        try:
+            supplied_uuid = str(uuid_module.UUID(str(supplied_uuid)))
+        except (ValueError, TypeError, AttributeError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_DATASHEET_UUID", "message": "Invalid datasheet UUID."}
+            )
+        if supplied_uuid not in original_uuids or supplied_uuid in retained_uuids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "INVALID_DATASHEET_REFERENCE", "message": "Datasheet reference is invalid or duplicated."}
+            )
+        datasheet["uuid"] = supplied_uuid
+        retained_uuids.add(supplied_uuid)
+
     if len(to_add) != len(files):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -338,29 +413,51 @@ async def duplicate_element(
                 "message": "Number of new datasheets does not match number of uploaded files."
             }
         )
+    max_pdf_size = 10 * 1024 * 1024
+    pdf_contents = []
     for file in files:
-        if file.content_type != "application/pdf":
+        content = await file.read(max_pdf_size + 1)
+        if len(content) > max_pdf_size:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={"error_code": "FILE_TOO_LARGE", "message": "Datasheet files must be no larger than 10 MB."}
+            )
+        if not content.startswith(b"%PDF-"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"error_code": "INVALID_FILE_TYPE", "message": f"File {file.filename} is not a PDF."}
+                detail={"error_code": "INVALID_FILE_TYPE", "message": "Datasheet uploads must contain a valid PDF header."}
             )
+        pdf_contents.append(content)
 
     copied_datasheets = []
-    new_files = iter(files)
-    for datasheet in source_datasheets:
-        copied = dict(datasheet)
-        old_uuid = copied.get("uuid")
-        new_uuid = str(uuid_module.uuid4())
-        destination = os.path.join(UPLOAD_DIR, f"{new_uuid}.pdf")
-        if old_uuid:
-            source = os.path.join(UPLOAD_DIR, f"{old_uuid}.pdf")
-            if os.path.isfile(source):
+    created_paths = []
+    os.makedirs(UPLOAD_DIR, mode=0o750, exist_ok=True)
+    try:
+        new_contents = iter(pdf_contents)
+        for datasheet in source_datasheets:
+            copied = dict(datasheet)
+            old_uuid = copied.get("uuid")
+            new_uuid = str(uuid_module.uuid4())
+            destination = os.path.join(UPLOAD_DIR, f"{new_uuid}.pdf")
+            if old_uuid:
+                source = os.path.join(UPLOAD_DIR, f"{old_uuid}.pdf")
+                if not os.path.isfile(source):
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail={"error_code": "DATASHEET_NOT_FOUND", "message": "Datasheet file not found."}
+                    )
                 shutil.copyfile(source, destination)
-        else:
-            with open(destination, "wb") as pdf:
-                pdf.write(await next(new_files).read())
-        copied["uuid"] = new_uuid
-        copied_datasheets.append(copied)
+            else:
+                with open(destination, "xb") as pdf:
+                    pdf.write(next(new_contents))
+            created_paths.append(destination)
+            copied["uuid"] = new_uuid
+            copied_datasheets.append(copied)
+    except Exception:
+        for path in created_paths:
+            if os.path.isfile(path):
+                os.remove(path)
+        raise
     values["datasheets"] = copied_datasheets
 
     duplicate = models.Element(**values)
@@ -384,6 +481,9 @@ async def duplicate_element(
         return _serialize_element(duplicate)
     except IntegrityError:
         await db.rollback()
+        for path in created_paths:
+            if os.path.isfile(path):
+                os.remove(path)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
@@ -391,18 +491,43 @@ async def duplicate_element(
                 "message": "Invalid data or an element with this name already exists."
             }
         )
+    except Exception:
+        await db.rollback()
+        for path in created_paths:
+            if os.path.isfile(path):
+                os.remove(path)
+        raise
 
 @router.delete('/elements/{uuid}')
 async def delete_element(uuid: str, db: AsyncSession = Depends(get_db)):
-    element = await db.get(models.Element, uuid)
+    try:
+        element_uuid = uuid_module.UUID(uuid)
+    except (ValueError, TypeError, AttributeError):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "INVALID_UUID", "message": "Invalid UUID."}
+        )
+
+    element = await db.get(models.Element, element_uuid)
     if not element:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error_code": "ELEMENT_NOT_FOUND", "message": "Element not found."}
         )
+    datasheet_paths = []
+    for datasheet in element.datasheets or []:
+        try:
+            datasheet_uuid = uuid_module.UUID(str(datasheet.get("uuid", "")))
+        except (ValueError, TypeError, AttributeError):
+            continue
+        datasheet_paths.append(os.path.join(UPLOAD_DIR, f"{datasheet_uuid}.pdf"))
+
     await db.delete(element)
     try:
         await db.commit()
+        for path in datasheet_paths:
+            if os.path.isfile(path):
+                os.remove(path)
         return {"message": "Element deleted successfully."}
     except IntegrityError:
         await db.rollback()

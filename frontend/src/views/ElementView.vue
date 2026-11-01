@@ -11,6 +11,9 @@
     import { delay } from '@/utils/tools';
     import { OnyksContainer, OnyksToastContainer } from 'onyks-web-ui-system';
     import { i18n } from '@/utils/localization';
+    import { labels_generate } from '@/utils/generateLabels';
+    import RemoveItemsDialog from '@/components/RemoveItemsDialog.vue';
+    import { useRemoveItemsDialog } from '@/composables/useRemoveItemsDialog';
 
     const loaderStore = useLoaderStore();
     const route = useRoute();
@@ -36,7 +39,12 @@
         duplicate:
         {
             open: false
-        }
+        },
+        remove: useRemoveItemsDialog(services.elements, i18n.global.t('elements.remove'), ['uuid', 'part_name'], () =>
+        {
+            OnyksToastContainer.error(i18n.global.t('elements.removed_successfully'))
+            router.push('/manager/management')
+        })
     })
 
     onMounted(async () =>
@@ -116,7 +124,7 @@
                 try
                 {
                     dialogs.duplicate.open = true;
-                    let result = await services.elements.update(route.params.uuid, obj.details, obj.files)
+                    let result = await services.elements.duplicate(route.params.uuid, obj.details, obj.files)
                     await delay(1000)
                     dialogs.duplicate.open = false;
                     OnyksToastContainer.success(i18n.global.t('elements.duplicated_successfully'))
@@ -135,7 +143,11 @@
 
 <template>
     <ManagerPage :title="$t('elements.' + schema)">
-        <onyks-button background="red" @click="router.back()">{{$t('common.back')}}</onyks-button>
+        <onyks-container gap="m" type="group">
+            <onyks-button background="red" @click="router.back()">{{$t('common.back')}}</onyks-button>
+            <onyks-button v-if="schema != 'details' && schema != 'create'" background="blue" @click="router.push(`/manager/elements/details/${route.params.uuid}`)">{{$t('common.details')}}</onyks-button>
+        </onyks-container>
+        
         <ElementForm :schema="schema" v-model="obj"></ElementForm>
 
         <onyks-container align="end" v-if="schema !== 'details'">
@@ -143,9 +155,19 @@
             <onyks-button v-if="schema == 'edit'" background="green" @click="btns.edit.action()">{{$t('common.edit')}}</onyks-button>
             <onyks-button v-if="schema == 'duplicate'" background="green" @click="btns.duplicate.action()">{{$t('common.duplicate')}}</onyks-button>
         </onyks-container>
+        <onyks-container justify="end" v-if="schema === 'details'" type="group" gap="m" mobile-breakpoint="600">
+
+            <onyks-button background="blue" @click="router.push(`/manager/elements/edit/${route.params.uuid}`)">{{$t('common.edit')}}</onyks-button>
+            <onyks-button background="yellow" @click="router.push(`/manager/elements/duplicate/${route.params.uuid}`)">{{$t('common.duplicate')}}</onyks-button>
+            <onyks-button background="red" @click="dialogs.remove.items = [obj.details]; dialogs.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
+            <onyks-button @click="labels_generate([obj.details])" background="green">{{$t('common.labels')}}</onyks-button>
+
+        </onyks-container>
+
         <ProcessingElementDialog :open="dialogs.create.open" :message="$t('elements.creating')"></ProcessingElementDialog>
         <ProcessingElementDialog :open="dialogs.duplicate.open" :message="$t('elements.duplicating')"></ProcessingElementDialog>
         <ProcessingElementDialog :open="dialogs.edit.open" :message="$t('elements.editing')"></ProcessingElementDialog>
+        <RemoveItemsDialog v-model="dialogs.remove"></RemoveItemsDialog>
 
     </ManagerPage>
 </template>

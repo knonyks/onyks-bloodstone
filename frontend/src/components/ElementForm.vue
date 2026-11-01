@@ -317,11 +317,13 @@
 
         <onyks-header level="6">{{ $t('common.datasheets') }}</onyks-header>
 
-        <onyks-container v-if="props.schema == 'details'" gap="m" type="group">
+        <onyks-container v-if="props.schema == 'details' && Object.keys(obj.details.datasheets).length > 0" gap="m" type="group">
             <onyks-tag background="yellow" @click="() => open_datasheet(x.uuid)" icon="F756" v-for="x in obj.details.datasheets" :key="x.name" class="tag">{{ x.name }}</onyks-tag>
         </onyks-container>
 
-        <UploadFiles v-else  v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
+        <UploadFiles v-else v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
+
+        <onyks-text v-if="props.schema == 'details' && Object.keys(obj.details.datasheets).length == 0">{{ $t('elements.no_datasheets_defined') }}</onyks-text>
 
         <onyks-header level="6">{{ $t('common.tags') }}</onyks-header>
 
@@ -338,6 +340,7 @@
     onyks-textarea
     {
         height: 250px;
+        flex-shrink: 0;
     }
 
     .selector-btns
