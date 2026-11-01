@@ -18,6 +18,7 @@
     const convertedContent = computed(() => 
     {
         let result = []
+        console.log(props.path, props.obj);
         if(props.path != '')
             result = result.concat(props.path.split('/'));
         if(props.obj != '')

@@ -38,7 +38,7 @@ async def get_elements_count(db = Depends(get_db)):
 
 @router.get('/elements/last-added')
 async def get_elements_last_added(db = Depends(get_db)):
-    query = (select(models.Element).order_by(models.Element.createdAt.desc()).limit(1))
+    query = (select(models.Element).order_by(models.Element.created_at.desc()).limit(1))
     result = await db.execute(query)
     
     item = result.scalar_one_or_none()
@@ -212,33 +212,31 @@ async def path_elements(uuid: str, element: str = Form(...), files: List[UploadF
             }
         )
 
-
-
 @router.get("/elements")
 async def get_elements_list(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     search: str | None = Query(None),
-    sortBy: str = Query("created_at"),
-    sortDesc: bool = Query(False),
+    sort_by: str = Query("created_at"),
+    sort_desc: bool = Query(False),
     db = Depends(get_db)
 ):
     skip = (page - 1) * limit
     keys = {a.key for a in sa_inspect(models.Element).column_attrs}
-    sort_key = sortBy if sortBy in keys else "created_at"
+    sort_key = sort_by if sort_by in keys else "created_at"
     sort_column = getattr(models.Element, sort_key)
 
     query = select(models.Element)
     countQuery = select(func.count()).select_from(models.Element)
     if search:
-        cond = models.Element.partName.ilike(f"%{search.strip()}%")
+        cond = models.Element.part_name.ilike(f"%{search.strip()}%")
         query = query.where(cond)
         countQuery = countQuery.where(cond)
 
     totalCount = (await db.execute(countQuery)).scalar() or 0
     query = (
         query
-        .order_by(sort_column.desc() if sortDesc else sort_column.asc())
+        .order_by(sort_column.desc() if sort_desc else sort_column.asc())
         .offset(skip)
         .limit(limit)
     )
@@ -250,7 +248,6 @@ async def get_elements_list(
         "page": page,
         "limit": limit,
     }
-
 
 @router.get('/elements/{uuid}')
 async def get_element(uuid: str, db = Depends(get_db)):
@@ -416,5 +413,3 @@ async def delete_element(uuid: str, db: AsyncSession = Depends(get_db)):
                 "message": "Failed to delete element due to integrity constraints."
             }
         )
-
-

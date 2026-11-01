@@ -9,8 +9,6 @@
     import { models } from '@/utils/models';
     import ProcessingElementDialog from '@/components/ProcessingElementDialog.vue';
     import { delay } from '@/utils/tools';
-
-    import { watch } from 'vue';
     import { OnyksContainer, OnyksToastContainer } from 'onyks-web-ui-system';
     import { i18n } from '@/utils/localization';
 
@@ -46,7 +44,10 @@
         if(schema == 'edit' || schema == 'duplicate' || schema == 'details')
         {
             let result = await services.elements.get(route.params.uuid);
-            Object.assign(obj.details, result.data || {});
+            const details = Object.fromEntries(
+                Object.entries(result.data || {}).filter(([, value]) => value !== null)
+            );
+            Object.assign(obj.details, details);
         }   
         
         // for (const [key, value] of Object.entries(obj.details))

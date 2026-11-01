@@ -26,7 +26,7 @@ class Manufacturer(Base):
     id:  Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column('name', String(256), unique=True, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    elements: Mapped[List["Element"]] = relationship(back_populates="manufacturerRel")
+    elements: Mapped[List["Element"]] = relationship(back_populates="element_manufacturer")
 
 class Supplier(Base):
     __tablename__ = "suppliers"
@@ -35,7 +35,7 @@ class Supplier(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column('name', String(256), unique=True, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    elementSuppliers: Mapped[List["ElementSupplier"]] = relationship(
+    element_suppliers: Mapped[List["ElementSupplier"]] = relationship(
         back_populates="suppliers",
         passive_deletes=True,
     )
@@ -48,7 +48,7 @@ class Table(Base):
     name: Mapped[str] = mapped_column('name', String(256), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     elements: Mapped[List["Element"]] = relationship(
-        back_populates="tableCategory",
+        back_populates="table_category",
         foreign_keys="Element.table",
     )
 
@@ -76,15 +76,9 @@ class Element(Base):
     )
 
     description: Mapped[Optional[str]] = mapped_column('description', String(1024), nullable=True, default='')
-
-
-
-
-
     value: Mapped[Optional[str]] = mapped_column('value', String(256), nullable=True, default='')
     availability: Mapped[Optional[str]] = mapped_column('availability', String(256), nullable=True, default='')
 
-    
     library_reference: Mapped[Optional[str]] = mapped_column('library_ref', String(1024), nullable=True, default='')
     library_path: Mapped[Optional[str]] = mapped_column('library_path', String(1024), nullable=True, default='')
     
@@ -103,21 +97,14 @@ class Element(Base):
         lazy="selectin", 
     )
 
-    
-    tags: Mapped[List[str]] = mapped_column(MutableList.as_mutable(ARRAY(String(50))), default=list, nullable=False)
-
-
-    
-    
-    datasheets: Mapped[list] = mapped_column('datasheets', JSONB, default=list)
-
     created_at: Mapped[datetime] = mapped_column('created_at', DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    
-    tableCategory = relationship(
+    tags: Mapped[List[str]] = mapped_column(MutableList.as_mutable(ARRAY(String(50))), default=list, nullable=False)
+    datasheets: Mapped[list] = mapped_column('datasheets', JSONB, default=list)
+    table_category = relationship(
         "Table",
         back_populates="elements"
     )
-    manufacturerRel = relationship("Manufacturer", back_populates="elements")
+    element_manufacturer = relationship("Manufacturer", back_populates="elements")
 
 class ElementSupplier(Base):
     __tablename__ = "element_supplier"
@@ -134,7 +121,7 @@ class ElementSupplier(Base):
 
 
     elements: Mapped["Element"] = relationship(back_populates="suppliers")
-    suppliers: Mapped["Supplier"] = relationship(back_populates="elementSuppliers", lazy="joined")
+    suppliers: Mapped["Supplier"] = relationship(back_populates="element_suppliers", lazy="joined")
 
     @property
     def id(self) -> int:

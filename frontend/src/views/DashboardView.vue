@@ -60,16 +60,16 @@
                 <onyks-container gap="m" cols="2" rows="4" type="grid" mobile-breakpoint="900" style="grid-template-columns: 125px auto;">
 
                     <onyks-header level="6" cols="1">{{ $t('elements.part_name') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.partName || $t('common.no_data') }}</onyks-text>
+                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.part_name || $t('common.no_data') }}</onyks-text>
 
                     <onyks-header level="6" cols="1">{{ $t('elements.manufacturer') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{data.elements?.lastAdded?.manufacturer || $t('common.no_data')}}</onyks-text>
+                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.manufacturer || $t('common.no_data') }}</onyks-text>
 
                     <onyks-header level="6" cols="1">{{ $t('elements.table') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{data.elements?.lastAdded?.table || $t('common.no_data')}}</onyks-text>
+                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.table || $t('common.no_data') }}</onyks-text>
 
                     <onyks-header level="6" cols="1">{{ $t('common.created_at') }}</onyks-header>
-                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.createdAt ? $d(new Date(data.elements.lastAdded.createdAt), 'long') : $t('common.no_data') }}</onyks-text>
+                    <onyks-text size="m" cols="1">{{ data.elements?.lastAdded?.created_at ? $d(new Date(data.elements.lastAdded.created_at), 'long') : $t('common.no_data') }}</onyks-text>
 
                 </onyks-container>
             </onyks-card>

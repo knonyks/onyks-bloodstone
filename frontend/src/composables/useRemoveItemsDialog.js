@@ -1,12 +1,12 @@
 import { ref, computed, unref } from 'vue'
 import { delay } from '../utils/tools'
 
-export const useRemoveItemsDialog = (_service = null, _title = '', _keys = ['id', 'name'], _handle_end = () => {}, _items = (() => [])) =>
+export const useRemoveItemsDialog = (_service = null, _title = '', _keys = ['id', 'name'], _handle_end = () => {}) =>
 {
     const first_open = ref(false)
     const second_open = ref(false)
 
-    const items = computed(_items)
+    const items = ref([])
     const is_loading = ref(false)
 
     const title = ref(_title)

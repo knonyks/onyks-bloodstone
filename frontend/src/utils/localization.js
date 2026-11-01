@@ -87,7 +87,14 @@ const pl =
         duplicate: 'Duplikuj',
         select: 'Wybierz',
         reset: 'Resetuj',
+        
         datasheets: 'Karty katalogowe',
+        no_tags_defined: 'Brak zdefiniowanych znaczników',
+        tags: 'Znaczniki',
+        open: 'Otwórz',
+        supplier_deleted: 'Dostawca został usunięty',
+        manufacturer_deleted: 'Producent został usunięty',
+        table_deleted: 'Tabela została usunięta'
     },
     error_codes:
     {
@@ -100,7 +107,8 @@ const pl =
         INVALID_DATA_OR_TABLE_ALREADY_EXISTS: 'Nieprawidłowe dane lub taka tabela już istnieje.',
         TABLE_EMPTY_NAME: 'Nazwa tabeli nie może być pusta.',
         TABLE_NOT_EMPTY: 'Tabela nie jest pusta.',
-        INVALID_DATA_OR_ELEMENT_ALREADY_EXISTS: 'Nieprawidłowe dane wejściowe lub taki element już istnieje.'
+        INVALID_DATA_OR_ELEMENT_ALREADY_EXISTS: 'Nieprawidłowe dane wejściowe lub taki element już istnieje.',
+        INVALID_ELEMENT: 'Nieprawidłowy dane wejściowe elementu.'
     },
     suppliers:
     {
@@ -111,7 +119,8 @@ const pl =
         added: 'Dostawca został dodany',
         edited: 'Dostawca został zaktualizowany',
         supplier_name: 'Nazwa dostawcy',
-        suppliers_code: 'Kod dostawcy'
+        suppliers_code: 'Kod dostawcy',
+        suppliers_codes: 'Kody dostawców'
     },
     manufacturers:
     {
@@ -165,7 +174,11 @@ const pl =
         please_select_footprint: 'Proszę wybrać wzór montażowy',
         other_details: 'Pozostałe szczegóły',
         suppliers_codes: 'Kody dostawców',
-        no_suppliers_codes_defined: 'Brak zdefiniowanych kodów dostawców'
+        no_suppliers_codes_defined: 'Brak zdefiniowanych kodów dostawców',
+        add_datasheets: 'Dodaj arkusze danych',
+        already_uploaded: 'Obecny na serwerze',
+        not_uploaded_yet: 'Jeszcze nie przesłano',
+        delete: 'Usuń element'
     }
 }
 

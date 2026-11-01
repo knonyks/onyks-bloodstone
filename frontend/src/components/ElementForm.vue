@@ -8,7 +8,7 @@
     import { services, suppliers } from '@/utils/api.js';
     import UploadFiles from './UploadFiles.vue';
     import TagsSelector from './TagsSelector.vue';
-    import { useTagsSelector } from '../utils/tools';
+    import { open_datasheet } from '../utils/tools';
     import { useValueSelector } from '@/composables/useValueSelector.js';
     import AddItemDialog from './AddItemDialog.vue';
     import EditItemDialog from './EditItemDialog.vue';
@@ -24,6 +24,7 @@
     import SuppliersSelector from './SuppliersSelector.vue';
     import BasicTable from './BasicTable.vue';
     import { useBasicTable } from '@/composables/useBasicTable.js';
+    import { useTagsSelector } from '@/composables/useTagsSelector.js';
 
     const props = defineProps(['schema'])
     const obj = defineModel({
@@ -59,7 +60,7 @@
             }
         }),
         suppliers: useSuppliersSelector(services.suppliers),
-        // tags: useTagsSelector(services.tags, toRef(obj.value.details, 'tags'))
+        tags: useTagsSelector(services.tags, toRef(obj.value.details, 'tags'))
     })
 
     const dialogs = reactive(
@@ -190,7 +191,7 @@
         selectors.manufacturer.init()
         selectors.tables.init()
         selectors.suppliers.init()
-        // selectors.tags.init()
+        selectors.tags.init()
     })
 </script>
 
@@ -300,32 +301,35 @@
 
         <onyks-table v-if="props.schema == 'details' && Object.keys(obj.details.suppliers).length > 0" :columns="[{'label':$t('suppliers.supplier_name'), 'key': 'name'},{'label':$t('suppliers.suppliers_code'), 'key': 'value'}]" :data="tables.suppliers"></onyks-table>
 
-
         <onyks-text v-if="props.schema == 'details' && Object.keys(obj.details.suppliers).length == 0">{{ $t('elements.no_suppliers_codes_defined') }}</onyks-text>
 
         <SuppliersSelector v-model="selectors.suppliers" v-model:value="obj.details.suppliers" v-if="props.schema != 'details'"></SuppliersSelector>
 
         <onyks-container gap="m" type="grid" cols="3" mobile-breakpoint="900" v-if="props.schema != 'details'" style="max-width: 500px;">
             <onyks-button @click="dialogs.suppliers.add.open = true" class="selector-btns" background="green">{{ $t('common.add') }}</onyks-button>
-            <onyks-button @click="dialogs.suppliers.edit.name = obj.details.table; dialogs.suppliers.edit.open = true" class="selector-btns" background="blue" :disabled="true">{{ $t('common.edit') }}</onyks-button>
-            <onyks-button @click="dialogs.suppliers.remove.first_open = true" class="selector-btns" background="red" :disabled="true">{{ $t('common.remove') }}</onyks-button>
+            <onyks-button @click="dialogs.suppliers.edit.name = obj.details.table; dialogs.suppliers.edit.open = true" class="selector-btns" background="blue" :disabled="!dialogs.suppliers.edit.item">{{ $t('common.edit') }}</onyks-button>
+            <onyks-button @click="dialogs.suppliers.remove.first_open = true" class="selector-btns" background="red" :disabled="!dialogs.suppliers.remove.items.length">{{ $t('common.remove') }}</onyks-button>
         </onyks-container>
 
         <AddItemDialog v-model="dialogs.suppliers.add"></AddItemDialog>
         <EditItemDialog v-model="dialogs.suppliers.edit"></EditItemDialog>
         <RemoveItemsDialog v-model="dialogs.suppliers.remove"></RemoveItemsDialog>
 
-
         <onyks-header level="6">{{ $t('common.datasheets') }}</onyks-header>
 
-        <!-- <UploadFiles v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
+        <onyks-container v-if="props.schema == 'details'" gap="m" type="group">
+            <onyks-tag background="yellow" @click="() => open_datasheet(x.uuid)" icon="F756" v-for="x in obj.details.datasheets" :key="x.name" class="tag">{{ x.name }}</onyks-tag>
+        </onyks-container>
 
-        <onyks-header level="6">Tags</onyks-header>
+        <UploadFiles v-else  v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
+
+        <onyks-header level="6">{{ $t('common.tags') }}</onyks-header>
+
         <TagsSelector v-model:tags="obj.details.tags" v-model="selectors.tags" v-if="props.schema != 'details'"></TagsSelector>
         <onyks-container gap="m" type="group" v-else-if="obj.details.tags.length > 0">
             <onyks-tag v-for="tag in obj.details.tags" :key="tag">{{ tag }}</onyks-tag>
         </onyks-container>
-        <onyks-text v-else>No tags defined</onyks-text> -->
+        <onyks-text v-else>{{ $t('common.no_tags_defined') }}</onyks-text>
 
     </onyks-container>
 </template>
@@ -339,5 +343,10 @@
     .selector-btns
     {
         width: 100%;
+    }
+
+    .tag
+    {
+        min-width: 100px;
     }
 </style>
