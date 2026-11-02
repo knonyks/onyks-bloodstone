@@ -52,7 +52,6 @@ class ElementOutput(ElementBase):
 
 class UserRank(str, Enum):
     EDITOR = 'editor'
-    VIEWER = "viewer"
     ADMIN = "admin"
 
 class UserBase(BaseModel):

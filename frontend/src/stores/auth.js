@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import { auth } from '@/utils/api'
+import { OnyksToastContainer } from 'onyks-web-ui-system'
+
+let refreshPromise = null
 
 export const useAuthStore = defineStore('auth', 
 {
@@ -19,19 +22,42 @@ export const useAuthStore = defineStore('auth',
       const { data } = await auth.login(username, password)
       this.token = data.access_token
       localStorage.setItem('token', this.token)
-      await this.fetchMe()
+      await this.fetch_me()
     },
-    async fetchMe() 
+    async fetch_me() 
     {
       const { data } = await auth.me()
       this.user = data
-      console.log(this.user)
     },
-    async logout() 
+    refresh() 
+    {
+      if (!refreshPromise) 
+      {
+        refreshPromise = auth.refresh().then(({ data }) => 
+        {
+            this.token = data.access_token
+            localStorage.setItem('token', this.token)
+        }).finally(() => { refreshPromise = null })
+      }
+      return refreshPromise
+    },
+
+    clear() 
     {
       this.token = null
       this.user = null
       localStorage.removeItem('token')
+    },
+
+    async logout() 
+    {
+      try 
+      { 
+        OnyksToastContainer.info('Logging out...')
+        await auth.logout()
+      } 
+      catch {}
+      this.clear()
     },
   },
 })

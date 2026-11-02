@@ -42,14 +42,12 @@ DBDExptime 300
 <Location /svn>
     DAV svn
     SVNParentPath /var/svn
-    
-    AuthzSVNAccessFile /etc/svn-authz
 
     AuthType Basic
     AuthName "SVN Repository"
 
     AuthBasicProvider dbd
-    AuthDBDUserPWQuery "SELECT password FROM private.users WHERE username = %s"
+    AuthDBDUserPWQuery "SELECT password FROM private.users WHERE username = %s AND (expiration_time = TIMESTAMP '1970-01-01 00:00:00' OR expiration_time >= CURRENT_TIMESTAMP)"
 
     <If "%{HTTP_USER_AGENT} =~ /Mozilla/">
         Require all denied

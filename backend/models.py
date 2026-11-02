@@ -129,7 +129,6 @@ class ElementSupplier(Base):
         return self.suppliers.name
 
 class UserRank(PyEnum):
-    viewer = "viewer"
     admin = "admin"
     editor = "editor"
 
@@ -153,7 +152,7 @@ class User(Base):
     rank: Mapped[UserRank] = mapped_column(
         Enum(UserRank, name='user_rank', native_enum=True),
         nullable=False,
-        default=UserRank.viewer,
+        default=UserRank.editor,
     )
     created_at: Mapped[datetime] = mapped_column(
         'created_at',

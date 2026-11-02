@@ -1,11 +1,15 @@
 import axios from 'axios';
 import router from '@/router';
+import { useAuthStore } from '@/stores/auth';
 
 const api = axios.create(
 {
     baseURL: '/api',
-    timeout: 5000
+    timeout: 5000,
+    withCredentials: true,
 });
+
+const AUTH_URLS = ['/auth/login', '/auth/refresh', '/auth/logout']
 
 api.interceptors.request.use((config) => 
 {
@@ -16,11 +20,26 @@ api.interceptors.request.use((config) =>
 
 api.interceptors.response.use(
     (res) => res,
-    (err) => {
-    if (err.response?.status === 401) 
+    async (err) => 
     {
-        localStorage.removeItem('token')
-        router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+        const original = err.config
+        const is_auth_call = AUTH_URLS.some((u) => original?.url?.includes(u))
+
+        if (err.response?.status === 401 && !is_auth_call && !original._retry) 
+        {
+            original._retry = true
+            const auth = useAuthStore()
+            try 
+            {
+                await auth.refresh()
+                original.headers.Authorization = `Bearer ${auth.token}`
+                return api(original)
+            } 
+            catch 
+            {
+                auth.clear()
+                router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+            }
     }
     return Promise.reject(err)
     }
@@ -541,6 +560,30 @@ export const auth =
         try
         {
             const response = await api.get('/auth/me');
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    refresh: async () =>
+    {
+        try
+        {
+            const response = await api.post('/auth/refresh');
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    logout: async () =>
+    {
+        try
+        {
+            const response = await api.post('/auth/logout');
             return response
         }
         catch (error)

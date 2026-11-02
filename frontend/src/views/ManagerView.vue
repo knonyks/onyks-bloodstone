@@ -12,7 +12,6 @@
     const log_out = async () => 
     {
         await authStore.logout()
-        OnyksToastContainer.info('Logged out...', 1000)
         router.push('/login')
     }
 </script>
