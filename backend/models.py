@@ -17,8 +17,6 @@ event.listen(
     DDL("CREATE EXTENSION IF NOT EXISTS pgcrypto"),
 )
 
-
-
 class Manufacturer(Base):
     __tablename__ = "manufacturers"
     __table_args__ = {'schema': 'private'}
@@ -52,8 +50,7 @@ class Table(Base):
         foreign_keys="Element.table",
     )
 
-
-class Element(Base):    
+class Element(Base):
     __tablename__ = "elements"
     __table_args__ = (
         Index("ix_elements_tags_gin", "tags", postgresql_using="gin"),
@@ -131,9 +128,6 @@ class ElementSupplier(Base):
     def name(self) -> str:
         return self.suppliers.name
 
-
-
-# FINAL
 class UserRank(PyEnum):
     viewer = "viewer"
     admin = "admin"
@@ -146,7 +140,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, unique=False, nullable=True)
     surname: Mapped[str] = mapped_column(String, unique=False, nullable=True)
-    login: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     expiration_time: Mapped[datetime] = mapped_column(

@@ -38,23 +38,23 @@ sync_authz_file() {
         
         export PGPASSWORD=$POSTGRES_PASSWORD
         
-        # Download login and rank from PostgreSQL and append to the temp authz file
+        # Download username and rank from PostgreSQL and append to the temp authz file
         # If the query fails (e.g. database is down), we skip this iteration and try again in 10 seconds
         if psql "host=database dbname=$POSTGRES_DB user=$POSTGRES_USER" -Atc \
-           "SELECT login, rank FROM private.users;" >> /tmp/svn-authz.tmp 2>/dev/null; then
+           "SELECT username, rank FROM private.users;" >> /tmp/svn-authz.tmp 2>/dev/null; then
            
            # Process the downloaded data to convert ranks to permissions
            # Here we read the temp file line by line, convert ranks to permissions, and write to another temp file
            # We use a case statement to map ranks to permissions (admin and editor get rw, user gets r)
            
-           # Clean up the tmp file to only have login and rank
+           # Clean up the tmp file to only have username and rank
            psql "host=database dbname=$POSTGRES_DB user=$POSTGRES_USER" -Atc \
-           "SELECT login, rank FROM private.users;" | while IFS='|' read login rank; do
+           "SELECT username, rank FROM private.users;" | while IFS='|' read username rank; do
                 case $rank in
-                    server) echo "$login = rw" ;;
-                    admin) echo "$login = rw" ;;
-                    editor) echo "$login = rw" ;;
-                    user) echo "$login = r" ;;
+                    server) echo "$username = rw" ;;
+                    admin) echo "$username = rw" ;;
+                    editor) echo "$username = rw" ;;
+                    user) echo "$username = r" ;;
                 esac
            done > /tmp/svn-perms.tmp
 

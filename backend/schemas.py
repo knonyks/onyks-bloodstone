@@ -56,17 +56,15 @@ class UserRank(str, Enum):
     ADMIN = "admin"
 
 class UserBase(BaseModel):
-    login: Optional[str] = None
-    name: Optional[str] = None
-    surname: Optional[str] = None
-    email: Optional[str] = None
+    username: Optional[str] = None
     rank: Optional[UserRank] = None
     expiration_time: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
 class UserFull(UserBase):
-    id: int
-    password: Optional[str] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    email: Optional[str] = None
 
 T = TypeVar('T')
 
@@ -103,3 +101,7 @@ class SupplierBase(BaseModel):
 class SupplierFull(SupplierBase):
     id: int
     created_at: datetime
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

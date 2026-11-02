@@ -9,6 +9,7 @@ import AdminView from '@/views/AdminView.vue';
 import SettingsView from '@/views/SettingsView.vue';
 import { useLoaderStore } from '@/stores/loader';
 import { i18n } from '@/utils/localization';
+import { useAuthStore } from '@/stores/auth';
 
 const routes = [
   {
@@ -18,62 +19,64 @@ const routes = [
   {
     path: '/login',
     component: LoginView,
-    name: 'Login',
-    meta: { title: 'Login - ONYKS Bloodstone' }
+    name: 'login',
+    meta: { title: 'Login - ONYKS Bloodstone', guestOnly: true }
   },
   {
     path: '/manager',
     component: ManagerView,
+    meta: { requiresAuth: true },
     children: 
     [
       {
         path: 'dashboard',
         component: DashboardView,
-        meta: { title: i18n.global.t('common.dashboard') + ' - ONYKS Bloodstone' }
+        name: 'dashboard',
+        meta: { title: i18n.global.t('common.dashboard') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'management',
         component: ManagementView,
-        meta: { title: i18n.global.t('common.management') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.management') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'repository',
         component: RepositoryView,
-        meta: { title: i18n.global.t('common.repository') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.repository') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'admin',
         component: AdminView,
-        meta: { title: i18n.global.t('common.admin_panel') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.admin_panel') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'settings',
         component: SettingsView,
-        meta: { title: i18n.global.t('common.settings') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('common.settings') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/create',
         name: 'element-create',
         component: ElementView,
-        meta: { title: i18n.global.t('elements.create') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('elements.create') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/details/:uuid',
         name: 'element-details',
         component: ElementView,
-        meta: { title: i18n.global.t('elements.details') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('elements.details') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/edit/:uuid',
         name: 'element-edit',
         component: ElementView,
-        meta: { title: i18n.global.t('elements.edit') + ' - ONYKS Bloodstone' }
+        meta: { title: i18n.global.t('elements.edit') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/duplicate/:uuid',
         name: 'element-duplicate',
         component: ElementView,
-        meta: { title: i18n.global.t('elements.duplicate') + ' - ONYKS Bloodstone' },
+        meta: { title: i18n.global.t('elements.duplicate') + ' - ONYKS Bloodstone', requiresAuth: true },
       },
     ]
   }
@@ -88,14 +91,24 @@ const router = createRouter(
 router.beforeEach((to, from, next) => 
 {
   document.title = to.meta.title || 'ONYKS Bloodstone';
+  const auth = useAuthStore()
   const loaderStore = useLoaderStore()
 
-  if(from.path == '/')
+  if (from.path == '/')
   {
     loaderStore.globalIsLoading = true
   }
 
-  loaderStore.isLoading = true 
+  loaderStore.isLoading = true
+
+  if (to.meta.requiresAuth && !auth.isLoggedIn) 
+  {
+    return next({ name: 'login', query: { redirect: to.fullPath } })
+  }
+  if (to.meta.guestOnly && auth.isLoggedIn) 
+  {
+    return next({ name: 'dashboard', query: { redirect: to.fullPath } })
+  }
   next();
 });
 

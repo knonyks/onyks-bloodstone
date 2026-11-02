@@ -41,7 +41,7 @@ export const models =
                 id: '',
                 name: '',
                 surname: '',
-                login: '',
+                username: '',
                 password: '',
                 rank: '',
                 expirationTime: '',

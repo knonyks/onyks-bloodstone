@@ -1,18 +1,6 @@
-import { degrees, PDFDocument, rgb, StandardFonts, PageSizes } from 'pdf-lib';
-import QRCode from 'qrcode'
-import { DateTime } from "luxon";
-import { services } from './api';
-import { reactive } from 'vue'
-import { ref } from 'vue';
-import { watch } from 'vue';
-import { computed } from 'vue';
-import { unref } from 'vue';
 import { i18n } from './localization';
 import { html } from 'lit';
 import router from '@/router';
-import RemoveItemsDialog from '@/components/RemoveItemsDialog.vue';
-import { createApp } from 'vue';
-import { useRemoveItemsDialog } from '@/composables/useRemoveItemsDialog';
 
 export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -92,4 +80,3 @@ export const elements_table_expand_template = (row) =>
         </onyks-container>
     `
 }
-

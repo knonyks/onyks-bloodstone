@@ -1,15 +1,30 @@
 import axios from 'axios';
+import router from '@/router';
 
 const api = axios.create(
 {
     baseURL: '/api',
-    timeout: 5000,
-    headers: 
-    {
-        'Content-Type': 'application/json',
-    // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
+    timeout: 5000
 });
+
+api.interceptors.request.use((config) => 
+{
+    const token = localStorage.getItem('token')
+    if (token) config.headers.Authorization = `Bearer ${token}`
+    return config
+})
+
+api.interceptors.response.use(
+    (res) => res,
+    (err) => {
+    if (err.response?.status === 401) 
+    {
+        localStorage.removeItem('token')
+        router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+    }
+    return Promise.reject(err)
+    }
+)
 
 export const repository = 
 {
@@ -358,78 +373,6 @@ export const tags =
     }
 }
 
-
-
-
-
-export const users = 
-{
-    list: async (page = 1, limit = 10, search = null, sort_by = 'created_at', sort_desc = false) =>
-    {
-        try
-        {
-            const response = await api.get(`/users`, {
-                params:
-                {
-                    page: page,
-                    limit: limit,
-                    search: search,
-                    sort_by: sort_by,
-                    sort_desc: sort_desc
-                }
-            });
-            return response
-        }
-        catch (error)
-        {
-            throw error
-        }
-    },
-    delete: async (id) =>
-    {
-        try
-        {
-            const response = await api.delete(`/users/${id}`);
-            return response
-        }
-        catch (error)
-        {
-            throw error
-        }
-    },
-    update: async (id, user) =>
-    {
-        try
-        {
-            const response = await api.patch(`/users/${id}`, user);
-            return response
-        }
-        catch (error)
-        {
-            throw error
-        }
-    },
-    create: async (user) =>
-    {
-        try
-        {
-            const response = await api.post(`/users`, user);
-            return response
-        }
-        catch (error)
-        {
-            throw error
-        }
-    },
-    
-}
-
-
-
-
-
-
-
 export const elements = 
 {
     last_added: async () =>
@@ -578,6 +521,97 @@ export const elements =
     }
 }
 
+export const auth = 
+{
+    login: async (username, password) =>
+    {
+        try
+        {
+            const form = new URLSearchParams({ username, password });
+            const response = await api.post('/auth/login', form);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    me: async () =>
+    {
+        try
+        {
+            const response = await api.get('/auth/me');
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    }
+}
+
+
+export const users = 
+{
+    list: async (page = 1, limit = 10, search = null, sort_by = 'created_at', sort_desc = false) =>
+    {
+        try
+        {
+            const response = await api.get(`/users`, {
+                params:
+                {
+                    page: page,
+                    limit: limit,
+                    search: search,
+                    sort_by: sort_by,
+                    sort_desc: sort_desc
+                }
+            });
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    delete: async (id) =>
+    {
+        try
+        {
+            const response = await api.delete(`/users/${id}`);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    update: async (id, user) =>
+    {
+        try
+        {
+            const response = await api.patch(`/users/${id}`, user);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    create: async (user) =>
+    {
+        try
+        {
+            const response = await api.post(`/users`, user);
+            return response
+        }
+        catch (error)
+        {
+            throw error
+        }
+    },
+    
+}
 
 
 export const services = 
@@ -588,7 +622,8 @@ export const services =
     manufacturers,
     suppliers,
     users,
-    tags
+    tags,
+    auth
 }
 
 window.x = services

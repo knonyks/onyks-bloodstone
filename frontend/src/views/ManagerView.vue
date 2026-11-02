@@ -1,9 +1,20 @@
 <script setup>
     import { RouterView, useRoute } from 'vue-router'
     import { useLoaderStore } from '@/stores/loader';
+    import { useAuthStore } from '@/stores/auth';
+    import { OnyksToastContainer } from 'onyks-web-ui-system';
+    import router from '@/router'
 
     const loaderStore = useLoaderStore()
     const route = useRoute()
+    const authStore = useAuthStore()
+    
+    const log_out = async () => 
+    {
+        await authStore.logout()
+        OnyksToastContainer.info('Logged out...', 1000)
+        router.push('/login')
+    }
 </script>
 
 <template>
@@ -23,7 +34,11 @@
                     <component :is="Component" :key="route.fullPath"/>
                 </transition>
             </router-view>
-            <onyks-container class="footer"></onyks-container>
+            <onyks-container class="footer" align="center">
+                <onyks-container style="box-sizing: border-box; max-width: 1024px; width: 100%;" align="end" padding="m">
+                    <onyks-button @click="log_out">Logout</onyks-button>
+                </onyks-container>
+            </onyks-container>
             <onyks-loader scroll-container=".manager-view" :isLoading.prop="loaderStore.isLoading" reset-scroll></onyks-loader>
         </onyks-container>
     </onyks-container>

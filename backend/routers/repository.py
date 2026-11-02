@@ -1,14 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 import os
 from fastapi import HTTPException
 from redis.exceptions import RedisError
 from utils import MyRepository
 from redis_client import r
+from routers.auth import get_current_user
 
 router = APIRouter()
 
 @router.get('/repository/info')
-async def get_repository_info():
+async def get_repository_info(current_user = Depends(get_current_user)):
     repo_name = os.getenv("SVN_REPO_NAME")
     if not repo_name:
         raise HTTPException(status_code=500, detail={
@@ -18,7 +19,7 @@ async def get_repository_info():
     return {'name': repo_name}
 
 @router.get("/repository/content")
-async def get_repository_content(path: str):
+async def get_repository_content(path: str, current_user = Depends(get_current_user)):
     repository_url = "file:///local_svn"
     if path.lower().endswith(('.schlib', '.pcblib')):
         try:
@@ -38,7 +39,7 @@ async def get_repository_content(path: str):
             })
 
 @router.get("/repository/statistics")
-async def get_repository_statistics():
+async def get_repository_statistics(current_user = Depends(get_current_user)):
     try:
         schlib_count = int(r.get('schlib_count') or 0)
         pcblib_count = int(r.get('pcblib_count') or 0)
