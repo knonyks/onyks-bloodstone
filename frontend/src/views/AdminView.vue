@@ -1,13 +1,13 @@
 <script setup lang="js">
     import { onMounted, reactive } from 'vue';
-    import ManagerPage from '@/components/ManagerPage.vue';
-    import { useLoaderStore } from '@/stores/loader';
-    import SubTitle from '@/components/SubTitle.vue';
-    import BasicButtonsPanel from '@/components/BasicButtonsPanel.vue';
-    import BasicTable from '@/components/BasicTable.vue';
-    import { useBasicTable } from '@/composables/useBasicTable';
-    import { i18n } from '@/utils/localization';
-    import { services } from '@/utils/api';
+    import ManagerPage from '../components/ManagerPage.vue';
+    import { useLoaderStore } from '../stores/loader';
+    import SubTitle from '../components/SubTitle.vue';
+    import BasicButtonsPanel from '../components/BasicButtonsPanel.vue';
+    import BasicTable from '../components/BasicTable.vue';
+    import { useBasicTable } from '../composables/useBasicTable';
+    import { i18n } from '../utils/localization';
+    import { services } from '../utils/api';
 
     const loaderStore = useLoaderStore()
     const usersTable = reactive(useBasicTable())
@@ -17,8 +17,8 @@
             key: 'selected'
         },
         {
-            label: i18n.global.t('common.id'),
-            key: 'id'
+            label: i18n.global.t('users.username'),
+            key: 'username'
         },
         {
             label: i18n.global.t('users.name'),
@@ -48,8 +48,8 @@
     usersTable.service = services.users
     usersTable.format_data = (e) => {
         return {
+            ...e,
             selected: e.selected ?? false,
-            id: e.id,
             name: e.name || i18n.global.t('common.no_data'),
             surname: e.surname || i18n.global.t('common.no_data'),
             email: e.email || i18n.global.t('common.no_data'),
@@ -90,5 +90,4 @@
 </template>
 
 <style lang="css" scoped>
-
 </style>

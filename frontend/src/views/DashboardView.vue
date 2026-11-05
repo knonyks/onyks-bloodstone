@@ -1,9 +1,9 @@
 <script setup lang="js">
     import { reactive } from 'vue';
-    import ManagerPage from '@/components/ManagerPage.vue';
+    import ManagerPage from '../components/ManagerPage.vue';
     import { onMounted } from 'vue';
-    import { services } from '@/utils/api';
-    import { useLoaderStore } from '@/stores/loader';
+    import { services } from '../utils/api';
+    import { useLoaderStore } from '../stores/loader';
 
     const loaderStore = useLoaderStore()
 

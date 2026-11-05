@@ -1,6 +1,10 @@
 <script setup>
+    import { i18n } from '../utils/localization.js';
+    import UserAlert from './UserAlert.vue';
     import WarningAlert from './WarningAlert.vue';
+    import { useAuthStore } from '../stores/auth.js';
     const props = defineProps({ title: String, expand: { type: Boolean, default: false } })
+    const authStore = useAuthStore();
 </script>
 
 <template>
@@ -10,6 +14,7 @@
         </onyks-container>
         <onyks-container gap="l" type="stack">
             <WarningAlert></WarningAlert>
+            <UserAlert :username="authStore.user.username" :expiration_time="i18n.global.d(authStore.user.expiration_time, 'short')"></UserAlert>
             <slot></slot>
         </onyks-container>
     </onyks-container>

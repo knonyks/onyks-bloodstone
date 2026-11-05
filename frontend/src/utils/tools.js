@@ -1,6 +1,14 @@
 import { i18n } from './localization';
 import { html } from 'lit';
 import router from '@/router';
+import AvailabilityPlusMinus from '@/components/AvailabilityPlusMinus.vue';
+import { defineCustomElement } from 'vue';
+
+
+
+const AvailabilityPlusMinusElement = defineCustomElement(AvailabilityPlusMinus);
+
+customElements.define('availability-plus-minus', AvailabilityPlusMinusElement);
 
 export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -24,10 +32,13 @@ export const elements_table_expand_template = (row) =>
                 }>${i18n.global.t('common.remove')}</onyks-tag>
                 <onyks-tag style="cursor: pointer; width: 75px; text-align: center;" background="green" icon="" style="width: 75px; text-align: center;" @click=${() => router.push(`elements/details/${row?.uuid}`)}>${i18n.global.t('common.details')}</onyks-tag>
             </onyks-container>
-        
+
             <onyks-container style="grid-template-columns: 500px minmax(0, 1fr);" type="grid" gap="m">
                 <onyks-container type="stack" gap="m" cols="1"> 
                     
+                    <onyks-header level="6">${i18n.global.t('elements.availability')}</onyks-header>
+                    <availability-plus-minus></availability-plus-minus>
+
                     <onyks-header level="6">${i18n.global.t('elements.uuid')}</onyks-header>
                     <onyks-text size="s">${row?.uuid}</onyks-text>
 

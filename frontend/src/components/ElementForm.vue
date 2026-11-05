@@ -5,26 +5,26 @@
     import { onMounted } from 'vue';
     import RepositoryModelDialog from './RepositoryModelDialog.vue';
     import { OnyksHeader } from 'onyks-web-ui-system';
-    import { services, suppliers } from '@/utils/api.js';
+    import { services, suppliers } from '../utils/api.js';
     import UploadFiles from './UploadFiles.vue';
     import TagsSelector from './TagsSelector.vue';
     import { open_datasheet } from '../utils/tools';
-    import { useValueSelector } from '@/composables/useValueSelector.js';
+    import { useValueSelector } from '../composables/useValueSelector.js';
     import AddItemDialog from './AddItemDialog.vue';
     import EditItemDialog from './EditItemDialog.vue';
     import RemoveItemsDialog from './RemoveItemsDialog.vue';
-    import { useAddItemDialog } from '@/composables/useAddItemDialog.js';
-    import { useEditItemDialog } from '@/composables/useEditItemDialog.js';
-    import { useRemoveItemsDialog } from '@/composables/useRemoveItemsDialog.js';
-    import { i18n } from '@/utils/localization.js';
+    import { useAddItemDialog } from '../composables/useAddItemDialog.js';
+    import { useEditItemDialog } from '../composables/useEditItemDialog.js';
+    import { useRemoveItemsDialog } from '../composables/useRemoveItemsDialog.js';
+    import { i18n } from '../utils/localization.js';
     import { OnyksToastContainer } from 'onyks-web-ui-system';
-    import {usePCBModelSelector} from '@/composables/usePCBModelSelector.js';
+    import {usePCBModelSelector} from '../composables/usePCBModelSelector.js';
     import PCBModelSelector from './PCBModelSelector.vue';
-    import { useSuppliersSelector } from '@/composables/useSuppliersSelector.js';
+    import { useSuppliersSelector } from '../composables/useSuppliersSelector.js';
     import SuppliersSelector from './SuppliersSelector.vue';
     import BasicTable from './BasicTable.vue';
-    import { useBasicTable } from '@/composables/useBasicTable.js';
-    import { useTagsSelector } from '@/composables/useTagsSelector.js';
+    import { useBasicTable } from '../composables/useBasicTable.js';
+    import { useTagsSelector } from '../composables/useTagsSelector.js';
 
     const props = defineProps(['schema'])
     const obj = defineModel({

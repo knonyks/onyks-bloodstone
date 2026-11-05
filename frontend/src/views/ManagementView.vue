@@ -1,24 +1,24 @@
 <script setup>
-    import { useLoaderStore } from '@/stores/loader';
-    import ManagerPage from '@/components/ManagerPage.vue';
+    import { useLoaderStore } from '../stores/loader';
+    import ManagerPage from '../components/ManagerPage.vue';
     import { onMounted, ref, reactive, computed } from 'vue';
-    import BasicButtonsPanel from '@/components/BasicButtonsPanel.vue';
-    import BasicSearch from '@/components/BasicSearch.vue';
-    import BasicTable from '@/components/BasicTable.vue';
-    import { services } from '@/utils/api';
-    import AddItemDialog from '@/components/AddItemDialog.vue';
-    import EditItemDialog from '@/components/EditItemDialog.vue';
-    import RemoveItemsDialog from '@/components/RemoveItemsDialog.vue';
-    import router from '@/router';
-    import { i18n } from '@/utils/localization';
+    import BasicButtonsPanel from '../components/BasicButtonsPanel.vue';
+    import BasicSearch from '../components/BasicSearch.vue';
+    import BasicTable from '../components/BasicTable.vue';
+    import { services } from '../utils/api';
+    import AddItemDialog from '../components/AddItemDialog.vue';
+    import EditItemDialog from '../components/EditItemDialog.vue';
+    import RemoveItemsDialog from '../components/RemoveItemsDialog.vue';
+    import router from '../router';
+    import { i18n } from '../utils/localization';
     import { OnyksToastContainer } from 'onyks-web-ui-system';
-    import { elements_table_expand_template } from '@/utils/tools';
-    import { useAddItemDialog } from '@/composables/useAddItemDialog';
-    import { useEditItemDialog } from '@/composables/useEditItemDialog';
-    import { useRemoveItemsDialog } from '@/composables/useRemoveItemsDialog';
-    import { useBasicTable } from '@/composables/useBasicTable';
-    import SubTitle from '@/components/SubTitle.vue';
-    import { labels_generate } from '@/utils/generateLabels';
+    import { elements_table_expand_template } from '../utils/tools';
+    import { useAddItemDialog } from '../composables/useAddItemDialog';
+    import { useEditItemDialog } from '../composables/useEditItemDialog';
+    import { useRemoveItemsDialog } from '../composables/useRemoveItemsDialog';
+    import { useBasicTable } from '../composables/useBasicTable';
+    import SubTitle from '../components/SubTitle.vue';
+    import { labels_generate } from '../utils/generateLabels';
     
     const loaderStore = useLoaderStore()
     const expand_page = ref(false)

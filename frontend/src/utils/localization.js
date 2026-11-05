@@ -108,7 +108,7 @@ const pl =
         TABLE_EMPTY_NAME: 'Nazwa tabeli nie może być pusta.',
         TABLE_NOT_EMPTY: 'Tabela nie jest pusta.',
         INVALID_DATA_OR_ELEMENT_ALREADY_EXISTS: 'Nieprawidłowe dane wejściowe lub taki element już istnieje.',
-        INVALID_ELEMENT: 'Nieprawidłowy dane wejściowe elementu.'
+        INVALID_ELEMENT: 'Nieprawidłowe dane wejściowe elementu.'
     },
     suppliers:
     {

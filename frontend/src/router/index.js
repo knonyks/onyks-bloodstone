@@ -10,6 +10,7 @@ import SettingsView from '@/views/SettingsView.vue';
 import { useLoaderStore } from '@/stores/loader';
 import { i18n } from '@/utils/localization';
 import { useAuthStore } from '@/stores/auth';
+import ErrorView from '@/views/ErrorView.vue';
 
 const routes = [
   {
@@ -21,6 +22,12 @@ const routes = [
     component: LoginView,
     name: 'login',
     meta: { title: 'Login - ONYKS Bloodstone', guestOnly: true }
+  },
+  {
+    path: '/error',
+    name: 'error',
+    component: ErrorView,
+    meta: { title: 'Error - ONYKS Bloodstone' }
   },
   {
     path: '/manager',
@@ -47,9 +54,9 @@ const routes = [
       {
         path: 'admin',
         component: AdminView,
-        meta: { title: i18n.global.t('common.admin_panel') + ' - ONYKS Bloodstone', requiresAuth: true }
+        meta: { title: i18n.global.t('common.admin_panel') + ' - ONYKS Bloodstone', requiresAuth: true, ranks: ['admin'] }
       },
-      {
+      { 
         path: 'settings',
         component: SettingsView,
         meta: { title: i18n.global.t('common.settings') + ' - ONYKS Bloodstone', requiresAuth: true }
@@ -79,6 +86,10 @@ const routes = [
         meta: { title: i18n.global.t('elements.duplicate') + ' - ONYKS Bloodstone', requiresAuth: true },
       },
     ]
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: { name: 'error' }
   }
 ]
 
@@ -88,10 +99,11 @@ const router = createRouter(
   routes
 })
 
-router.beforeEach((to, from, next) => 
+router.beforeEach(async (to, from, next) => 
 {
   document.title = to.meta.title || 'ONYKS Bloodstone';
   const auth = useAuthStore()
+  await auth.init()
   const loaderStore = useLoaderStore()
 
   if (from.path == '/')
@@ -104,6 +116,10 @@ router.beforeEach((to, from, next) =>
   if (to.meta.requiresAuth && !auth.isLoggedIn) 
   {
     return next({ name: 'login', query: { redirect: to.fullPath } })
+  }
+  if (to.meta.ranks && !auth.hasRank(...to.meta.ranks)) 
+  {
+    return { name: 'error' }
   }
   if (to.meta.guestOnly && auth.isLoggedIn) 
   {

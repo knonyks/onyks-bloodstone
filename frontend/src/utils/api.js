@@ -2,12 +2,17 @@ import axios from 'axios';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 
-const api = axios.create(
+let api = axios.create(
 {
     baseURL: '/api',
     timeout: 5000,
     withCredentials: true,
 });
+
+export const set_api = (new_api) =>
+{
+    api = new_api
+}
 
 const AUTH_URLS = ['/auth/login', '/auth/refresh', '/auth/logout']
 

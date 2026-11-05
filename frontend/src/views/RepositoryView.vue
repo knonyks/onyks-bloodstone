@@ -1,9 +1,9 @@
 <script setup lang="js">
-    import RepositoryExplorer from '@/components/RepositoryExplorer.vue';
+    import RepositoryExplorer from '../components/RepositoryExplorer.vue';
     import { onMounted, reactive } from 'vue';
-    import ManagerPage from '@/components/ManagerPage.vue';
-    import { useLoaderStore } from '@/stores/loader';
-    import { useRepositoryExplorer } from '@/composables/useRepositoryExplorer';
+    import ManagerPage from '../components/ManagerPage.vue';
+    import { useLoaderStore } from '../stores/loader';
+    import { useRepositoryExplorer } from '../composables/useRepositoryExplorer';
 
     const loaderStore = useLoaderStore()
     const repository = reactive(useRepositoryExplorer())

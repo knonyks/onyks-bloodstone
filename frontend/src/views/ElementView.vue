@@ -1,19 +1,19 @@
 <script setup lang="js">
     import { onMounted, ref, reactive, onBeforeUnmount } from 'vue';
-    import ManagerPage from '@/components/ManagerPage.vue'
-    import { useLoaderStore } from '@/stores/loader';
+    import ManagerPage from '../components/ManagerPage.vue'
+    import { useLoaderStore } from '../stores/loader';
     import { useRoute } from 'vue-router';
     import { useRouter } from 'vue-router';
-    import ElementForm from '@/components/ElementForm.vue';
-    import { services } from '@/utils/api';
-    import { models } from '@/utils/models';
-    import ProcessingElementDialog from '@/components/ProcessingElementDialog.vue';
-    import { delay } from '@/utils/tools';
+    import ElementForm from '../components/ElementForm.vue';
+    import { services } from '../utils/api';
+    import { models } from '../utils/models';
+    import ProcessingElementDialog from '../components/ProcessingElementDialog.vue';
+    import { delay } from '../utils/tools';
     import { OnyksContainer, OnyksToastContainer } from 'onyks-web-ui-system';
-    import { i18n } from '@/utils/localization';
-    import { labels_generate } from '@/utils/generateLabels';
-    import RemoveItemsDialog from '@/components/RemoveItemsDialog.vue';
-    import { useRemoveItemsDialog } from '@/composables/useRemoveItemsDialog';
+    import { i18n } from '../utils/localization';
+    import { labels_generate } from '../utils/generateLabels';
+    import RemoveItemsDialog from '../components/RemoveItemsDialog.vue';
+    import { useRemoveItemsDialog } from '../composables/useRemoveItemsDialog';
 
     const loaderStore = useLoaderStore();
     const route = useRoute();

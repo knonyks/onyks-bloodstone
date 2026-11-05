@@ -1,9 +1,9 @@
 <script setup>
-    import Logos from '@/components/Logos.vue';
-    import { useLoaderStore } from '@/stores/loader';
+    import Logos from '../components/Logos.vue';
+    import { useLoaderStore } from '../stores/loader';
     import { ref } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
-    import { useAuthStore } from '@/stores/auth';
+    import { useAuthStore } from '../stores/auth';
     import { OnyksToastContainer } from 'onyks-web-ui-system';
 
     const auth = useAuthStore()   
@@ -21,7 +21,6 @@
         try
         {
             const response = await auth.login(username.value, password.value)
-            OnyksToastContainer.success('Login successful!', 1000)
             router.push(route.query.redirect || '/')
         }
         catch (error)
