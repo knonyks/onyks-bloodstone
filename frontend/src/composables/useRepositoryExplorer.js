@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { services } from '@/utils/api'
+import { services } from '../utils/api'
 
 export const useRepositoryExplorer = () =>
 {

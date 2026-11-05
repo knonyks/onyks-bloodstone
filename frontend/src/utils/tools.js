@@ -1,7 +1,7 @@
 import { i18n } from './localization';
 import { html } from 'lit';
-import router from '@/router';
-import AvailabilityPlusMinus from '@/components/AvailabilityPlusMinus.vue';
+import router from '../router';
+import AvailabilityPlusMinus from '../components/AvailabilityPlusMinus.vue';
 import { defineCustomElement } from 'vue';
 
 

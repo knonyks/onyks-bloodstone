@@ -1,5 +1,5 @@
 import { ref, computed, unref } from 'vue'
-import { i18n } from '@/utils/localization'
+import { i18n } from '../utils/localization'
 
 export const useEditItemDialog = (_service = null, _title = '', _handle_end = () => {}, _item = (() => null)) =>
 {

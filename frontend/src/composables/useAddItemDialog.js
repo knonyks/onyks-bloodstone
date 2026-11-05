@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { i18n } from '@/utils/localization'
+import { i18n } from '../utils/localization'
 
 export const useAddItemDialog = (_service = null, _title = '', _handle_end = () => {}) =>
 {
