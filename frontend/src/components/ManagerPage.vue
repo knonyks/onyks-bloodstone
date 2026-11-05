@@ -14,7 +14,7 @@
         </onyks-container>
         <onyks-container gap="l" type="stack">
             <WarningAlert></WarningAlert>
-            <UserAlert :username="authStore.user.username" :expiration_time="i18n.global.d(authStore.user.expiration_time, 'short')"></UserAlert>
+            <UserAlert :username="authStore?.user?.username" :expiration_time="i18n.global.d(authStore?.user?.expiration_time, 'short')"></UserAlert>
             <slot></slot>
         </onyks-container>
     </onyks-container>

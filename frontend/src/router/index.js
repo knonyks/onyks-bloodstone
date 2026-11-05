@@ -1,16 +1,7 @@
-import DashboardView from '../views/DashboardView.vue';
-import ManagementView from '../views/ManagementView.vue';
-import RepositoryView from '../views/RepositoryView.vue';
 import { createRouter, createWebHistory } from 'vue-router'
-import ElementView from '../views/ElementView.vue';
-import LoginView from '../views/LoginView.vue';
-import ManagerView from '../views/ManagerView.vue';
-import AdminView from '../views/AdminView.vue';
-import SettingsView from '../views/SettingsView.vue';
 import { useLoaderStore } from '../stores/loader';
 import { i18n } from '../utils/localization';
 import { useAuthStore } from '../stores/auth';
-import ErrorView from '../views/ErrorView.vue';
 
 const routes = [
   {
@@ -19,70 +10,70 @@ const routes = [
   },
   {
     path: '/login',
-    component: LoginView,
+    component: () => import('../views/LoginView.vue'),
     name: 'login',
     meta: { title: 'Login - ONYKS Bloodstone', guestOnly: true }
   },
   {
     path: '/error',
     name: 'error',
-    component: ErrorView,
+    component: () => import('../views/ErrorView.vue'),
     meta: { title: 'Error - ONYKS Bloodstone' }
   },
   {
     path: '/manager',
-    component: ManagerView,
+    component: () => import('../views/ManagerView.vue'),
     meta: { requiresAuth: true },
     children: 
     [
       {
         path: 'dashboard',
-        component: DashboardView,
+        component: () => import('../views/DashboardView.vue'),
         name: 'dashboard',
         meta: { title: i18n.global.t('common.dashboard') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'management',
-        component: ManagementView,
+        component: () => import('../views/ManagementView.vue'),
         meta: { title: i18n.global.t('common.management') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'repository',
-        component: RepositoryView,
+        component: () => import('../views/RepositoryView.vue'),
         meta: { title: i18n.global.t('common.repository') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'admin',
-        component: AdminView,
+        component: () => import('../views/AdminView.vue'),
         meta: { title: i18n.global.t('common.admin_panel') + ' - ONYKS Bloodstone', requiresAuth: true, ranks: ['admin'] }
       },
       { 
         path: 'settings',
-        component: SettingsView,
+        component: () => import('../views/SettingsView.vue'),
         meta: { title: i18n.global.t('common.settings') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/create',
         name: 'element-create',
-        component: ElementView,
+        component: () => import('../views/ElementView.vue'),
         meta: { title: i18n.global.t('elements.create') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/details/:uuid',
         name: 'element-details',
-        component: ElementView,
+        component: () => import('../views/ElementView.vue'),
         meta: { title: i18n.global.t('elements.details') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/edit/:uuid',
         name: 'element-edit',
-        component: ElementView,
+        component: () => import('../views/ElementView.vue'),
         meta: { title: i18n.global.t('elements.edit') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
       {
         path: 'elements/duplicate/:uuid',
         name: 'element-duplicate',
-        component: ElementView,
+        component: () => import('../views/ElementView.vue'),
         meta: { title: i18n.global.t('elements.duplicate') + ' - ONYKS Bloodstone', requiresAuth: true },
       },
     ]

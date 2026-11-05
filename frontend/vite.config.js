@@ -15,9 +15,10 @@ export default defineConfig({
     vueDevTools(),
   ],
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
+alias: {
+  '@': fileURLToPath(new URL('./src', import.meta.url)),
+  '@bloodstone': fileURLToPath(new URL('./src', import.meta.url)),
+},
   },
   server: {
     proxy: {
