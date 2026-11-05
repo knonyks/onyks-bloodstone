@@ -1,4 +1,4 @@
-import 'onyks-web-ui-system'
+import 'onyks-web-ui'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 

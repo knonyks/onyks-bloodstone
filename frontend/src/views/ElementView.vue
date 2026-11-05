@@ -9,7 +9,7 @@
     import { models } from '../utils/models';
     import ProcessingElementDialog from '../components/ProcessingElementDialog.vue';
     import { delay } from '../utils/tools';
-    import { OnyksContainer, OnyksToastContainer } from 'onyks-web-ui-system';
+    import { OnyksContainer, OnyksToastContainer } from 'onyks-web-ui';
     import { i18n } from '../utils/localization';
     import { labels_generate } from '../utils/generateLabels';
     import RemoveItemsDialog from '../components/RemoveItemsDialog.vue';

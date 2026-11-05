@@ -1,7 +1,7 @@
 <template>
     <onyks-container type="group" :class="$style.container" gap="m" align="center" justify="center" padding="m">
         <img src="../assets/logo.png">
-        <img src="../../node_modules/onyks-web-ui-system/dist/logo.png">
+        <img src="../../node_modules/onyks-web-ui/dist/logo.png">
     </onyks-container>
 </template>
 

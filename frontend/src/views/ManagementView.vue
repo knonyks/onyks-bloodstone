@@ -11,7 +11,7 @@
     import RemoveItemsDialog from '../components/RemoveItemsDialog.vue';
     import router from '../router';
     import { i18n } from '../utils/localization';
-    import { OnyksToastContainer } from 'onyks-web-ui-system';
+    import { OnyksToastContainer } from 'onyks-web-ui';
     import { elements_table_expand_template } from '../utils/tools';
     import { useAddItemDialog } from '../composables/useAddItemDialog';
     import { useEditItemDialog } from '../composables/useEditItemDialog';

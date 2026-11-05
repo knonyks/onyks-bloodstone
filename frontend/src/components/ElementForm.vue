@@ -4,7 +4,7 @@
     import { computed, reactive, toRef } from 'vue';
     import { onMounted } from 'vue';
     import RepositoryModelDialog from './RepositoryModelDialog.vue';
-    import { OnyksHeader } from 'onyks-web-ui-system';
+    import { OnyksHeader } from 'onyks-web-ui';
     import { services, suppliers } from '../utils/api.js';
     import UploadFiles from './UploadFiles.vue';
     import TagsSelector from './TagsSelector.vue';
@@ -17,7 +17,7 @@
     import { useEditItemDialog } from '../composables/useEditItemDialog.js';
     import { useRemoveItemsDialog } from '../composables/useRemoveItemsDialog.js';
     import { i18n } from '../utils/localization.js';
-    import { OnyksToastContainer } from 'onyks-web-ui-system';
+    import { OnyksToastContainer } from 'onyks-web-ui';
     import {usePCBModelSelector} from '../composables/usePCBModelSelector.js';
     import PCBModelSelector from './PCBModelSelector.vue';
     import { useSuppliersSelector } from '../composables/useSuppliersSelector.js';

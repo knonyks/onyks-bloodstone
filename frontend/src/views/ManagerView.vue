@@ -2,7 +2,7 @@
     import { RouterView, useRoute } from 'vue-router'
     import { useLoaderStore } from '../stores/loader';
     import { useAuthStore } from '../stores/auth';
-    import { OnyksToastContainer } from 'onyks-web-ui-system';
+    import { OnyksToastContainer } from 'onyks-web-ui';
     import router from '../router'
 
     const loaderStore = useLoaderStore()
@@ -19,7 +19,7 @@
 <template>
     <onyks-container align="center" class="manager-view">
         <onyks-nav class="manager-nav" size="m" mobile-breakpoint="900" max-view-items="5">
-            <img src="../../node_modules/onyks-web-ui-system/dist/logo.png" class="logo">
+            <img src="../../node_modules/onyks-web-ui/dist/logo.png" class="logo">
             <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">{{ $t('common.dashboard') }}</router-link>
             <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">{{ $t('common.management') }}</router-link>
             <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">{{ $t('common.repository') }}</router-link>

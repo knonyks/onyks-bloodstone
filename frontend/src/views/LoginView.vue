@@ -4,7 +4,7 @@
     import { ref } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
     import { useAuthStore } from '../stores/auth';
-    import { OnyksToastContainer } from 'onyks-web-ui-system';
+    import { OnyksToastContainer } from 'onyks-web-ui';
 
     const auth = useAuthStore()   
     const loaderStore = useLoaderStore()
