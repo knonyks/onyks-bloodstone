@@ -1,16 +1,16 @@
-import DashboardView from '@/views/DashboardView.vue';
-import ManagementView from '@/views/ManagementView.vue';
-import RepositoryView from '@/views/RepositoryView.vue';
+import DashboardView from '../views/DashboardView.vue';
+import ManagementView from '../views/ManagementView.vue';
+import RepositoryView from '../views/RepositoryView.vue';
 import { createRouter, createWebHistory } from 'vue-router'
-import ElementView from '@/views/ElementView.vue';
-import LoginView from '@/views/LoginView.vue';
-import ManagerView from '@/views/ManagerView.vue';
-import AdminView from '@/views/AdminView.vue';
-import SettingsView from '@/views/SettingsView.vue';
-import { useLoaderStore } from '@/stores/loader';
-import { i18n } from '@/utils/localization';
-import { useAuthStore } from '@/stores/auth';
-import ErrorView from '@/views/ErrorView.vue';
+import ElementView from '../views/ElementView.vue';
+import LoginView from '../views/LoginView.vue';
+import ManagerView from '../views/ManagerView.vue';
+import AdminView from '../views/AdminView.vue';
+import SettingsView from '../views/SettingsView.vue';
+import { useLoaderStore } from '../stores/loader';
+import { i18n } from '../utils/localization';
+import { useAuthStore } from '../stores/auth';
+import ErrorView from '../views/ErrorView.vue';
 
 const routes = [
   {
