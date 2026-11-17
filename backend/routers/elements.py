@@ -1,5 +1,4 @@
 from fastapi import Depends, APIRouter, HTTPException, status, Query
-from fastapi.exceptions import RequestValidationError
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -7,8 +6,8 @@ from sqlalchemy.exc import IntegrityError
 import shutil
 import models
 import schemas
-from database import AsyncSessionLocal
 from routers.common import get_db
+from routers.auth import get_current_user
 from fastapi import Form, UploadFile, File
 from typing import List
 import os
@@ -19,7 +18,7 @@ from pydantic import ValidationError
 
 UPLOAD_DIR = "/uploads"
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 def _serialize_element(item):
     out = {a.key: getattr(item, a.key) for a in sa_inspect(models.Element).column_attrs}
@@ -30,14 +29,18 @@ def _serialize_element(item):
     return out
 
 @router.get('/elements/count')
-async def get_elements_count(db = Depends(get_db)):
+async def get_elements_count(
+    db = Depends(get_db),
+):
     query = select(func.count()).select_from(models.Element)
     result = await db.execute(query)
     totalCount = result.scalar()
     return {'count': totalCount}
 
 @router.get('/elements/last-added')
-async def get_elements_last_added(db = Depends(get_db)):
+async def get_elements_last_added(
+    db = Depends(get_db),
+):
     query = (select(models.Element).order_by(models.Element.created_at.desc()).limit(1))
     result = await db.execute(query)
     
@@ -55,7 +58,11 @@ async def get_elements_last_added(db = Depends(get_db)):
     return item
 
 @router.post("/elements")
-async def post_elements(element: str = Form(...), files: List[UploadFile] | None = File(default=None), db = Depends(get_db)):
+async def post_elements(
+    element: str = Form(...),
+    files: List[UploadFile] | None = File(default=None),
+    db = Depends(get_db),
+):
     try:
         data = json.loads(element)
     except json.JSONDecodeError:
@@ -127,7 +134,12 @@ async def post_elements(element: str = Form(...), files: List[UploadFile] | None
         )
 
 @router.patch('/elements/{uuid}')
-async def path_elements(uuid: str, element: str = Form(...), files: List[UploadFile] | None = File(default=None), db: AsyncSession = Depends(get_db)):
+async def path_elements(
+    uuid: str,
+    element: str = Form(...),
+    files: List[UploadFile] | None = File(default=None),
+    db: AsyncSession = Depends(get_db),
+):
     try:
         element_uuid = uuid_module.UUID(uuid)
     except ValueError:
@@ -271,7 +283,7 @@ async def get_elements_list(
     search: str | None = Query(None),
     sort_by: str = Query("created_at"),
     sort_desc: bool = Query(False),
-    db = Depends(get_db)
+    db = Depends(get_db),
 ):
     skip = (page - 1) * limit
     keys = {a.key for a in sa_inspect(models.Element).column_attrs}
@@ -302,7 +314,10 @@ async def get_elements_list(
     }
 
 @router.get('/elements/{uuid}')
-async def get_element(uuid: str, db = Depends(get_db)):
+async def get_element(
+    uuid: str,
+    db = Depends(get_db),
+):
     try:
         element_uuid = uuid_module.UUID(uuid)
     except ValueError:
@@ -326,7 +341,7 @@ async def duplicate_element(
     uuid: str,
     element: str | None = Form(default=None),
     files: List[UploadFile] | None = File(default=None),
-    db = Depends(get_db)
+    db = Depends(get_db),
 ):
     try:
         element_uuid = uuid_module.UUID(uuid)
@@ -499,7 +514,10 @@ async def duplicate_element(
         raise
 
 @router.delete('/elements/{uuid}')
-async def delete_element(uuid: str, db: AsyncSession = Depends(get_db)):
+async def delete_element(
+    uuid: str,
+    db: AsyncSession = Depends(get_db),
+):
     try:
         element_uuid = uuid_module.UUID(uuid)
     except (ValueError, TypeError, AttributeError):

@@ -4,20 +4,20 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 import models
 import schemas
-from database import AsyncSessionLocal
 from routers.common import get_db
+from routers.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.get('/manufacturers/count')
-async def get_manufacturers_count(db = Depends(get_db)):
+async def get_manufacturers_count(db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(func.count()).select_from(models.Manufacturer)
     result = await db.execute(query)
     totalCount = result.scalar()
     return {'count': totalCount}
 
 @router.get('/manufacturers/counts')
-async def get_manufacturers_counts(db = Depends(get_db)):
+async def get_manufacturers_counts(db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(models.Manufacturer.name, func.count(models.Element.uuid)).select_from(models.Manufacturer).outerjoin(models.Element, models.Manufacturer.name == models.Element.manufacturer).group_by(models.Manufacturer.name)
     result = await db.execute(query)
     rows = result.all()
@@ -33,7 +33,8 @@ async def get_manufacturers_list(
     search: str | None = Query(None),
     sortBy: str = Query("id"),
     sortDesc: bool = Query(False),
-    db = Depends(get_db)
+    db = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     limit = max(1, min(limit, 100))
     skip = (page - 1) * limit
@@ -73,7 +74,7 @@ async def get_manufacturers_list(
     return schemas.PageResponse(items=entries, total=totalCount, page=page, limit=limit)
 
 @router.delete('/manufacturers/{id}')
-async def delete_manufacturers(id: int, db = Depends(get_db)):
+async def delete_manufacturers(id: int, db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(models.Manufacturer).where(models.Manufacturer.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -92,7 +93,7 @@ async def delete_manufacturers(id: int, db = Depends(get_db)):
     return id
 
 @router.post('/manufacturers')
-async def post_manufacturers(manufacturer: dict, db = Depends(get_db)):
+async def post_manufacturers(manufacturer: dict, db = Depends(get_db), current_user = Depends(get_current_user)):
     name = manufacturer.get("name")
     if isinstance(name, str) and not name.strip():
         raise HTTPException(
@@ -131,7 +132,7 @@ async def post_manufacturers(manufacturer: dict, db = Depends(get_db)):
         )
 
 @router.get('/manufacturers/{id}')
-async def get_manufacturers(id: int, db = Depends(get_db)):
+async def get_manufacturers(id: int, db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(models.Manufacturer).where(models.Manufacturer.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -148,7 +149,7 @@ async def get_manufacturers(id: int, db = Depends(get_db)):
     return item
 
 @router.patch('/manufacturers/{id}')
-async def patch_manufacturers(id: int, manufacturer: dict, db = Depends(get_db)):
+async def patch_manufacturers(id: int, manufacturer: dict, db = Depends(get_db), current_user = Depends(get_current_user)):
     if "name" in manufacturer and (
         not isinstance(manufacturer["name"], str) or not manufacturer["name"].strip()
     ):
@@ -162,7 +163,7 @@ async def patch_manufacturers(id: int, manufacturer: dict, db = Depends(get_db))
 
     try:
         validated_manufacturer = schemas.ManufacturerBase.model_validate(manufacturer)
-    except ValidationError as exc:
+    except ValidationError:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={

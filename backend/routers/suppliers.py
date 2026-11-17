@@ -1,24 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import ValidationError
-from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
-import models
-import schemas
-from database import AsyncSessionLocal
-from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 import models
-from database import AsyncSessionLocal
-from routers.common import get_db
 import schemas
 from pydantic import ValidationError
+from routers.common import get_db
+from routers.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.get('/suppliers/count')
-async def get_suppliers_count(db = Depends(get_db)):
+async def get_suppliers_count(db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(func.count()).select_from(models.Supplier)
     result = await db.execute(query)
     totalCount = result.scalar()
@@ -31,7 +24,8 @@ async def get_suppliers_list(
     search: str | None = Query(None),
     sort_by: str = Query("id"),
     sort_desc: bool = Query(False),
-    db = Depends(get_db)
+    db = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     limit = max(1, min(limit, 100))
     skip = (page - 1) * limit
@@ -71,7 +65,7 @@ async def get_suppliers_list(
     return schemas.PageResponse(items=entries, total=totalCount, page=page, limit=limit)
 
 @router.delete('/suppliers/{id}')
-async def delete_suppliers(id: int, db = Depends(get_db)):
+async def delete_suppliers(id: int, db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(models.Supplier).where(models.Supplier.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -90,7 +84,7 @@ async def delete_suppliers(id: int, db = Depends(get_db)):
     return id
 
 @router.post('/suppliers')
-async def post_suppliers(supplier_data: dict, db = Depends(get_db)):
+async def post_suppliers(supplier_data: dict, db = Depends(get_db), current_user = Depends(get_current_user)):
     name = supplier_data.get('name')
     if not isinstance(name, str) or not name.strip():
         raise HTTPException(
@@ -118,7 +112,7 @@ async def post_suppliers(supplier_data: dict, db = Depends(get_db)):
         )
 
 @router.get('/suppliers/{id}')
-async def get_suppliers(id: int, db = Depends(get_db)):
+async def get_suppliers(id: int, db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(models.Supplier).where(models.Supplier.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()
@@ -135,7 +129,7 @@ async def get_suppliers(id: int, db = Depends(get_db)):
     return item
 
 @router.patch('/suppliers/{id}')
-async def update_suppliers(id: int, supplier: dict, db = Depends(get_db)):
+async def update_suppliers(id: int, supplier: dict, db = Depends(get_db), current_user = Depends(get_current_user)):
     query = select(models.Supplier).where(models.Supplier.id == id)
     result = await db.execute(query)
     item = result.scalar_one_or_none()

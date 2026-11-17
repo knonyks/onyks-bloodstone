@@ -13,10 +13,11 @@ from sqlalchemy.exc import IntegrityError
 import models
 from database import AsyncSessionLocal
 from routers.common import get_db
+from routers.auth import get_current_user
 import schemas
 from pydantic import ValidationError
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.get("/tags")
 async def get_tags_list(

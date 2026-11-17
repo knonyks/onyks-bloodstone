@@ -1,3 +1,3 @@
 <template>
-    <onyks-header level="4"><slot></slot></onyks-header>
+    <onyks-header size="xl"><slot></slot></onyks-header>
 </template>

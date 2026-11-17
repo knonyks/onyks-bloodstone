@@ -1,23 +1,18 @@
-from typing import Generic, Optional, TypeVar
 import secrets
 import bcrypt
 from fastapi import Response
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import String, cast, func, or_, select
 import models
 import schemas
-from database import AsyncSessionLocal
 from routers.common import get_db
-
-
-
+from routers.auth import require_role, UserRank
 
 router = APIRouter()
 
 @router.get("/users", response_model=schemas.PageResponse[schemas.UserFull])
-async def get_users(query: schemas.PageQuery = Depends(), db=Depends(get_db)):
+async def get_users(query: schemas.PageQuery = Depends(), db=Depends(get_db), _admin=Depends(require_role(UserRank.ADMIN))):
 	columns = {
 		column.name: getattr(models.User, column.name)
 		for column in models.User.__table__.columns
@@ -53,7 +48,7 @@ async def get_users(query: schemas.PageQuery = Depends(), db=Depends(get_db)):
 	}
 
 @router.delete("/users/{id}")
-async def delete_user(id: int, db=Depends(get_db)):
+async def delete_user(id: int, db=Depends(get_db), _admin=Depends(require_role(UserRank.ADMIN))):
     statement = select(models.User).where(models.User.id == id)
     result = await db.execute(statement)
     user = result.scalar_one_or_none()
@@ -67,7 +62,7 @@ async def delete_user(id: int, db=Depends(get_db)):
     return Response(status_code=204)
 
 @router.patch("/users/{id}", response_model=schemas.UserFull)
-async def update_user(id: int, user: schemas.UserBase, db: AsyncSession = Depends(get_db)):
+async def update_user(id: int, user: schemas.UserBase, db: AsyncSession = Depends(get_db), _admin=Depends(require_role(UserRank.ADMIN))):
     statement = select(models.User).where(models.User.id == id)
     result = await db.execute(statement)
     existing_user = result.scalar_one_or_none()
@@ -76,14 +71,14 @@ async def update_user(id: int, user: schemas.UserBase, db: AsyncSession = Depend
             "error_code": "USER_NOT_FOUND",
             "message": f"User with id {id} not found"
         })
-    for key, value in user.dict(exclude_unset=True).items():
+    for key, value in user.model_dump(exclude_unset=True).items():
         setattr(existing_user, key, value)
     await db.commit()
     await db.refresh(existing_user)
     return existing_user
 
 @router.post("/users", response_model=schemas.UserFull)
-async def create_user(user: schemas.UserBase, db: AsyncSession = Depends(get_db)):
+async def create_user(user: schemas.UserBase, db: AsyncSession = Depends(get_db), _admin=Depends(require_role(UserRank.ADMIN))):
     user_data = user.model_dump(exclude_unset=True)
     plain_password = secrets.token_urlsafe(16)
     user_data["password"] = bcrypt.hashpw(

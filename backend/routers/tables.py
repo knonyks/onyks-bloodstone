@@ -5,10 +5,10 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 import models
 import schemas
-from database import AsyncSessionLocal
 from routers.common import get_db
+from routers.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.get('/tables/count')
 async def get_tables_count(db = Depends(get_db)):

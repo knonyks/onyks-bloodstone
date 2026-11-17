@@ -10,7 +10,7 @@
 <template>
     <onyks-container gap="m" :class="['manager-page', { expand: props.expand }]" padding="m" type="stack">
         <onyks-container class="header" padding="l">
-            <onyks-header>{{ props.title }}</onyks-header>
+            <onyks-header size="4xl">{{ props.title }}</onyks-header>
         </onyks-container>
         <onyks-container gap="l" type="stack">
             <WarningAlert></WarningAlert>
