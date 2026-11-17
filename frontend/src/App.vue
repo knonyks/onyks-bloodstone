@@ -38,9 +38,9 @@
     {
         position: sticky;
         top: 0;
-        z-index: 101;
         width: 100%;
         flex-shrink: 0;
+        z-index: 20;
     }
 
     onyks-dialog
@@ -76,7 +76,7 @@
         max-width: 400px;
         width: 100%;
         box-sizing: border-box;
-        z-index: 101;
+        z-index: 100;
         pointer-events: none;
         height: fit-content;
     }

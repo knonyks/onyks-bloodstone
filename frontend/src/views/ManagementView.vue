@@ -186,19 +186,19 @@
     <ManagerPage :title="$t('common.management')" :expand="expand_page">
         <onyks-container type="group" align="center" justify="left" gap="m">
             <onyks-text>{{$t('common.expand_page')}}</onyks-text>
-            <onyks-checkbox @change="expand_page = !expand_page" :checked="expand_page"></onyks-checkbox>
+            <onyks-checkbox size="m" @change="expand_page = !expand_page" :checked="expand_page"></onyks-checkbox>
         </onyks-container>
 
         <!-- Elements -->
         <SubTitle>{{ $t('common.elements') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button @click="router.push('/manager/elements/create')" background="green">{{$t('common.add')}}</onyks-button>
-            <onyks-button background="blue" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/edit/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.edit')}}</onyks-button>
-            <onyks-button background="yellow" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/duplicate/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.duplicate')}}</onyks-button>
-            <onyks-button background="red" :disabled="tables.elements.selected === 0" @click="dialogs.elements.remove.items = tables.elements.data.filter(item => item.selected); dialogs.elements.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
-            <onyks-button background="gray" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/details/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.details')}}</onyks-button>
-            <onyks-button @click="labels_generate(tables.elements?.data.filter(item => item.selected))" background="green" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button>
-            <onyks-button background="blue">{{$t('common.scan')}}</onyks-button>
+            <onyks-button animated @click="router.push('/manager/elements/create')" background="green">{{$t('common.add')}}</onyks-button>
+            <onyks-button animated background="blue" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/edit/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.edit')}}</onyks-button>
+            <onyks-button animated background="yellow" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/duplicate/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.duplicate')}}</onyks-button>
+            <onyks-button animated background="red" :disabled="tables.elements.selected === 0" @click="dialogs.elements.remove.items = tables.elements.data.filter(item => item.selected); dialogs.elements.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
+            <onyks-button animated background="gray" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/details/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.details')}}</onyks-button>
+            <onyks-button animated @click="labels_generate(tables.elements?.data.filter(item => item.selected))" background="green" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button>
+            <onyks-button animated background="blue">{{$t('common.scan')}}</onyks-button>
         </BasicButtonsPanel>
         <BasicSearch v-model="tables.elements.search_phrase" :search="tables.elements.search"></BasicSearch>
         <BasicTable v-model="tables.elements" @remove-element="(event) => {
@@ -211,9 +211,9 @@
         <!-- Tables -->
         <SubTitle>{{ $t('common.tables') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button background="green" @click="dialogs.tables.add.open = true">{{$t('common.add')}}</onyks-button>
-            <onyks-button background="blue" :disabled="!(tables.tables.selected == 1)" @click="dialogs.tables.edit.name = dialogs.tables.edit.item.name; dialogs.tables.edit.open = true">{{$t('common.edit')}}</onyks-button>
-            <onyks-button background="red" :disabled="!(tables.tables.selected > 0)" @click="dialogs.tables.remove.items = tables.tables.data.filter(item => item.selected); dialogs.tables.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
+            <onyks-button animated background="green" @click="dialogs.tables.add.open = true">{{$t('common.add')}}</onyks-button>
+            <onyks-button animated background="blue" :disabled="!(tables.tables.selected == 1)" @click="dialogs.tables.edit.name = dialogs.tables.edit.item.name; dialogs.tables.edit.open = true">{{$t('common.edit')}}</onyks-button>
+            <onyks-button animated background="red" :disabled="!(tables.tables.selected > 0)" @click="dialogs.tables.remove.items = tables.tables.data.filter(item => item.selected); dialogs.tables.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
         </BasicButtonsPanel>
         <BasicSearch v-model="tables.tables.search_phrase" :search="tables.tables.search"></BasicSearch>
         <BasicTable v-model="tables.tables"></BasicTable>
@@ -224,9 +224,9 @@
         <!-- Manufacturers -->
         <SubTitle>{{ $t('common.manufacturers') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button background="green" @click="dialogs.manufacturers.add.open = true">{{$t('common.add')}}</onyks-button>
-            <onyks-button background="blue" :disabled="!(tables.manufacturers.selected == 1)" @click="dialogs.manufacturers.edit.name = dialogs.manufacturers.edit.item.name; dialogs.manufacturers.edit.open = true">{{$t('common.edit')}}</onyks-button>
-            <onyks-button background="red" :disabled="!(tables.manufacturers.selected > 0)" @click="dialogs.manufacturers.remove.items = tables.manufacturers.data.filter(item => item.selected); dialogs.manufacturers.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
+            <onyks-button animated background="green" @click="dialogs.manufacturers.add.open = true">{{$t('common.add')}}</onyks-button>
+            <onyks-button animated background="blue" :disabled="!(tables.manufacturers.selected == 1)" @click="dialogs.manufacturers.edit.name = dialogs.manufacturers.edit.item.name; dialogs.manufacturers.edit.open = true">{{$t('common.edit')}}</onyks-button>
+            <onyks-button animated background="red" :disabled="!(tables.manufacturers.selected > 0)" @click="dialogs.manufacturers.remove.items = tables.manufacturers.data.filter(item => item.selected); dialogs.manufacturers.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
         </BasicButtonsPanel>
         <BasicSearch v-model="tables.manufacturers.search_phrase" :search="tables.manufacturers.search"></BasicSearch>
         <BasicTable v-model="tables.manufacturers"></BasicTable>
@@ -237,9 +237,9 @@
         <!-- Suppliers -->
         <SubTitle>{{ $t('common.suppliers') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button background="green" @click="dialogs.suppliers.add.open = true">{{$t('common.add')}}</onyks-button>
-            <onyks-button background="blue" :disabled="!(tables.suppliers.selected == 1)" @click="dialogs.suppliers.edit.name = dialogs.suppliers.edit.item.name; dialogs.suppliers.edit.open = true">{{$t('common.edit')}}</onyks-button>
-            <onyks-button background="red" :disabled="!(tables.suppliers.selected > 0)" @click="() =>
+            <onyks-button animated background="green" @click="dialogs.suppliers.add.open = true">{{$t('common.add')}}</onyks-button>
+            <onyks-button animated background="blue" :disabled="!(tables.suppliers.selected == 1)" @click="dialogs.suppliers.edit.name = dialogs.suppliers.edit.item.name; dialogs.suppliers.edit.open = true">{{$t('common.edit')}}</onyks-button>
+            <onyks-button animated background="red" :disabled="!(tables.suppliers.selected > 0)" @click="() =>
                 {
                     dialogs.suppliers.remove.items = tables.suppliers.data.filter(item => item.selected); dialogs.suppliers.remove.first_open = true
                 }">{{$t('common.remove')}}</onyks-button>
@@ -256,5 +256,6 @@
     :deep(onyks-table)
     {
         height: 600px;
+        z-index: 0;
     }
 </style>

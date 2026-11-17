@@ -1,0 +1,14 @@
+{
+    "common":
+    {
+        "dashboard": "Dashboard",
+        "management": "Management",
+        "repository": "Repository",
+        "settings": "Ustawienia",
+        "admin":"Admin"
+    },
+    "error_codes":
+    {
+
+    }
+}

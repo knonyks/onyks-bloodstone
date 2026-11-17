@@ -15,6 +15,7 @@
   "dependencies": {
     "@vueuse/core": "^14.3.0",
     "axios": "^1.13.6",
+    "country-flag-icons": "^1.6.20",
     "luxon": "^3.7.2",
     "mitt": "^3.0.1",
     "onyks-web-ui": "github:knonyks/onyks-web-ui",

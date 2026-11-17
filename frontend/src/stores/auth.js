@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { auth } from '../utils/api'
 import { OnyksToastContainer } from 'onyks-web-ui'
+import { i18n } from '@/utils/localization'
 
 let refreshPromise = null
 
@@ -31,7 +32,7 @@ export const useAuthStore = defineStore('auth',
       this.token = data.access_token
       localStorage.setItem('token', this.token)
       await this.fetch_me()
-      OnyksToastContainer.success('Logged in successfully.')
+      OnyksToastContainer.success(i18n.global.t('common.login_success'))
     },
     async fetch_me() 
     {
@@ -62,7 +63,7 @@ export const useAuthStore = defineStore('auth',
     {
       try 
       { 
-        OnyksToastContainer.info('Logging out...')
+        OnyksToastContainer.info(i18n.global.t('common.logout_success'))
         await auth.logout()
       } 
       catch {}

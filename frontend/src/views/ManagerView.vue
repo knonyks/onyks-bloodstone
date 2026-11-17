@@ -2,18 +2,12 @@
     import { RouterView, useRoute } from 'vue-router'
     import { useLoaderStore } from '../stores/loader';
     import { useAuthStore } from '../stores/auth';
-    import { OnyksToastContainer } from 'onyks-web-ui';
-    import router from '../router'
+    import UserTile from '@/components/UserTile.vue';
+    import { i18n } from '../utils/localization.js';
 
     const loaderStore = useLoaderStore()
     const route = useRoute()
     const authStore = useAuthStore()
-    
-    const log_out = async () => 
-    {
-        await authStore.logout()
-        router.push('/login')
-    }
 </script>
 
 <template>
@@ -23,7 +17,7 @@
             <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">{{ $t('common.dashboard') }}</router-link>
             <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">{{ $t('common.management') }}</router-link>
             <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">{{ $t('common.repository') }}</router-link>
-            <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('views.ManagerView.nav.settings') }}</router-link>
+            <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('common.settings') }}</router-link>
             <router-link v-if="authStore.user?.rank === 'admin'" slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">{{ $t('common.admin_panel') }}</router-link>
         </onyks-nav>
         <onyks-container class="content" gap="m">
@@ -38,6 +32,7 @@
             </onyks-container>
             <onyks-loader scroll-container=".manager-view" :isLoading.prop="loaderStore.isLoading" reset-scroll></onyks-loader>
         </onyks-container>
+        <UserTile :username="authStore?.user?.username" :expiration_time="i18n.global.d(authStore?.user?.expiration_time, 'short')"></UserTile>
     </onyks-container>
 </template>
 
@@ -53,8 +48,8 @@
 
     onyks-loader
     {
-        z-index: 20000;
         position: relative;
+        z-index: 20;
     }
 
     .logo

@@ -5,6 +5,7 @@
     import { useRouter, useRoute } from 'vue-router'
     import { useAuthStore } from '../stores/auth';
     import { OnyksToastContainer } from 'onyks-web-ui';
+    import { i18n } from "../utils/localization.js"
 
     const auth = useAuthStore()   
     const loaderStore = useLoaderStore()
@@ -27,7 +28,7 @@
         {
             if(error.response.data.detail.error_code === "INVALID_CREDENTIALS")
             {
-                OnyksToastContainer.error(error.response.data.detail.message)
+                OnyksToastContainer.error(i18n.global.t('error_codes.' + error.response.data.detail.error_code))
             }
             else if(error.response.data.detail.error_code === "ACCOUNT_EXPIRED")
             {
@@ -35,7 +36,7 @@
             }
             else
             {
-                OnyksToastContainer.error('An unexpected error occurred.')
+                OnyksToastContainer.error(i18n.global.t('common.unexpected_error'))
             }
         }
     }
@@ -45,17 +46,16 @@
     <onyks-container class="content" align="center" justify="center" padding="m" type="stack" gap="m" cols="10" rows="1">
         <logos class="logos"></logos>    
         <onyks-container gap="m" class="login">
-            <onyks-header level="6">Login</onyks-header>
+            <onyks-header level="6">{{ $t('common.login') }}</onyks-header>
             <onyks-textfield type="text" v-model="username"></onyks-textfield>
-            <onyks-header level="6">Password</onyks-header>
+            <onyks-header level="6">{{ $t('common.password') }}</onyks-header>
             <onyks-textfield type="password" v-model="password"></onyks-textfield>
             
-            <onyks-button background="green" @click="handle_login">Login!</onyks-button>
+            <onyks-button background="green" @click="handle_login">{{ $t('common.log_in') }}</onyks-button>
         
-            <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Forgot password?</onyks-text></router-link>
-            <!-- <router-link to="/manager/dashboard" class="link"><onyks-text size="s">Request for create an account</onyks-text></router-link> -->
-            <onyks-dialog :open="expired_account_dialog" title="Account Expired" open scroll-target="none" size="m" title-size="l" corner-close @dialog-close="expired_account_dialog = false">
-                <onyks-text>Your account has expired. Please contact with your support to resolve this issue.</onyks-text>
+            <router-link to="/manager/dashboard" class="link"><onyks-text size="s">{{ $t('common.forgot_password') }}</onyks-text></router-link>
+            <onyks-dialog modal :open="expired_account_dialog" :title="$t('common.account_expired')" open scroll-target="none" size="m" title-size="l" corner-close @dialog-close="expired_account_dialog = false">
+                <onyks-text>{{ $t('common.account_expired_message') }}</onyks-text>
             </onyks-dialog>
         </onyks-container>
     </onyks-container>

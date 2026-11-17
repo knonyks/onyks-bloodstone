@@ -23,8 +23,9 @@
             <onyks-container class="delete-items" gap="m" type="grid" cols="10" padding="m" mobile-breakpoint="500">
                 
                 <template v-for="(item, index) in model.error_codes" :key="index">
-                    <onyks-text cols="4">{{ item[0] }} </onyks-text>
-                    <onyks-tag cols="6" :background="item[1] === 'ITEM_DELETE_SUCCESS' ? 'green' : 'red'" :icon="item[1] === 'ITEM_DELETE_SUCCESS' ? 'F270' : 'F627'">{{ $t('error_codes.' + item[1]) }}</onyks-tag>
+                    <onyks-container subcols="4"  align="start" justify="center"><onyks-text>{{ item[0] }}</onyks-text></onyks-container>
+                    
+                    <onyks-tag subcols="6" :background="item[1] === 'ITEM_DELETE_SUCCESS' ? 'green' : 'red'" :icon="item[1] === 'ITEM_DELETE_SUCCESS' ? 'F270' : 'F627'">{{ $t('error_codes.' + item[1]) }}</onyks-tag>
                 </template>
                 
             </onyks-container>

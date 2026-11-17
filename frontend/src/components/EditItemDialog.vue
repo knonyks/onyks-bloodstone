@@ -10,7 +10,7 @@
             <form @submit.prevent="model.handle_ok">
                 <onyks-textfield :error="model.error != ''" v-model="model.name" @input="model.error = ''" @keydown.enter.prevent="model.handle_ok"></onyks-textfield>
             </form>
-            <onyks-text>{{ model.error }}</onyks-text>
+            <onyks-text color="error">{{ model.error }}</onyks-text>
         </onyks-container>
         <onyks-button background="green" slot="footer" @click="model.handle_ok" :disabled="model.is_loading" size="m">OK</onyks-button>
     </onyks-dialog>

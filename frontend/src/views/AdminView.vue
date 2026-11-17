@@ -78,14 +78,18 @@
     <ManagerPage :title="$t('common.admin_panel')">
         <SubTitle>{{ $t('common.user_list') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button background="green">{{ $t('common.add') }}</onyks-button>
-            <onyks-button background="red">{{ $t('common.remove') }}</onyks-button>
-            <onyks-button background="blue">{{ $t('common.edit') }}</onyks-button>
-            <onyks-button background="orange">{{ $t('common.reset') }}</onyks-button>
-            <onyks-button background="purple">{{ $t('common.import') }}</onyks-button>
+            <onyks-button animated background="green">{{ $t('common.add') }}</onyks-button>
+            <onyks-button animated background="red">{{ $t('common.remove') }}</onyks-button>
+            <onyks-button animated background="blue">{{ $t('common.edit') }}</onyks-button>
+            <onyks-button animated background="orange">{{ $t('common.reset') }}</onyks-button>
+            <onyks-button animated background="purple">{{ $t('common.import') }}</onyks-button>
         </BasicButtonsPanel>
         <BasicTable v-model="usersTable"></BasicTable>
         <SubTitle>{{ $t('common.backup') }}</SubTitle>
+        <BasicButtonsPanel>
+            <onyks-button animated background="green">Create</onyks-button>
+        </BasicButtonsPanel>
+        <onyks-alert type="info">The next backup will be create at: 12.12.2026 12:12:32:312</onyks-alert>
     </ManagerPage>
 </template>
 

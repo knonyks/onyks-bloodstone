@@ -14,7 +14,7 @@
 </script>
 
 <template>
-    <ManagerPage title="Settings">
+    <ManagerPage :title="$t('common.settings')">
 
     </ManagerPage>
 </template>
