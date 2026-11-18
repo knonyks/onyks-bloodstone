@@ -2,7 +2,7 @@
     import { RouterView, useRoute } from 'vue-router'
     import { useLoaderStore } from '../stores/loader';
     import { useAuthStore } from '../stores/auth';
-    import UserTile from '@/components/UserTile.vue';
+    import UserTile from '../components/UserTile.vue';
     import { i18n } from '../utils/localization.js';
 
     const loaderStore = useLoaderStore()

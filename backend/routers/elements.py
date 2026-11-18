@@ -31,6 +31,7 @@ def _serialize_element(item):
 @router.get('/elements/count')
 async def get_elements_count(
     db = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     query = select(func.count()).select_from(models.Element)
     result = await db.execute(query)
@@ -40,6 +41,7 @@ async def get_elements_count(
 @router.get('/elements/last-added')
 async def get_elements_last_added(
     db = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     query = (select(models.Element).order_by(models.Element.created_at.desc()).limit(1))
     result = await db.execute(query)
@@ -62,6 +64,7 @@ async def post_elements(
     element: str = Form(...),
     files: List[UploadFile] | None = File(default=None),
     db = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     try:
         data = json.loads(element)
@@ -139,6 +142,7 @@ async def path_elements(
     element: str = Form(...),
     files: List[UploadFile] | None = File(default=None),
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     try:
         element_uuid = uuid_module.UUID(uuid)
@@ -284,6 +288,7 @@ async def get_elements_list(
     sort_by: str = Query("created_at"),
     sort_desc: bool = Query(False),
     db = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     skip = (page - 1) * limit
     keys = {a.key for a in sa_inspect(models.Element).column_attrs}
@@ -317,6 +322,7 @@ async def get_elements_list(
 async def get_element(
     uuid: str,
     db = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     try:
         element_uuid = uuid_module.UUID(uuid)
@@ -342,6 +348,7 @@ async def duplicate_element(
     element: str | None = Form(default=None),
     files: List[UploadFile] | None = File(default=None),
     db = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     try:
         element_uuid = uuid_module.UUID(uuid)
@@ -517,6 +524,7 @@ async def duplicate_element(
 async def delete_element(
     uuid: str,
     db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     try:
         element_uuid = uuid_module.UUID(uuid)

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { auth } from '../utils/api'
 import { OnyksToastContainer } from 'onyks-web-ui'
-import { i18n } from '@/utils/localization'
+import { i18n } from '../utils/localization'
 
 let refreshPromise = null
 
