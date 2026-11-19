@@ -57,6 +57,17 @@ services:
     depends_on:
       - database
 
+  odbc:
+    build:
+      context: .
+      dockerfile: odbc/Dockerfile
+    env_file: ${CONFIG_FILE:-.env}
+    ports:
+      - "${ODBC_PORT}:${ODBC_PORT}"
+    depends_on:
+      - database
+    restart: unless-stopped   
+
   redis:
     image: redis:latest
     restart: unless-stopped
