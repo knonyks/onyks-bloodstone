@@ -86,7 +86,7 @@
                     await delay(1000)
                     dialogs.create.open = false;
                     OnyksToastContainer.success(i18n.global.t('elements.created_successfully'))
-                    router.push('/manager/elements/details/' + result.data.uuid)
+                    router.push({ name: 'element-details', params: { uuid: result.data.uuid } })
                 }
                 catch(err)
                 {
@@ -107,7 +107,7 @@
                     await delay(1000)
                     dialogs.edit.open = false;
                     OnyksToastContainer.success(i18n.global.t('elements.edited_successfully'))
-                    router.push('/manager/elements/details/' + result.data.uuid)
+                    router.push({ name: 'element-details', params: { uuid: result.data.uuid } })
                 }
                 catch(err)
                 {
@@ -128,7 +128,7 @@
                     await delay(1000)
                     dialogs.duplicate.open = false;
                     OnyksToastContainer.success(i18n.global.t('elements.duplicated_successfully'))
-                    router.push('/manager/elements/details/' + result.data.uuid)
+                    router.push({ name: 'element-details', params: { uuid: result.data.uuid } })
                 }
                 catch(err)
                 {

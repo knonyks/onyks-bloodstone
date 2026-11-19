@@ -9,7 +9,7 @@
     import AddItemDialog from '../components/AddItemDialog.vue';
     import EditItemDialog from '../components/EditItemDialog.vue';
     import RemoveItemsDialog from '../components/RemoveItemsDialog.vue';
-    import router from '../router';
+    import { useRouter } from 'vue-router'
     import { i18n } from '../utils/localization';
     import { OnyksToastContainer } from 'onyks-web-ui';
     import { elements_table_expand_template } from '../utils/tools';
@@ -20,6 +20,7 @@
     import SubTitle from '../components/SubTitle.vue';
     import { labels_generate } from '../utils/generateLabels';
     
+    const router = useRouter()
     const loaderStore = useLoaderStore()
     const expand_page = ref(false)
     const tables = reactive(
@@ -192,11 +193,11 @@
         <!-- Elements -->
         <SubTitle>{{ $t('common.elements') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button animated @click="router.push('/manager/elements/create')" background="green">{{$t('common.add')}}</onyks-button>
-            <onyks-button animated background="blue" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/edit/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.edit')}}</onyks-button>
-            <onyks-button animated background="yellow" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/duplicate/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.duplicate')}}</onyks-button>
+            <onyks-button animated @click="router.push({ name: 'element-create'})" background="green">{{$t('common.add')}}</onyks-button>
+            <onyks-button animated background="blue" :disabled="tables.elements.selected != 1" @click="router.push({ name: 'element-edit', params: { uuid: tables.elements?.data.filter(item => item.selected)[0]?.uuid } })">{{$t('common.edit')}}</onyks-button>
+            <onyks-button animated background="yellow" :disabled="tables.elements.selected != 1" @click="router.push({ name: 'element-duplicate', params: { uuid: tables.elements?.data.filter(item => item.selected)[0]?.uuid } })">{{$t('common.duplicate')}}</onyks-button>
             <onyks-button animated background="red" :disabled="tables.elements.selected === 0" @click="dialogs.elements.remove.items = tables.elements.data.filter(item => item.selected); dialogs.elements.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
-            <onyks-button animated background="gray" :disabled="tables.elements.selected != 1" @click="router.push(`/manager/elements/details/${tables.elements?.data.filter(item => item.selected)[0]?.uuid}`)">{{$t('common.details')}}</onyks-button>
+            <onyks-button animated background="gray" :disabled="tables.elements.selected != 1" @click="router.push({ name: 'element-details', params: { uuid: tables.elements?.data.filter(item => item.selected)[0]?.uuid } })">{{$t('common.details')}}</onyks-button>
             <onyks-button animated @click="labels_generate(tables.elements?.data.filter(item => item.selected))" background="green" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button>
             <onyks-button animated background="blue">{{$t('common.scan')}}</onyks-button>
         </BasicButtonsPanel>
