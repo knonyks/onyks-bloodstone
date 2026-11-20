@@ -43,7 +43,7 @@
         remove: useRemoveItemsDialog(services.elements, i18n.global.t('elements.remove'), ['uuid', 'part_name'], () =>
         {
             OnyksToastContainer.error(i18n.global.t('elements.removed_successfully'))
-            router.push('/manager/management')
+            router.push({ name: 'management' })
         })
     })
 
@@ -145,7 +145,7 @@
     <ManagerPage :title="$t('elements.' + schema)">
         <onyks-container gap="m" type="group">
             <onyks-button background="red" @click="router.back()">{{$t('common.back')}}</onyks-button>
-            <onyks-button v-if="schema != 'details' && schema != 'create'" background="blue" @click="router.push(`/manager/elements/details/${route.params.uuid}`)">{{$t('common.details')}}</onyks-button>
+            <onyks-button v-if="schema != 'details' && schema != 'create'" background="blue" @click="router.push({ name: 'element-details', params: { uuid: route.params.uuid } })">{{$t('common.details')}}</onyks-button>
         </onyks-container>
         
         <ElementForm :schema="schema" v-model="obj"></ElementForm>
@@ -157,8 +157,8 @@
         </onyks-container>
         <onyks-container justify="end" v-if="schema === 'details'" type="group" gap="m" mobile-breakpoint="600">
 
-            <onyks-button background="blue" @click="router.push(`/manager/elements/edit/${route.params.uuid}`)">{{$t('common.edit')}}</onyks-button>
-            <onyks-button background="yellow" @click="router.push(`/manager/elements/duplicate/${route.params.uuid}`)">{{$t('common.duplicate')}}</onyks-button>
+            <onyks-button background="blue" @click="router.push({ name: 'element-edit', params: { uuid: route.params.uuid } })">{{$t('common.edit')}}</onyks-button>
+            <onyks-button background="yellow" @click="router.push({ name: 'element-duplicate', params: { uuid: route.params.uuid } })">{{$t('common.duplicate')}}</onyks-button>
             <onyks-button background="red" @click="dialogs.remove.items = [obj.details]; dialogs.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
             <onyks-button @click="labels_generate([obj.details])" background="green">{{$t('common.labels')}}</onyks-button>
 

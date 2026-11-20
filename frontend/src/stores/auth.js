@@ -32,7 +32,11 @@ export const useAuthStore = defineStore('auth',
       this.token = data.access_token
       localStorage.setItem('token', this.token)
       await this.fetch_me()
-      OnyksToastContainer.success(i18n.global.t('common.login_success'))
+      if(!window.__TAURI__)
+      {
+        OnyksToastContainer.success(i18n.global.t('common.login_success'))
+      }
+      
     },
     async fetch_me() 
     {

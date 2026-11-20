@@ -1,31 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pwdlib import PasswordHash
 import hashlib
 import secrets
-from fastapi import Response
 from schemas import Token, UserBase, UserRank
-from fastapi.security import OAuth2PasswordBearer
-from redis_client import password_hash, oauth2_scheme
+from redis_client import oauth2_scheme
 from datetime import datetime, timedelta, timezone
 import os
 import jwt
-from fastapi import Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from routers.common import get_db
 import models
-from fastapi import FastAPI, Depends, HTTPException, status, Cookie, Response
 
 router = APIRouter()
 refresh_tokens: dict[str, dict] = {}
 
-SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY or len(SECRET_KEY) < 32:
+    raise RuntimeError("Set SECRET_KEY to a random value of at least 32 characters")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES", "15"))
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS", "7"))
 REFRESH_COOKIE = "refresh_token"
 REFRESH_COOKIE_PATH = "/api/auth"
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "true").lower() == "true"
 
 def is_expired(expiration_time: datetime | None) -> bool:
     if expiration_time is None:
@@ -57,7 +55,7 @@ def set_refresh_cookie(response: Response, token: str):
         REFRESH_COOKIE, token,
         max_age=REFRESH_TOKEN_DAYS * 24 * 3600,
         httponly=True,
-        secure=False,
+        secure=COOKIE_SECURE,
         samesite="lax",
         path=REFRESH_COOKIE_PATH,
     )

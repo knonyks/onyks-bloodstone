@@ -279,9 +279,26 @@ const finish = async () =>
     link.href = url
     link.download = `labels_${DateTime.now().setZone('Europe/Warsaw').toFormat('yyyy-MM-dd_HH-mm-ss')}.pdf`;
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if(window.__TAURI__)
+    {
+        const filePath = await window.__TAURI__.dialog.save({
+            title: i18n.global.t('common.save'),
+            defaultPath: `labels_${DateTime.now().setZone('Europe/Warsaw').toFormat('yyyy-MM-dd_HH-mm-ss')}.pdf`,
+            filters: [{ name: 'PDF', extensions: ['pdf'] }]
+        });
+        if(filePath)
+        {
+            console.log(window.__TAURI__)
+            await window.__TAURI__.fs.writeFile(filePath, new Uint8Array(pdfBytes));
+            await window.__TAURI__.opener.openPath(filePath);
+        }
+    }
+    else
+    {
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 }
 
 export const labels_generate = async (newData) =>
