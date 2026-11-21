@@ -18,13 +18,19 @@ const routes = [
     path: '/error',
     name: 'error',
     component: () => import('../views/ErrorView.vue'),
-    meta: { title: 'Error - ONYKS Bloodstone' }
+    meta: { title: 'Error - ONYKS Bloodstone' },
+    beforeEnter: (to, from) => {
+      if (!from.name) {
+        return { name: 'dashboard', replace: true }
+      }
+    }
   },
   {
     path: '/manager',
+    redirect: '/manager/dashboard',
     component: () => import('../views/ManagerView.vue'),
     meta: { requiresAuth: true },
-    children: 
+    children:
     [
       {
         path: 'dashboard',
@@ -34,6 +40,7 @@ const routes = [
       },
       {
         path: 'management',
+        name: 'management',
         component: () => import('../views/ManagementView.vue'),
         meta: { title: i18n.global.t('common.management') + ' - ONYKS Bloodstone', requiresAuth: true }
       },
@@ -80,7 +87,8 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: { name: 'error' }
+    name: 'not-found',
+    redirect: { name: 'error', replace: true }
   }
 ]
 

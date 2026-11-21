@@ -25,7 +25,7 @@
     import BasicTable from './BasicTable.vue';
     import { useBasicTable } from '../composables/useBasicTable.js';
     import { useTagsSelector } from '../composables/useTagsSelector.js';
-import SubTitle from './SubTitle.vue';
+    import SubTitle from './SubTitle.vue';
 
     const props = defineProps(['schema'])
     const obj = defineModel({
@@ -183,8 +183,9 @@ import SubTitle from './SubTitle.vue';
         }),
     })
 
-    onMounted(async () => 
+    const init = () =>
     {
+        console.log('jestem')
         dialogs.symbol.init()
         dialogs.footprint_1.init()
         dialogs.footprint_2.init()
@@ -193,7 +194,9 @@ import SubTitle from './SubTitle.vue';
         selectors.tables.init()
         selectors.suppliers.init()
         selectors.tags.init()
-    })
+    }
+
+    defineExpose({init})
 </script>
 
 <template>
@@ -322,7 +325,7 @@ import SubTitle from './SubTitle.vue';
             <onyks-tag background="yellow" @click="() => open_datasheet(x.uuid)" icon="F756" v-for="x in obj.details.datasheets" :key="x.name" class="tag">{{ x.name }}</onyks-tag>
         </onyks-container>
 
-        <UploadFiles v-else v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
+        <UploadFiles v-else-if="props.schema != 'details'" v-model:datasheets="obj.details.datasheets" v-model:files="obj.files"></UploadFiles>
 
         <onyks-text v-if="props.schema == 'details' && Object.keys(obj.details.datasheets).length == 0">{{ $t('elements.no_datasheets_defined') }}</onyks-text>
 

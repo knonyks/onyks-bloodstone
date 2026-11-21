@@ -19,7 +19,8 @@
     const route = useRoute();
     const router = useRouter();
     const schema = route.name === 'element-edit' ? 'edit' : route.name === 'element-duplicate' ? 'duplicate' : route.name === 'element-details' ? 'details' : 'create';
-    
+    const form = ref(null)
+
     const obj = reactive(
     {
         details: models.elements.getModel(),
@@ -51,24 +52,27 @@
     {
         if(schema == 'edit' || schema == 'duplicate' || schema == 'details')
         {
-            let result = await services.elements.get(route.params.uuid);
-            const details = Object.fromEntries(
-                Object.entries(result.data || {}).filter(([, value]) => value !== null)
-            );
-            Object.assign(obj.details, details);
-        }   
-        
-        // for (const [key, value] of Object.entries(obj.details))
-        // {
-        //     if (typeof value === 'string' && !value)
-        //     {
-        //         obj.details[key] = i18n.global.t('common.no_data')
-        //     }
-        // }
-        // if(schema == 'edit')
-        // {
+            try
+            {
+                let result = await services.elements.get(route.params.uuid);
+                const details = Object.fromEntries(
+                    Object.entries(result.data || {}).filter(([, value]) => value !== null)
+                );
+                Object.assign(obj.details, details);
+            }
+            catch(e)
+            {
+                router.push({name: 'error'})
+            }
 
-        // }
+        }   
+        if(schema == 'details')
+        {
+            obj.details.value = obj.details.value || i18n.global.t('common.no_data')
+            obj.details.availability = obj.details.availability || i18n.global.t('common.no_data')
+            obj.details.description = obj.details.description || i18n.global.t('common.no_data')
+        }
+        form.value.init()
         loaderStore.hide()
         loaderStore.globalHide()
     })
@@ -148,7 +152,7 @@
             <onyks-button v-if="schema != 'details' && schema != 'create'" background="blue" @click="router.push({ name: 'element-details', params: { uuid: route.params.uuid } })">{{$t('common.details')}}</onyks-button>
         </onyks-container>
         
-        <ElementForm :schema="schema" v-model="obj"></ElementForm>
+        <ElementForm ref="form" :schema="schema" v-model="obj"></ElementForm>
 
         <onyks-container align="end" v-if="schema !== 'details'">
             <onyks-button v-if="schema == 'create'" background="green" @click="btns.add.action()">{{$t('common.create')}}</onyks-button>
