@@ -13,7 +13,7 @@
 </script>
 
 <template>
-    <onyks-path @path-change="model.path_change($event)" :content="model.path"></onyks-path>
+    <onyks-path style="overflow-x: scroll;" @path-change="model.path_change($event)" :content="model.path"></onyks-path>
     <onyks-file-explorer :types="types" @enter-folder="model.enter_folder($event)" :content="model.content" @select="model.handle_select($event)"></onyks-file-explorer>
     <onyks-container type="group" padding="" justify="end">
         <onyks-button animated @click="model.refresh" background="yellow">{{ $t('common.refresh') }}</onyks-button>

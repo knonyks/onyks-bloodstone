@@ -17,8 +17,8 @@
             <router-link slot="nav" to="/manager/dashboard" .selected="route.path.endsWith('/dashboard')">{{ $t('common.dashboard') }}</router-link>
             <router-link slot="nav" to="/manager/management" .selected="route.path.endsWith('/management')">{{ $t('common.management') }}</router-link>
             <router-link slot="nav" to="/manager/repository" .selected="route.path.endsWith('/repository')">{{ $t('common.repository') }}</router-link>
-            <!-- <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('common.settings') }}</router-link> -->
-            <!-- <router-link v-if="authStore.user?.rank === 'admin'" slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">{{ $t('common.admin_panel') }}</router-link> -->
+            <router-link slot="nav" to="/manager/settings" .selected="route.path.endsWith('/settings')">{{ $t('common.settings') }}</router-link>
+            <router-link v-if="authStore.user?.rank === 'admin'" slot="nav" to="/manager/admin" .selected="route.path.endsWith('/admin')">{{ $t('common.admin_panel') }}</router-link>
         </onyks-nav>
         <onyks-container class="content" gap="m">
             

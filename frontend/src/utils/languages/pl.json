@@ -76,8 +76,6 @@
         "part_name": "Nazwa",
         "manufacturer": "Producent",
         "table": "Tabela",
-
-
         "value": "Wartość",
         "description": "Opis",
         "availability": "Dostępność",
@@ -148,8 +146,19 @@
         "username": "Nazwa użytkownika",
         "name": "Imię",
         "surname": "Nazwisko",
-        "email": "E-mail",
-        "expiration_time": "Data ważności"
+        "email": "Adres E-mail",
+        "expiration_time": "Data ważności konta",
+        "basic_information":"Podstawowe informacje",
+        "rank": "Ranga",
+        "editor": "Edytor",
+        "admin": "Admin",
+        "how_much_time": {
+            "years": "0 lat | {n} rok | {n} lata | {n} lat",
+            "days": "0 dni | {n} dzień | {n} dni | {n} dni",
+            "hours": "0 godzin | {n} godzina | {n} godziny | {n} godzin",
+            "minutes": "0 minut | {n} minuta | {n} minuty | {n} minut"
+        },
+        "no_access": "Nie masz dostępu do tej zawartości"
     },
     "error_codes":
     {

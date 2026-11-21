@@ -33,6 +33,27 @@ export function get_preferred_locale()
     return DEFAULT_LOCALE;
 }
 
+function polishPluralizationRule(choice, choicesLength) 
+{
+    if (choice === 0) 
+    {
+        return 0
+    }
+
+    if (choice === 1) 
+    {
+        return 1
+    }
+
+    const teen = choice % 100 > 10 && choice % 100 < 20
+    if (!teen && choice % 10 >= 2 && choice % 10 <= 4) 
+    {
+        return 2
+    }
+
+    return 3
+}
+
 const datetimeFormats = 
 {
     'en': 
@@ -59,6 +80,10 @@ const datetimeFormats =
 export const i18n = createI18n({
     legacy: false,
     locale: DEFAULT_LOCALE,
+    pluralRules: 
+    {
+        pl: polishPluralizationRule
+    },
     fallbackLocale: {
         'en': ['en'],
         default: ['pl']

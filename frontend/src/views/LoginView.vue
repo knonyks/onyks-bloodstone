@@ -47,13 +47,13 @@
         <logos class="logos"></logos>    
         <onyks-container gap="m" class="login">
             <onyks-header level="6">{{ $t('common.login') }}</onyks-header>
-            <onyks-textfield type="text" v-model="username"></onyks-textfield>
+            <onyks-textfield type="text" v-model="username" @keyup.enter="handle_login"></onyks-textfield>
             <onyks-header level="6">{{ $t('common.password') }}</onyks-header>
-            <onyks-textfield type="password" v-model="password"></onyks-textfield>
+            <onyks-textfield type="password" v-model="password" @keyup.enter="handle_login"></onyks-textfield>
             
-            <onyks-button background="green" @click="handle_login">{{ $t('common.log_in') }}</onyks-button>
+            <onyks-button animated background="green" @click="handle_login">{{ $t('common.log_in') }}</onyks-button>
         
-            <router-link to="/manager/dashboard" class="link"><onyks-text size="s">{{ $t('common.forgot_password') }}</onyks-text></router-link>
+            <!-- <router-link to="/manager/dashboard" class="link"><onyks-text size="s">{{ $t('common.forgot_password') }}</onyks-text></router-link> -->
             <onyks-dialog modal :open="expired_account_dialog" :title="$t('common.account_expired')" open scroll-target="none" size="m" title-size="l" corner-close @dialog-close="expired_account_dialog = false">
                 <onyks-text>{{ $t('common.account_expired_message') }}</onyks-text>
             </onyks-dialog>

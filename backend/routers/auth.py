@@ -2,7 +2,7 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 import hashlib
 import secrets
-from schemas import Token, UserBase, UserRank
+from schemas import Token, UserBase, UserRank, UserFull
 from redis_client import oauth2_scheme
 from datetime import datetime, timedelta, timezone
 import os
@@ -241,13 +241,11 @@ async def logout(response: Response, refresh_token: str | None = Cookie(default=
             await redis.srem(_k_user_set(username), h)
     clear_refresh_cookie(response)
 
-
 @router.post("/auth/logout-all", status_code=204)
 async def logout_all(response: Response, user: UserBase = Depends(get_current_user)):
     await revoke_all_refresh_tokens(user.username)
     clear_refresh_cookie(response)
 
-
-@router.get("/auth/me", response_model=UserBase)
-async def me(user: UserBase = Depends(get_current_user)):
+@router.get("/auth/me", response_model=UserFull)
+async def me(user: UserFull = Depends(get_current_user)):
     return user

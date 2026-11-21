@@ -53,13 +53,11 @@
             name: e.name || i18n.global.t('common.no_data'),
             surname: e.surname || i18n.global.t('common.no_data'),
             email: e.email || i18n.global.t('common.no_data'),
-            rank: e.rank ? i18n.global.t(`users.ranks.${e.rank}`) : i18n.global.t('common.no_data'),
+            rank: e.rank ? i18n.global.t(`users.${e.rank}`) : i18n.global.t('common.no_data'),
             expiration_time: e.expiration_time ? i18n.global.d(new Date(e.expiration_time), 'short') : '',
             created_at: e.created_at ? i18n.global.d(new Date(e.created_at), 'short') : ''
         }
     }
-
-    
 
     onMounted(async () =>
     {
@@ -79,15 +77,15 @@
         <SubTitle>{{ $t('common.user_list') }}</SubTitle>
         <BasicButtonsPanel>
             <onyks-button animated background="green">{{ $t('common.add') }}</onyks-button>
-            <onyks-button animated background="red">{{ $t('common.remove') }}</onyks-button>
             <onyks-button animated background="blue">{{ $t('common.edit') }}</onyks-button>
-            <onyks-button animated background="orange">{{ $t('common.reset') }}</onyks-button>
+            <onyks-button animated background="red" :disabled="usersTable.selected == 0">{{ $t('common.remove') }}</onyks-button>
+            <onyks-button animated background="orange" :disabled="usersTable.selected == 0">{{ $t('common.reset') }}</onyks-button>
             <onyks-button animated background="purple">{{ $t('common.import') }}</onyks-button>
         </BasicButtonsPanel>
         <BasicTable v-model="usersTable"></BasicTable>
         <SubTitle>{{ $t('common.backup') }}</SubTitle>
         <BasicButtonsPanel>
-            <onyks-button animated background="green">Create</onyks-button>
+            <onyks-button animated background="green">{{ $t('common.create') }}</onyks-button>
         </BasicButtonsPanel>
         <onyks-alert type="info">The next backup will be create at: 12.12.2026 12:12:32:312</onyks-alert>
     </ManagerPage>

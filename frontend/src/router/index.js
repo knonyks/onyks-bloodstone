@@ -98,7 +98,7 @@ const router = createRouter(
   routes
 })
 
-router.beforeEach(async (to, from, next) => 
+router.beforeEach(async (to, from) => 
 {
   document.title = to.meta.title || 'ONYKS Bloodstone';
   const auth = useAuthStore()
@@ -114,17 +114,17 @@ router.beforeEach(async (to, from, next) =>
 
   if (to.meta.requiresAuth && !auth.isLoggedIn) 
   {
-    return next({ name: 'login', query: { redirect: to.fullPath } })
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.meta.ranks && !auth.hasRank(...to.meta.ranks)) 
   {
-    return { name: 'error' }
+    return { name: 'dashboard', replace: true }
   }
   if (to.meta.guestOnly && auth.isLoggedIn) 
   {
-    return next({ name: 'dashboard', query: { redirect: to.fullPath } })
+    return { name: 'dashboard', query: { redirect: to.fullPath } }
   }
-  next();
+  return true;
 });
 
 export default router
