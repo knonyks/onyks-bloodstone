@@ -25,6 +25,7 @@
     import BasicTable from './BasicTable.vue';
     import { useBasicTable } from '../composables/useBasicTable.js';
     import { useTagsSelector } from '../composables/useTagsSelector.js';
+import SubTitle from './SubTitle.vue';
 
     const props = defineProps(['schema'])
     const obj = defineModel({
@@ -198,18 +199,18 @@
 <template>
     <onyks-container gap="m">
         <!-- Basic information -->
-        <onyks-header level="4">{{ $t('elements.basic_information') }}</onyks-header>
+        <SubTitle>{{ $t('elements.basic_information') }}</SubTitle>
         <onyks-container type="grid" cols="2" mobile-breakpoint="600" gap="m">
 
             <onyks-container gap="m">
 
-                <onyks-header level="6" v-if="props.schema == 'details' || props.schema == 'edit'">{{ $t('common.uuid') }}</onyks-header>
+                <onyks-header  v-if="props.schema == 'details' || props.schema == 'edit'">{{ $t('common.uuid') }}</onyks-header>
                 <onyks-textfield v-if="props.schema == 'details' || props.schema == 'edit'" v-model="obj.details.uuid" disabled></onyks-textfield>
 
-                <onyks-header level="6">{{ $t('elements.part_name') }}</onyks-header>
+                <onyks-header >{{ $t('elements.part_name') }}</onyks-header>
                 <onyks-textfield v-model="obj.details.part_name" :disabled="props.schema == 'details'"></onyks-textfield>
 
-                <onyks-header level="6">{{ $t('elements.manufacturer') }}</onyks-header>
+                <onyks-header >{{ $t('elements.manufacturer') }}</onyks-header>
                 <onyks-textfield v-if="props.schema == 'details'" v-model="obj.details.manufacturer" :disabled="props.schema == 'details'"></onyks-textfield>
                 <ValueSelector v-if="props.schema != 'details'" v-model="selectors.manufacturer" v-model:value="obj.details.manufacturer"></ValueSelector>
 
@@ -223,19 +224,19 @@
                 <EditItemDialog v-model="dialogs.manufacturer.edit"></EditItemDialog>
                 <RemoveItemsDialog v-model="dialogs.manufacturer.remove"></RemoveItemsDialog>
 
-                <onyks-header level="6">{{ $t('elements.value') }}</onyks-header>
+                <onyks-header >{{ $t('elements.value') }}</onyks-header>
                 <onyks-textfield v-model="obj.details.value" :disabled="props.schema == 'details'"></onyks-textfield>
 
             </onyks-container>
             <onyks-container gap="m">
 
-                <onyks-header level="6">{{ $t('elements.availability') }}</onyks-header>
+                <onyks-header >{{ $t('elements.availability') }}</onyks-header>
                 <onyks-textfield v-model="obj.details.availability" :disabled="props.schema == 'details'"></onyks-textfield>
 
-                <onyks-header level="6" v-if="props.schema == 'details' || props.schema == 'edit'">{{ $t('common.created_at') }}</onyks-header>
+                <onyks-header  v-if="props.schema == 'details' || props.schema == 'edit'">{{ $t('common.created_at') }}</onyks-header>
                 <onyks-textfield disabled v-model="obj.details.created_at" v-if="props.schema == 'details' || props.schema == 'edit'" :disabled="props.schema == 'details'"></onyks-textfield>
 
-                <onyks-header level="6">{{ $t('elements.table') }}</onyks-header>
+                <onyks-header >{{ $t('elements.table') }}</onyks-header>
                 <onyks-textfield v-if="props.schema == 'details'" v-model="obj.details.table" :disabled="props.schema == 'details'"></onyks-textfield>
                 <ValueSelector v-if="props.schema != 'details'" v-model="selectors.tables" v-model:value="obj.details.table"></ValueSelector>
 
@@ -251,21 +252,21 @@
             </onyks-container>
 
         </onyks-container>
-        <onyks-header level="6">{{ $t('elements.description') }}</onyks-header>
+        <onyks-header >{{ $t('elements.description') }}</onyks-header>
         <onyks-textarea maxlength="1024" v-model="obj.details.description" size="m" placeholder="" resize="none" :disabled="props.schema == 'details'"></onyks-textarea>
 
         <!-- Symbol & Footprints -->
-        <onyks-header level="4">{{ $t('elements.symbols_and_footprints') }}</onyks-header>
+        <SubTitle>{{ $t('elements.symbols_and_footprints') }}</SubTitle>
         <onyks-container type="grid" cols="2" mobile-breakpoint="900" gap="m">
             <onyks-container gap="m" cols="1" type="grid">
-                <onyks-header level="6">{{ $t('elements.symbol') }}</onyks-header>
+                <onyks-header >{{ $t('elements.symbol') }}</onyks-header>
                 <ElementPath class="element-path" v-model:path="obj.details.library_path" v-model:obj="obj.details.library_reference"></ElementPath>
                 <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="blue" @click="dialogs.symbol.open = true">{{ $t('common.select') }}</onyks-button>
                     <onyks-button background="red" @click="obj.details.library_path = ''; obj.details.library_reference = ''">{{ $t('common.reset') }}</onyks-button>
                 </onyks-container>
 
-                <onyks-header level="6">{{ $t('elements.footprint_no_2') }}</onyks-header>
+                <onyks-header >{{ $t('elements.footprint_no_2') }}</onyks-header>
                 <ElementPath class="element-path" v-model:path="obj.details.footprint_path_2" v-model:obj="obj.details.footprint_reference_2"></ElementPath>
                 <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="purple" @click="dialogs.footprint_2.open = true">{{ $t('common.select') }}</onyks-button>
@@ -274,7 +275,7 @@
 
             </onyks-container>
             <onyks-container gap="m" cols="1" type="grid">
-                <onyks-header level="6">{{ $t('elements.footprint_no_1') }}</onyks-header>
+                <onyks-header >{{ $t('elements.footprint_no_1') }}</onyks-header>
                 <ElementPath class="element-path" v-model:path="obj.details.footprint_path_1" v-model:obj="obj.details.footprint_reference_1"></ElementPath>
 
                 <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
@@ -282,7 +283,7 @@
                     <onyks-button background="red" @click="obj.details.footprint_path_1 = ''; obj.details.footprint_reference_1 = ''">{{ $t('common.reset') }}</onyks-button>
                 </onyks-container>
 
-                <onyks-header level="6">{{ $t('elements.footprint_no_3') }}</onyks-header>
+                <onyks-header >{{ $t('elements.footprint_no_3') }}</onyks-header>
                 <ElementPath class="element-path" v-model:path="obj.details.footprint_path_3" v-model:obj="obj.details.footprint_reference_3"></ElementPath>
                 <onyks-container type="group" gap="m" v-if="props.schema != 'details'">
                     <onyks-button background="purple" @click="dialogs.footprint_3.open = true">{{ $t('common.select') }}</onyks-button>
@@ -296,8 +297,8 @@
             <PCBModelSelector v-model="dialogs.footprint_3"></PCBModelSelector>
         </onyks-container>
 
-        <onyks-header level="4">{{ $t('elements.other_details') }}</onyks-header>
-        <onyks-header level="6">{{ $t('elements.suppliers_codes') }}</onyks-header>
+        <SubTitle>{{ $t('elements.other_details') }}</SubTitle>
+        <onyks-header >{{ $t('elements.suppliers_codes') }}</onyks-header>
 
         <onyks-table v-if="props.schema == 'details' && Object.keys(obj.details.suppliers).length > 0" :columns="[{'label':$t('suppliers.supplier_name'), 'key': 'name'},{'label':$t('suppliers.suppliers_code'), 'key': 'value'}]" :data="tables.suppliers"></onyks-table>
 
@@ -315,7 +316,7 @@
         <EditItemDialog v-model="dialogs.suppliers.edit"></EditItemDialog>
         <RemoveItemsDialog v-model="dialogs.suppliers.remove"></RemoveItemsDialog>
 
-        <onyks-header level="6">{{ $t('common.datasheets') }}</onyks-header>
+        <onyks-header >{{ $t('common.datasheets') }}</onyks-header>
 
         <onyks-container v-if="props.schema == 'details' && Object.keys(obj.details.datasheets).length > 0" gap="m" type="group">
             <onyks-tag background="yellow" @click="() => open_datasheet(x.uuid)" icon="F756" v-for="x in obj.details.datasheets" :key="x.name" class="tag">{{ x.name }}</onyks-tag>
@@ -325,7 +326,7 @@
 
         <onyks-text v-if="props.schema == 'details' && Object.keys(obj.details.datasheets).length == 0">{{ $t('elements.no_datasheets_defined') }}</onyks-text>
 
-        <onyks-header level="6">{{ $t('common.tags') }}</onyks-header>
+        <onyks-header >{{ $t('common.tags') }}</onyks-header>
 
         <TagsSelector v-model:tags="obj.details.tags" v-model="selectors.tags" v-if="props.schema != 'details'"></TagsSelector>
         <onyks-container gap="m" type="group" v-else-if="obj.details.tags.length > 0">

@@ -63,10 +63,10 @@ services:
       dockerfile: odbc/Dockerfile
     env_file: ${CONFIG_FILE:-.env}
     ports:
-      - "${ODBC_PORT}:${ODBC_PORT}"
+      - "${ODBC_PORT}:5433"
     depends_on:
       - database
-    restart: unless-stopped   
+    restart: unless-stopped
 
   redis:
     image: redis:latest

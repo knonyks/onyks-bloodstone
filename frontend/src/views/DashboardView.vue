@@ -4,6 +4,7 @@
     import { onMounted } from 'vue';
     import { services } from '../utils/api';
     import { useLoaderStore } from '../stores/loader';
+    import SubTitle from '../components/SubTitle.vue';
 
     const loaderStore = useLoaderStore()
 
@@ -51,8 +52,7 @@
 <template>
   
     <ManagerPage :title="$t('common.dashboard')">
-        <onyks-header size="xl">{{ $t('common.overview') }}</onyks-header>
-
+        <SubTitle>{{ $t('common.overview') }}</SubTitle>
         <onyks-container gap="m" type="grid" mobile-breakpoint="700" cols="4" rows="1">
 
             <onyks-card title-size="l" :title="$t('common.last_added_element')" size="l" class="card" subcols="2">
@@ -113,7 +113,7 @@
             </onyks-card>
         </onyks-container>
 
-        <onyks-header size="xl">{{ $t('common.tables') }}</onyks-header>
+        <SubTitle>{{ $t('common.tables') }}</SubTitle>
 
         <onyks-container type="grid" cols="6" v-if="Object.keys(data.tables.counts || {}).length > 0"  gap="m" mobile-breakpoint="800">
             <onyks-card title-size="l" v-for="(number, name) in data.tables.counts" :key="name" :title="name" size="l" subcols="2">
@@ -123,7 +123,7 @@
 
         <onyks-text v-else>{{ $t('common.no_tables') }}</onyks-text>
 
-        <onyks-header size="xl">{{ $t('common.manufacturers') }}</onyks-header>
+        <SubTitle>{{ $t('common.manufacturers') }}</SubTitle>
         
         <onyks-container type="grid" cols="6" v-if="Object.keys(data.manufacturers.counts || {}).length > 0" gap="m" mobile-breakpoint="800">
             <onyks-card title-size="l" v-for="(number, name) in data.manufacturers.counts" :title="name" subcols="2" size="l">

@@ -17,7 +17,9 @@ import logging
 import os
 import re
 import secrets
+import socket
 import sqlite3
+import ssl
 import struct
 import time
 from dataclasses import dataclass, field
@@ -31,10 +33,20 @@ from backend.models import Element, Supplier, Table, User
 
 
 ODBC_HOST = os.getenv("ODBC_HOST", "0.0.0.0")
-ODBC_PORT = int(os.getenv("ODBC_PORT", "5433"))
+ODBC_LISTEN_PORT = int(os.getenv("ODBC_LISTEN_PORT", "5433"))
 ODBC_DATABASE = os.getenv("ODBC_DATABASE", "bloodstone")
 REFRESH_SECONDS = float(os.getenv("ODBC_REFRESH", "30"))
+_tls = os.getenv("ODBC_TLS", "off").strip().lower()
+TLS_MODE = {"1": "on", "true": "on", "yes": "on", "0": "off", "false": "off", "no": "off"}.get(_tls, _tls)
+if TLS_MODE not in ("off", "on", "require"):
+    raise SystemExit(f"ODBC_TLS must be off / on / require, got: {_tls!r}")
+TLS_CERT = os.getenv("ODBC_TLS_CERT", "").strip()
+TLS_KEY = os.getenv("ODBC_TLS_KEY", "").strip()
+TLS_DIR = Path(os.getenv("ODBC_TLS_DIR", str(Path(__file__).resolve().parent / "certs")))
+
 AUTH_FAIL_DELAY = 1.0
+MAX_FAILS = int(os.getenv("ODBC_MAX_FAILS", "5"))
+LOCKOUT_SECONDS = int(os.getenv("ODBC_LOCKOUT", "900"))
 
 ELEMENT_COLUMNS = {
     "uuid": "uuid",
@@ -83,13 +95,39 @@ def verify_password(plain: str, hashed: str) -> bool:
     return False
 
 
+_failures: dict[str, list[float]] = {}
+
+
+def _locked(username: str) -> bool:
+    now = time.monotonic()
+    recent = [t for t in _failures.get(username, []) if now - t < LOCKOUT_SECONDS]
+    _failures[username] = recent
+    return len(recent) >= MAX_FAILS
+
+
 async def authenticate(username: str, password: str) -> str | None:
+    if _locked(username):
+        await asyncio.sleep(AUTH_FAIL_DELAY)
+        return f'too many failed attempts for "{username}" - try again in {LOCKOUT_SECONDS // 60} min'
+    try:
+        error = await _check_user(username, password)
+    except Exception:
+        log.exception("Database error during login")
+        return "server error during login - please try again"
+    if error and "password authentication failed" in error:
+        _failures.setdefault(username, []).append(time.monotonic())
+    elif not error:
+        _failures.pop(username, None)
+    return error
+
+
+async def _check_user(username: str, password: str) -> str | None:
     async with AsyncSessionLocal() as session:
         user = (await session.execute(select(User).where(User.username == username))).scalar_one_or_none()
     if user is None:
         await asyncio.sleep(AUTH_FAIL_DELAY)
         return f'password authentication failed for user "{username}"'
-    ok = await asyncio.to_thread(verify_password, password, user.password)
+    ok = await asyncio.to_thread(verify_password, password, user.password or "")
     if not ok:
         await asyncio.sleep(AUTH_FAIL_DELAY)
         return f'password authentication failed for user "{username}"'
@@ -97,8 +135,53 @@ async def authenticate(username: str, password: str) -> str | None:
     if expires.tzinfo is None:
         expires = expires.replace(tzinfo=timezone.utc)
     if expires <= datetime.now(timezone.utc):
-        return f'konto "{username}" wygasło {expires:%Y-%m-%d %H:%M} UTC'
+        return f'account "{username}" expired on {expires:%Y-%m-%d %H:%M} UTC'
     return None
+
+def ensure_cert() -> tuple[str, str]:
+    """Returns (cert, key). Generates a self-signed cert (10 years) into TLS_DIR if missing."""
+    import datetime as dt
+    TLS_DIR.mkdir(parents=True, exist_ok=True)
+    cert_path, key_path = TLS_DIR / "odbc.crt", TLS_DIR / "odbc.key"
+    if cert_path.exists() and key_path.exists():
+        return str(cert_path), str(key_path)
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.x509.oid import NameOID
+    key = ec.generate_private_key(ec.SECP256R1())
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "altium-odbc")])
+    now = dt.datetime.now(dt.timezone.utc)
+    cert = (x509.CertificateBuilder().subject_name(name).issuer_name(name)
+            .public_key(key.public_key()).serial_number(x509.random_serial_number())
+            .not_valid_before(now - dt.timedelta(days=1)).not_valid_after(now + dt.timedelta(days=3650))
+            .add_extension(x509.SubjectAlternativeName([x509.DNSName("localhost")]), critical=False)
+            .sign(key, hashes.SHA256()))
+    key_path.write_bytes(key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+                                           serialization.NoEncryption()))
+    cert_path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+    log.info("Generated self-signed certificate in %s", TLS_DIR)
+    return str(cert_path), str(key_path)
+
+
+def build_tls_context() -> ssl.SSLContext:
+    if TLS_CERT and TLS_KEY:
+        cert, key = TLS_CERT, TLS_KEY
+        log.info("TLS certificate: %s", cert)
+    else:
+        cert, key = ensure_cert()
+        log.warning("TLS uses a SELF-SIGNED certificate (%s): traffic is encrypted, but clients cannot "
+                    "verify the server (use SSL Mode=require, not verify-full). Set ODBC_TLS_CERT/KEY "
+                    "for a real certificate.", cert)
+    ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+    ctx.load_cert_chain(cert, key)
+    ctx.set_alpn_protocols(["postgresql"])  # required by the driver with sslnegotiation=direct
+    return ctx
+
+
+TLS_CONTEXT: ssl.SSLContext | None = None
+
 
 def _to_text(value) -> str | None:
     if value is None:
@@ -331,7 +414,7 @@ async def execute(sql: str) -> Result | None:
         value = SHOW_VALUES.get(name, "")
         return _rows([(name.split()[-1], OID_TEXT)], [(value,)], "SHOW")
     if word in ("insert", "update", "delete", "create", "drop", "alter", "truncate", "copy", "grant"):
-        raise QueryError("Altium ODBC bridge jest tylko do odczytu", "25006")
+        raise QueryError("Altium ODBC bridge is read-only", "25006")
     if word not in ("select", "with", "values"):
         raise QueryError(f"Wrong command: {word}", "0A000")
 
@@ -350,7 +433,7 @@ async def execute(sql: str) -> Result | None:
     try:
         cur = snap.db.execute(to_sqlite(sql))
     except sqlite3.Error as exc:
-        raise QueryError(f"{exc} (zapytanie: {sql})")
+        raise QueryError(f"{exc} (query: {sql})")
     rows = [tuple(None if v is None else str(v) for v in r) for r in cur.fetchall()]
     cols = []
     for d in cur.description or []:
@@ -389,8 +472,9 @@ def error_response(message: str, code: str = "XX000") -> bytes:
     return msg(b"E", b"SERROR\0VERROR\0C" + cstr(code) + b"M" + cstr(message) + b"\0")
 
 class Session:
-    def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter, tls: bool = False):
         self.r, self.w = reader, writer
+        self.tls = tls
         self.in_tx = False
         self.statements: dict[str, tuple[str, int]] = {}
         self.portals: dict[str, dict] = {}
@@ -415,6 +499,12 @@ class Session:
             length = struct.unpack("!I", await self.r.readexactly(4))[0]
             body = await self.r.readexactly(length - 4)
             code = struct.unpack("!I", body[:4])[0]
+            if code == 80877103 and TLS_CONTEXT and not self.tls:
+                self.w.write(b"S")
+                await self.w.drain()
+                await self.w.start_tls(TLS_CONTEXT)
+                self.tls = True
+                continue
             if code in (80877103, 80877104):
                 self.w.write(b"N")
                 await self.w.drain()
@@ -422,18 +512,24 @@ class Session:
             if code == 80877102:
                 return False
             if code != 196608:
-                self.w.write(error_response("Nieobsługiwana wersja protokołu", "0A000"))
+                self.w.write(error_response("Unsupported protocol version", "0A000"))
                 return False
             parts = body[4:].split(b"\0")
             params = {parts[i].decode(): parts[i + 1].decode() for i in range(0, len(parts) - 1, 2) if parts[i]}
             break
+
+        if TLS_MODE == "require" and not self.tls:
+            log.warning("Rejected unencrypted connection from %s", self.peer)
+            self.w.write(error_response("Server requires encryption - set SSL Mode = require", "28000"))
+            await self.w.drain()
+            return False
 
         user = params.get("user", "")
         self.w.write(msg(b"R", struct.pack("!I", 3)))
         await self.w.drain()
         kind, payload = await self.read_msg()
         password = payload.rstrip(b"\0").decode(errors="replace") if kind == b"p" else ""
-        error = await authenticate(user, password) if user and password else "brak loginu lub hasła"
+        error = await authenticate(user, password) if user and password else "missing username or password"
         if error:
             log.warning("Login went wrong from %s as %r: %s", self.peer, user, error)
             self.w.write(error_response(error, "28P01"))
@@ -589,20 +685,70 @@ class Session:
                         self.w.write(error_response(str(exc)))
                         failed = True
                 await self.w.drain()
-        except (asyncio.IncompleteReadError, ConnectionResetError):
+        except (asyncio.IncompleteReadError, ConnectionError, ssl.SSLError):
             pass
+        except Exception:
+            log.exception("Connection error (%s)", self.peer)
         finally:
             self.w.close()
 
 
+def _peek_first_byte(conn: socket.socket) -> bytes:
+    conn.settimeout(30)
+    try:
+        return conn.recv(1, socket.MSG_PEEK)
+    finally:
+        conn.setblocking(False)
+
+
+async def handle_connection(conn: socket.socket):
+    loop = asyncio.get_running_loop()
+    try:
+        first = await asyncio.to_thread(_peek_first_byte, conn)
+    except OSError:
+        conn.close()
+        return
+    if not first:
+        conn.close()
+        return
+    direct = first == b"\x16"
+    if direct and TLS_CONTEXT is None:
+        conn.close()
+        return
+    reader = asyncio.StreamReader(limit=2 ** 20)
+    protocol = asyncio.StreamReaderProtocol(reader, lambda r, w: Session(r, w, tls=direct).run())
+    try:
+        await loop.connect_accepted_socket(lambda: protocol, conn, ssl=TLS_CONTEXT if direct else None)
+    except (OSError, ssl.SSLError) as exc:
+        log.debug("TLS handshake failed: %s", exc)
+        conn.close()
+
+
 async def main():
-    logging.basicConfig(level=os.getenv("ALTIUM_ODBC_LOG", "INFO"),
+    global TLS_CONTEXT
+    logging.basicConfig(level=os.getenv("ODBC_LOG", os.getenv("ALTIUM_ODBC_LOG", "INFO")),
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-    await STORE.get()
-    server = await asyncio.start_server(lambda r, w: Session(r, w).run(), ODBC_HOST, ODBC_PORT)
-    log.info("Altium ODBC bridge listens to %s:%d (db: %s)", ODBC_HOST, ODBC_PORT, ODBC_DATABASE)
-    async with server:
-        await server.serve_forever()
+    while True:
+        try:
+            await STORE.get()
+            break
+        except Exception as exc:
+            log.warning("Database not ready (%s: %s) - retrying in 5 s",
+                        type(exc).__name__, str(exc).splitlines()[0][:200])
+            await asyncio.sleep(5)
+    TLS_CONTEXT = build_tls_context() if TLS_MODE != "off" else None
+
+    loop = asyncio.get_running_loop()
+    srv = socket.create_server((ODBC_HOST, ODBC_LISTEN_PORT))
+    srv.setblocking(False)
+    log.info("Altium ODBC bridge listens on %s:%d (db: %s, TLS: %s)",
+             ODBC_HOST, ODBC_LISTEN_PORT, ODBC_DATABASE, TLS_MODE)
+    tasks = set()
+    while True:
+        conn, _ = await loop.sock_accept(srv)
+        task = asyncio.create_task(handle_connection(conn))
+        tasks.add(task)
+        task.add_done_callback(tasks.discard)
 
 
 if __name__ == "__main__":

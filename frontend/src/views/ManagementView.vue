@@ -198,8 +198,8 @@
             <onyks-button animated background="yellow" :disabled="tables.elements.selected != 1" @click="router.push({ name: 'element-duplicate', params: { uuid: tables.elements?.data.filter(item => item.selected)[0]?.uuid } })">{{$t('common.duplicate')}}</onyks-button>
             <onyks-button animated background="red" :disabled="tables.elements.selected === 0" @click="dialogs.elements.remove.items = tables.elements.data.filter(item => item.selected); dialogs.elements.remove.first_open = true">{{$t('common.remove')}}</onyks-button>
             <onyks-button animated background="gray" :disabled="tables.elements.selected != 1" @click="router.push({ name: 'element-details', params: { uuid: tables.elements?.data.filter(item => item.selected)[0]?.uuid } })">{{$t('common.details')}}</onyks-button>
-            <onyks-button animated @click="labels_generate(tables.elements?.data.filter(item => item.selected))" background="green" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button>
-            <onyks-button animated background="blue">{{$t('common.scan')}}</onyks-button>
+            <onyks-button animated @click="labels_generate(tables.elements?.data.filter(item => item.selected))" background="purple" :disabled="tables.elements.selected === 0">{{$t('common.labels')}}</onyks-button>
+            <!-- <onyks-button animated background="pink">{{$t('common.scan')}}</onyks-button> -->
         </BasicButtonsPanel>
         <BasicSearch v-model="tables.elements.search_phrase" :search="tables.elements.search"></BasicSearch>
         <BasicTable v-model="tables.elements" @remove-element="(event) => {

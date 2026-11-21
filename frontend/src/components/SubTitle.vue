@@ -1,3 +1,3 @@
 <template>
-    <onyks-header size="xl"><slot></slot></onyks-header>
+    <onyks-header underline size="xl"><slot></slot></onyks-header>
 </template>
