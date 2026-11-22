@@ -1,15 +1,28 @@
 import { i18n } from './localization';
 import { html } from 'lit';
 import router from '../router';
+import { api } from './api';
+
 // import AvailabilityPlusMinus from '../components/AvailabilityPlusMinus.vue';
 // import RemoveItemsDialog from '../components/RemoveItemsDialog.vue';
 // import { defineCustomElement } from 'vue';
+
 
 export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const open_datasheet = (uuid) =>
 {
-    window.open('/files/' + uuid + '.pdf', '_blank');
+    if(window.__TAURI__)
+    {
+        new window.__TAURI__.webviewWindow.WebviewWindow(`datasheet-${uuid}-${Date.now()}`, {
+            url: api.getUri({ url: `/files/${uuid}.pdf` }),
+            title: `Datasheet ${uuid}`
+        });
+    }
+    else
+    {
+        window.open('/files/' + uuid + '.pdf', '_blank');
+    }
 };
 
 // customElements.define('availability-plus-minus', defineCustomElement(AvailabilityPlusMinus));

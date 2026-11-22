@@ -3,7 +3,7 @@ import en from './languages/en.json'
 import pl from './languages/pl.json'
 
 export const SUPPORT_LOCALES = ['pl', 'en'];
-export const DEFAULT_LOCALE = 'pl';
+export const DEFAULT_LOCALE = 'en';
 
 export function set_language(locale) 
 {

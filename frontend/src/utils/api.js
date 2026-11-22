@@ -2,7 +2,7 @@ import axios from 'axios';
 import router from '../router';
 import { useAuthStore } from '../stores/auth';
 
-let api = axios.create(
+export let api = axios.create(
 {
     baseURL: '/api',
     timeout: 5000,

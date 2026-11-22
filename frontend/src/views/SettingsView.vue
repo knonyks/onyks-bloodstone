@@ -2,9 +2,8 @@
     import ManagerPage from '../components/ManagerPage.vue';
     import { computed, onMounted } from 'vue';
     import { useLoaderStore } from '../stores/loader';
-    import SubTitle from '@/components/SubTitle.vue';
-    import { useAuthStore } from '@/stores/auth.js';
-import { i18n } from '@/utils/localization.js';
+    import { useAuthStore } from '../stores/auth.js';
+    import { i18n } from '../utils/localization.js';
 
     const loaderStore = useLoaderStore()
     const authStore = useAuthStore()
