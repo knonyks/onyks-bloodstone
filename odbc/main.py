@@ -340,7 +340,10 @@ def _filter_value(sql: str, column: str) -> str | None:
 
 def _matching_tables(sql: str, snap: Snapshot, column: str) -> list[tuple[int, str]]:
     pattern = _filter_value(sql, column)
-    return [(i, t) for i, t in enumerate(snap.tables) if _like_match(pattern, t)]
+    oid = re.search(r"\bc\.oid\s*=\s*(\d+)", sql, re.I)
+    wanted = int(oid.group(1)) if oid else None
+    return [(i, t) for i, t in enumerate(snap.tables)
+            if _like_match(pattern, t) and (wanted is None or TABLE_OID + i == wanted)]
 
 def catalog_tables(sql: str, snap: Snapshot) -> Result:
     names = [("TABLE_QUALIFIER", OID_NAME), ("TABLE_OWNER", OID_NAME), ("TABLE_NAME", OID_NAME),
