@@ -18,8 +18,13 @@ const AUTH_URLS = ['/auth/login', '/auth/refresh', '/auth/logout']
 
 api.interceptors.request.use((config) => 
 {
+    const is_auth_call = AUTH_URLS.some((url) => config.url?.includes(url))
     const token = localStorage.getItem('token')
-    if (token) config.headers.Authorization = `Bearer ${token}`
+    if (!is_auth_call && token && !config._retry)
+    {
+        config.headers = config.headers || {}
+        config.headers.Authorization = `Bearer ${token}`
+    }
     return config
 })
 
@@ -30,13 +35,14 @@ api.interceptors.response.use(
         const original = err.config
         const is_auth_call = AUTH_URLS.some((u) => original?.url?.includes(u))
 
-        if (err.response?.status === 401 && !is_auth_call && !original._retry) 
+        if (err.response?.status === 401 && original && !is_auth_call && !original._retry) 
         {
             original._retry = true
             const auth = useAuthStore()
             try 
             {
                 await auth.refresh()
+                original.headers = original.headers || {}
                 original.headers.Authorization = `Bearer ${auth.token}`
                 return api(original)
             } 

@@ -132,10 +132,11 @@ async def _check_user(username: str, password: str) -> str | None:
         await asyncio.sleep(AUTH_FAIL_DELAY)
         return f'password authentication failed for user "{username}"'
     expires = user.expiration_time
-    if expires.tzinfo is None:
-        expires = expires.replace(tzinfo=timezone.utc)
-    if expires <= datetime.now(timezone.utc):
-        return f'account "{username}" expired on {expires:%Y-%m-%d %H:%M} UTC'
+    if expires is not None and expires.date() != datetime(1970, 1, 1).date():
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if expires <= datetime.now(timezone.utc):
+            return f'account "{username}" expired on {expires:%Y-%m-%d %H:%M} UTC'
     return None
 
 def ensure_cert() -> tuple[str, str]:
@@ -394,6 +395,16 @@ def to_sqlite(sql: str) -> str:
     sql = re.sub(r"\bfor\s+(?:update|share|read\s+only)\b.*$", "", sql, flags=re.I | re.S)
     return sql
 
+def quote_known_tables(sql: str, snap: Snapshot) -> str:
+    for t in snap.tables:
+        if re.fullmatch(r"\w+", t):
+            continue
+        name = r"\s+".join(map(re.escape, t.split()))
+        sql = re.sub(rf'(\b(?:from|join)\s+)(?:"?public"?\s*\.\s*)?{name}(?![\w"\]])',
+                     lambda m: m.group(1) + '"' + t.replace('"', '""') + '"', sql, flags=re.I)
+    return sql
+
+
 async def execute(sql: str) -> Result | None:
     sql = _strip_comments(sql).strip()
     if not sql:
@@ -427,6 +438,7 @@ async def execute(sql: str) -> Result | None:
     if re.search(r"\b(pg_\w+|information_schema)\b", low):
         return catalog_query(sql, low, snap)
 
+    sql = quote_known_tables(sql, snap)
     m = re.search(r'\bfrom\s+(?:"((?:[^"]|"")+)"|(\w+))', sql, re.I)
     source = (m.group(1).replace('""', '"') if m.group(1) else m.group(2)).lower() if m else ""
     table_oid = next((TABLE_OID + i for i, t in enumerate(snap.tables) if t.lower() == source), 0)
@@ -560,6 +572,7 @@ class Session:
             try:
                 res = await execute(stmt)
             except QueryError as exc:
+                log.warning("Query error: %s", exc)
                 out += error_response(str(exc), exc.code)
                 break
             except Exception as exc:
@@ -678,6 +691,7 @@ class Session:
                     try:
                         self.w.write(await self.extended(kind, payload))
                     except QueryError as exc:
+                        log.warning("Query error: %s", exc)
                         self.w.write(error_response(str(exc), exc.code))
                         failed = True
                     except Exception as exc:

@@ -72,3 +72,5 @@ services:
   redis:
     image: redis:latest
     restart: unless-stopped
+
+# docker compose --env-file .env.v2 -p bloodstone-v2 up -d --build
